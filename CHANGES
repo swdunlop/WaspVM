@@ -1,0 +1,8 @@
+????/??/?? Initial Import from WaspVM 0.3
+  - Initial import from WaspVM devel on 2008/06/05, see README for rationale
+  - WaspVM compiles on Linux 2.6 with GNU toolchain.
+  - Removed timeouts, async I/O, crc32, shell.c, buffer.c
+  - WaspC requires 2008/06/06 devel patch to remove multimethods from core 
+    modules.
+  + WaspC builds with: waspc -exe waspc-rewind -stub waspvm-rewind bin/waspc
+

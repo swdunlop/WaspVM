@@ -1,0 +1,14 @@
+- Determine the minimum VM that will compile WaspVM
+  Use sxgrep to find all primitives used by the compiler.
+  Remove all other primitives.
+
+  - Remove buffer.c
+  - Remove os.c
+  - Keep file.c
+  - Keep process.c
+  - Keep channel.c
+  - Keep connection.c
+  - Lose I/O scheduler. Reimplement using a select primitive.
+  - Lose multimethods. Reimplement using compiler.
+  - Lose timeouts. Reimplement using time primitives.
+

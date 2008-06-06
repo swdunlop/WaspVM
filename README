@@ -1,0 +1,50 @@
+WHAT IS WASP LISP?
+------------------
+
+Wasp Lisp is a member of the Lisp-1 family, borrowing principles from R5RS Scheme, Python and Erlang.  It is a pragmatic language, designed to provide developers with tools to rapidly build network applications that require sophisticated logic and quick turnarounds between prototype and production.
+
+Wasp Lisp provides the following features inherited from Mosquito Lisp:
+
+  - Compact Implementation
+  - Cooperative Lightweight Threads
+  - Unique, efficient I/O model
+
+Beyond the functionality provided by Mosquito Lisp, Wasp Lisp provides the ability to extend Wasp Lisp with modules written in ANSI C and refinement of many of Mosquito's features based on feedback by the Lisp community.
+
+WHAT IS THIS PACKAGE?
+-----------------------
+
+This Wasp Lisp source code package consists of the source code for four key components of the Wasp Lisp environment:
+
+ - WaspDoc, the Wasp documentation tool which provides a way to view and update
+   documentation associated with Wasp Lisp.
+
+ - WaspVM, a compact interpreter written in ANSI C for programs written in 
+   Wasp Lisp.
+
+ - WaspC, the compiler for Wasp Lisp programs, written in Wasp Lisp itself.
+
+ - Wasp, the Wasp interactive environment which provides interactive 
+   programming and troubleshooting for Wasp Lisp programmers.
+
+The particular version of Wasp Lisp containing this file is called "Wasp Rewind".
+
+WHAT IS WASP REWIND?
+----------------------
+
+Wasp Rewind is a step backwards in the development of Wasp Lisp to resolve some key issues discovered in the separation of Wasp Lisp from its parent Mosquito Lisp:  
+
+  - Brittleness in how I/O interacts with the process scheduler.
+  - Cruft in the Wasp Lisp compiler.
+  - Insufficient unit testing.
+  - Insufficient documentation.
+
+To solve these problems, the Wasp Lisp team is taking a step back with the Rewind tree, removing a lot of functionality and leaving a core that is capable of compiling and executing Wasp Lisp programs.  What will be left in Wasp Lisp should, in many ways, mirror the functionality of the Scheme and Lua languages.
+
+After Wasp Lisp can self-compile again and execute a small but crucial set of demonstration programs, the effort will move to bringing the code quality and documentation of this subset up to the standard set by the Python community.  (The finest feature of Python is its community..)
+
+WHO IS THE WASP TEAM?
+---------------------
+
+Until the first point release of Wasp Rewind, the Wasp Team consists solely of the original designer of WaspVM and MOSVM, Scott W. Dunlop <swdunlop@gmail.com>.  After the ball gets rolling, the Wasp Team will expand to include members of the Wasp community who have shown the interest and insight to shepherd the evolution of Wasp Lisp.
+
