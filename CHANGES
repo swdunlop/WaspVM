@@ -3,5 +3,6 @@
   - WaspVM compiles on Linux 2.6 with GNU toolchain.
   - Removed timeouts, async I/O, crc32, shell.c, buffer.c
   - WaspC runs identically under Rewind VM.
+  - Wasp REPL runs under Rewind VM.
   + Ported over all dependencies of WaspC to Rewind.
 
