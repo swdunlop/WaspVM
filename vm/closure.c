@@ -1,5 +1,4 @@
 /* Copyright (C) 2006, Ephemeral Security, LLC
- * With Modifications Copyright (C) 2008, Scott W. Dunlop <swdunlop@gmail.com>
  *
  * This library is free software; you can redistribute it and/or modify it 
  * under the terms of the GNU Lesser General Public License, version 2.1
@@ -16,10 +15,6 @@
  */
 
 #include "waspvm.h"
-
-int wasp_is_function( wasp_value value ){
-    return wasp_is_primitive( value ) | wasp_is_closure( value ) | wasp_is_procedure( value );
-}
 
 wasp_closure wasp_make_closure( wasp_value name, wasp_instruction inst, wasp_pair env ){
     wasp_closure clos = WASP_OBJALLOC( closure );
@@ -48,6 +43,8 @@ wasp_value wasp_function_name( wasp_value function ){
     if( wasp_is_closure( function ) ){
         result = wasp_closure_fv( function )->name;
         if( ! result ) result = function;
+    }else if( wasp_is_multimethod( function ) ){
+        result = wasp_vf_symbol( wasp_multimethod_fv( function )->name );
     }else if( wasp_is_primitive( function ) ){
         result = wasp_vf_symbol( wasp_primitive_fv( function )->name );
     }else{

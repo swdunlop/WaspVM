@@ -131,6 +131,8 @@ void wasp_jump( ){
     wasp_pair  args = wasp_list_fv( wasp_cdr( WASP_CP->head ) );
     wasp_integer ct = WASP_CP->count;
 
+    fn = wasp_reduce_function( fn, args );
+    
     if( wasp_is_closure( fn ) ){
         wasp_closure clos = wasp_closure_fv( fn );
 

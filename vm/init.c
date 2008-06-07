@@ -47,6 +47,8 @@ void wasp_init_core_subsystems( ){
     wasp_init_channel_subsystem( );
     wasp_init_parse_subsystem( );
     wasp_init_tag_subsystem( );
+    wasp_init_multimethod_subsystem( );
+    wasp_init_plugin_subsystem( );
     wasp_init_file_subsystem( );
     wasp_init_channel_subsystem( );
     wasp_init_connection_subsystem( );

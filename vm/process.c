@@ -229,7 +229,7 @@ void wasp_deactivate_prim( wasp_process process, wasp_list call ){
 
 wasp_process wasp_spawn_call( wasp_pair call ){
     wasp_list rest = wasp_list_fv( wasp_cdr( call ) );
-    wasp_value func = wasp_car( call );
+    wasp_value func = wasp_reduce_function( wasp_car( call ), rest );
     call = wasp_cons( func, wasp_vf_list( rest ) );
     wasp_process p;
 
@@ -249,7 +249,6 @@ wasp_process wasp_spawn_call( wasp_pair call ){
         vm->cp->tail = wasp_last_pair( call );
         vm->cp->count = wasp_list_length( call );
         vm->t = WASP_T;
-
         if( wasp_is_closure( func ) ){
             wasp_closure c = wasp_closure_fv( func );
             p->name = c->name;

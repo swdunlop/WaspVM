@@ -55,6 +55,7 @@
 #include "waspvm/connection.h"
 #include "waspvm/error.h"
 #include "waspvm/tag.h"
+#include "waspvm/multimethod.h"
 #include "waspvm/file.h"
 #include "waspvm/time.h"
 #include "waspvm/plugin.h"

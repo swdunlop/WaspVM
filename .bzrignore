@@ -2,3 +2,7 @@
 *.loT
 *.la
 ./waspvm
+waspc-rewind
+waspvm-rewind
+FUTURE
+waspc-test
