@@ -1,3 +1,5 @@
+- Inhibit subsystem warning in standalone compiler in install mode..
+
 - Move string mutation back into buffer subsystem.
   Too complicated to explain to users why they shouldn't mutate borrowed strings.
   Remove -bang appellation for mutation.
