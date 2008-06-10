@@ -4,5 +4,6 @@
   - Removed timeouts, async I/O, crc32, shell.c, buffer.c
   - WaspC runs identically under Rewind VM.
   - Wasp REPL runs under Rewind VM.
-  + Ported over all dependencies of WaspC to Rewind.
+  - Ported over all dependencies of WaspC and REPL to Rewind.
+  + Ported install script back into build system.
 

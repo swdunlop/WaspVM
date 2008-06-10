@@ -1,0 +1,1 @@
+core/macro.mo core/config.mo site/config.mo core/file.mo core/module.mo core/io.mo lib/module.mo lib/iterate.mo lib/object.mo lib/record.mo lib/compile.mo lib/optimize.mo lib/eval.mo lib/waspc.mo lib/build.mo bin/waspc.mo 

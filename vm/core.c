@@ -1817,7 +1817,7 @@ WASP_BEGIN_PRIM( "copy-string", copy_string )
     NO_REST_ARGS( )
 
     wasp_string new = wasp_string_fm( wasp_sf_string( string ),
-                                    wasp_string_length( string ) );
+                                      wasp_string_length( string ) );
 
     RESULT( wasp_vf_string( new ) );
 WASP_END_PRIM( copy_string )

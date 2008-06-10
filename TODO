@@ -1,9 +1,25 @@
-- Determine the minimum VM that will compile WaspVM
-  Use sxgrep to find all primitives used by the compiler.
-  Remove all other primitives.
+- Port subsystem compilation into no-ac build system.
 
-  - Remove buffer.c
-  - Remove os.c
+- Move os filesystem primitives to filesystem subsystem.
+  - Modify build, module and compile to use os error trapping to find the right file.
+  - Move all dir- to filesystem.
+  - Move getcwd to filesystem.
+   
+- Move string mutation back into buffer subsystem.
+  Too complicated to explain to users why they shouldn't mutate borrowed strings.
+  Remove -bang appellation for mutation.
+  Buffer basic functionality stays in VM -- used by format and print.
+
+  - Rename all "(.*)string(.*)!$" to "\1buffer\2$"
+  - Rename all string_append to buffer_append
+  - Rename all string_read to buffer_read
+  - Check all indirect uses of wasp_string_alter
+  - Rename copy-string to string->buffer
+  - Add buffer->string
+
+  ? Should non-destructive string operations work on buffers?
+
+- Determine the minimum VM that will compile WaspVM
   - Keep file.c
   - Keep process.c
   - Keep channel.c
@@ -11,4 +27,56 @@
   - Lose I/O scheduler. Reimplement using a select primitive.
   - Lose multimethods. Reimplement using compiler.
   - Lose timeouts. Reimplement using time primitives.
+
+- Move set primitive to make-set
+
+- Move file management primitives to os.c
+
+- Polishing Words
+  Neal Stephenson in his "In the Beginning.. There Was the Command Line" essay, asserts that the
+  terseness of directory names in UNIX is similar to the smoothing of river stones.  By buffing
+  out irregularities in frequently used Lisp forms, we can make the language more approachable. 
+  See also Paul Graham for more inspiration from his Arc language ideas.
+
+  - Rename define of variables to def.
+  - Rename define of functions to def-fn
+  - Rename define of methods to def-mt
+  - Rename function to fn
+  - Rename set to make-set
+  - Rename set! to set
+  - Rename vector to make-vector
+  - Rename list to make-list
+  - Rename cons to make-pair
+  - Add var form
+    var declares locality of a variable when def would not do.
+  - Kill let / letrec / let* !
+
+- Add pcase -- predicate case
+  (pcase arg
+    ((vector? record? object?) (vector-iter (repr arg)))
+    ((dict? set?) (tree-iter (repr arg)))
+    ...)
+
+- Add make-error, forward-errors
+  make-error captures the context and the content, but does not propagate the guard chain.
+  forward-errors is a form that sends any caught error to a channel.
+
+- Modify wait to propagate errors.
+  If an error is received by wait, it is propagated upwards from wait.
+
+- Clarify -add vs. -append.
+  Add is an arithmetic operation.  
+  Append is concatenation of individual items.
+  Concat is concatenation of sequences.
+
+  (conc '(a b c) '(1 2 3)) -> (a b c 1 2 3)
+  (append '(a b c) '(1 2 3)) -> (a b c (1 2 3))
+
+- Should equal? v. eq? be removed, too?
+  Strings compared by length, hash then content.
+  Other objects compared by identity.
+  Does away with assq, assoc, etc.
+
+- Clarify verb-noun vs. noun-verb in primitive names?
+  Why do we have tc-add and not add-tc, yet we have send-output?
 

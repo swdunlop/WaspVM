@@ -1,0 +1,1 @@
+core/macro core/config site/config core/file core/module core/io lib/module lib/iterate lib/object lib/record lib/compile lib/optimize lib/eval lib/build bin/waspc
