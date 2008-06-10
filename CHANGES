@@ -1,9 +1,12 @@
 ????/??/?? Initial Import from WaspVM 0.3
-  - Initial import from WaspVM devel on 2008/06/05, see README for rationale
+  This is a fork of WaspVM 0.3 devel as of 2008/06/05 with reduced build complexity and the
+  removal of some functionality not needed for installation or compilation.  It is the new
+  development focus of the Wasp project -- see the README for details.
+
   - WaspVM compiles on Linux 2.6 with GNU toolchain.
-  - Removed timeouts, async I/O, crc32, shell.c, buffer.c
+  - Removed timeouts, async I/O, crc32 
   - WaspC runs identically under Rewind VM.
   - Wasp REPL runs under Rewind VM.
   - Ported over all dependencies of WaspC and REPL to Rewind.
-  + Ported install script back into build system.
+  - Ported install script back into build system.
 

@@ -53,6 +53,7 @@ void wasp_init_core_subsystems( ){
     wasp_init_channel_subsystem( );
     wasp_init_connection_subsystem( );
     wasp_init_queue_subsystem( );
+    wasp_init_shell_subsystem( );
 
     wasp_ss_main = wasp_symbol_fs( "main" );
 
