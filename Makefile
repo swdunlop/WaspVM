@@ -1,7 +1,9 @@
 ROOT=$(shell pwd)
+SYS=$(ROOT)/sys
 
 EXE = 
 OBJ = .o
+SO = .so
 
 WASPVM_EXE ?= $(ROOT)/waspvm$(EXE)
 WASPC_EXE ?= $(ROOT)/waspc$(EXE)
@@ -10,12 +12,19 @@ WASPLD_EXE ?= $(ROOT)/waspld$(EXE)
 
 CFLAGS ?= 
 CFLAGS += -Ivm
-LDFLAGS += -ldl
+LDFLAGS +=
 CPPFLAGS += -DWASP_PLATFORM='"generic"' -DWASP_VERSION='"0.3"' -DWASP_USE_SYNC_TERM -DWASP_SO='".so"'
+
+EXEFLAGS += -rdynamic -ldl
+SOFLAGS += -shared
 
 WASPVM_OBJS += vm/boolean.o vm/channel.o vm/closure.o vm/connection.o vm/core.o vm/error.o vm/file.o vm/format.o vm/init.o vm/list.o vm/memory.o vm/mq.o vm/number.o vm/package.o vm/parse.o vm/primitive.o vm/print.o vm/procedure.o vm/process.o vm/queue.o vm/string.o vm/tag.o vm/tree.o vm/vector.o vm/vm.o vm/multimethod.o vm/plugin.o vm/shell.o
 
-build: $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
+SYS_REGEX ?= $(SYS)/regex$(SO)
+SYS_FILESYSTEM ?= $(SYS)/filesystem$(SO)
+SUBSYSTEMS += $(SYS_REGEX) $(SYS_FILESYSTEM)
+
+build: $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE) $(SUBSYSTEMS)
 
 install: $(WASP_EXE)
 	cd mod && $(WASP_EXE) bin/install.ms
@@ -32,15 +41,14 @@ $(WASPC_EXE): $(WASPVM_EXE) $(WASPLD_EXE)
 	cd mod && $(WASPLD_EXE) $(WASPVM_EXE) $(shell cat mod/waspc.mf) $(WASPC_EXE)
 	chmod +rx $(WASPC_EXE)
 
-$(WASPVM_EXE): $(WASPVM_OBJS) vm/waspvm.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(WASPVM_EXE) $(WASPVM_OBJS) vm/waspvm.c
-
-$(WASPLD_EXE): $(WASPVM_OBJS) vm/waspld.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(WASPLD_EXE) $(WASPVM_OBJS) vm/waspld.c
+%$(EXE): vm/%.c $(WASPVM_OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(EXEFLAGS) -o $@ $(WASPVM_OBJS) $<
 
 vm/%$(OBJ): vm/%.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
+sys/%$(SO): sys/%.c
+	$(CC) $(LDFLAGS) $(SOFLAGS) $(CFLAGS) $(CPPFLAGS) $< -o $@
 clean:
 	rm -f vm/*.o $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE)
 	

@@ -17,13 +17,20 @@
 (define *waspvm?* #t)
 (export *waspvm?*)
 
+(define (can-read-file? path)
+  (guard (lambda x #f)
+    (define file (open-file path "r"))
+    (read-file file 1)
+    (close-file file)
+    #t))
+
 (define (find-module-file filename)
   (define module-dirs (apply make-tc (or (site-config 'mod-path) '())))
   (define module-found #f)
   (until (or (tc-empty? module-dirs) module-found)
     (define module-dir (tc-next! module-dirs))
     (define module-path (path-join module-dir filename))
-    (when (file-path? module-path)
+    (when (can-read-file? module-path)
       (set! module-found module-path)))
   module-found)
 

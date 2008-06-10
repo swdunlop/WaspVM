@@ -1,4 +1,14 @@
-????/??/?? Initial Import from WaspVM 0.3
+2008/06/10 Subsystems Back From The Future
+  - Added subsystem compilation back into the build system.
+  - Restored regex subsystem into the build system.
+  - Restored subsystem installation in the install script.
+  - Added filesystem subsystem.
+  - Moved all filesystem primitives other than file open and read primitives to filesystem 
+    subsystem.
+  - Removed uses of file-path? from core.
+  - Added dependency on sys/filesystem to compiler.
+
+2008/06/10 Initial Import from WaspVM 0.3
   This is a fork of WaspVM 0.3 devel as of 2008/06/05 with reduced build complexity and the
   removal of some functionality not needed for installation or compilation.  It is the new
   development focus of the Wasp project -- see the README for details.

@@ -1,5 +1,6 @@
 (import "lib/waspc")
 (import "lib/build")
+(import "sys/filesystem")
 
 (define (main . args)
   (define base-dir #f)
@@ -129,7 +130,7 @@
   (copy "core" mod-dir)
   (copy "lib" mod-dir)
   (copy "site" mod-dir)
-  ;(copy (string-append "sys/*" *plugin-ext*) mod-sys-dir)
+  (copy (string-append "sys/*" *plugin-ext*) mod-sys-dir)
 
   ;(copy "stubs/*" stub-dir)
   

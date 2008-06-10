@@ -1,10 +1,3 @@
-- Port subsystem compilation into no-ac build system.
-
-- Move os filesystem primitives to filesystem subsystem.
-  - Modify build, module and compile to use os error trapping to find the right file.
-  - Move all dir- to filesystem.
-  - Move getcwd to filesystem.
-   
 - Move string mutation back into buffer subsystem.
   Too complicated to explain to users why they shouldn't mutate borrowed strings.
   Remove -bang appellation for mutation.
