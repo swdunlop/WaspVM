@@ -1,5 +1,17 @@
-- Inhibit subsystem warning in standalone compiler in install mode..
+- WaspDoc documents exported macros.
+- WaspDoc documents exported types.
+- WaspDoc documents subsystems.
+- WaspDoc documents core primitives.
 
+- WaspDoc managed reference documentation.
+
+- WaspDoc renders markup to ASCII
+- WaspDoc renders markup to HTML
+- WaspDoc renders markup to PDF
+
+- Add tc-append! multiple terms.
+- Add set-append! multiple terms.
+- Add for-each and iter support for tc's.
 - Move string mutation back into buffer subsystem.
   Too complicated to explain to users why they shouldn't mutate borrowed strings.
   Remove -bang appellation for mutation.
@@ -22,6 +34,8 @@
   - Lose I/O scheduler. Reimplement using a select primitive.
   - Lose multimethods. Reimplement using compiler.
   - Lose timeouts. Reimplement using time primitives.
+
+- Inhibit subsystem warning in standalone compiler in install mode..
 
 - Move set primitive to make-set
 

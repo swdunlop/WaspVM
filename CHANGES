@@ -1,3 +1,8 @@
+2008/06/11 WaspDoc Parses Module Files
+  - Added waspdoc/waspdoc.ms
+  - waspdoc/waspdoc can analyze module files for their imports and exports
+    !! Note, this does not identify a module's macro exports, nor does it expand those macros. 
+
 2008/06/10 Subsystems Back From The Future
   - Added subsystem compilation back into the build system.
   - Restored regex subsystem into the build system.
