@@ -41,9 +41,6 @@
 (define (input (<connection> c))
   (connection-input c))
 
-(define (input (<os-connection> c))
-  (os-connection-input c))
-
 (define (input (<process> q))
   (queue-input q))
   
@@ -58,9 +55,6 @@
 
 (define (output (<connection> c))
   (connection-output c))
-
-(define (output (<os-connection> c))
-  (os-connection-output c))
 
 (define (output (<process> q))
   (queue-output q))

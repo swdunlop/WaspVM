@@ -1042,7 +1042,7 @@ WASP_BEGIN_PRIM( "globals", globals )
     RESULT( wasp_vf_list( wasp_get_globals( ) ) );
 WASP_END_PRIM( globals );
 
-WASP_BEGIN_PRIM( "set", set )
+WASP_BEGIN_PRIM( "make-set", make_set )
     wasp_set set = wasp_make_set( );
     
     for(;;){
@@ -1052,9 +1052,9 @@ WASP_BEGIN_PRIM( "set", set )
     }
     
     RESULT( wasp_vf_set( set ) );
-WASP_END_PRIM( set )
+WASP_END_PRIM( make_set )
 
-WASP_BEGIN_PRIM( "set-add!", set_addd )
+WASP_BEGIN_PRIM( "set-add!", set_add )
     REQ_SET_ARG( set );
     
     for(;;){
@@ -1064,7 +1064,7 @@ WASP_BEGIN_PRIM( "set-add!", set_addd )
     }
     
     RESULT( wasp_vf_set( set ) );
-WASP_END_PRIM( set_addd )
+WASP_END_PRIM( set_add )
 
 WASP_BEGIN_PRIM( "set-remove!", set_removed )
     REQ_SET_ARG( set );
@@ -1909,8 +1909,8 @@ void wasp_bind_core_prims( ){
     WASP_BIND_PRIM( vector_to_list );
     WASP_BIND_PRIM( list_to_vector );
 
-    WASP_BIND_PRIM( set );
-    WASP_BIND_PRIM( set_addd );
+    WASP_BIND_PRIM( make_set );
+    WASP_BIND_PRIM( set_add );
     WASP_BIND_PRIM( set_removed );
     WASP_BIND_PRIM( set_memberq );
     WASP_BIND_PRIM( set_to_list );

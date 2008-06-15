@@ -1,3 +1,11 @@
+- Incremental VM Loop
+  - Create a variant of spawn that suspends after each instruction.
+  - Add accessors for all of the process members.
+  - Write a process state decompiler.
+  - Write a shim routine for inserting procedures into the current call stack.
+
+- Does list append need to resemble set-append and string-append ?
+
 - WaspDoc documents exported macros.
 - WaspDoc documents exported types.
 - WaspDoc documents subsystems.
@@ -11,6 +19,7 @@
 
 - Add tc-append! multiple terms.
 - Add set-append! multiple terms.
+
 - Add for-each and iter support for tc's.
 - Move string mutation back into buffer subsystem.
   Too complicated to explain to users why they shouldn't mutate borrowed strings.
@@ -36,8 +45,6 @@
   - Lose timeouts. Reimplement using time primitives.
 
 - Inhibit subsystem warning in standalone compiler in install mode..
-
-- Move set primitive to make-set
 
 - Move file management primitives to os.c
 

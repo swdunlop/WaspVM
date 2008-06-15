@@ -78,7 +78,7 @@
     (set! module (read-module-source module)))
 
   (define module-id #f)
-  (define module-exports (set))
+  (define module-exports (make-set))
   (define module-members (make-tc))
   (define exported-members (dict))
   (define module-imports (make-tc))

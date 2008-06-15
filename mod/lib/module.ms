@@ -29,7 +29,7 @@
 
 (define (code-imports module)
   ;;; Returns a list of imported modules from a module.
-  (define ignore (set))
+  (define ignore (make-set))
   (define imports (make-tc))
 
   (define (is-import? expr)
@@ -53,7 +53,7 @@
 
 (define (code-exports module)
   ;;; Returns a list of exported symbols from a module.
-  (define ignore (set))
+  (define ignore (make-set))
   (define exports (make-tc))
 
   (define (is-export? expr)
@@ -79,7 +79,7 @@
 
 (define (code-dependencies source)
   (define deps (apply make-tc (core-dependencies)))
-  (define ignore (apply set (core-dependencies)))
+  (define ignore (apply make-set (core-dependencies)))
 
   (define (process-code code)
     (for-each process-module

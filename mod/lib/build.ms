@@ -90,7 +90,7 @@
                           (substring item 0 (- (string-length item) 3))
                           item))
                       modules))
-  (let ((scope (apply set modules))
+  (let ((scope (apply make-set modules))
         (order (make-tc))
         (undone (apply make-tc modules))
         (item #f))
