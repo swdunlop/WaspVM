@@ -1,3 +1,14 @@
+- Refactor-Lite 
+  Write a tool that identifies all C, H and MS files that reference a given function, feeds it to
+  vim -p, and preseeds a regex to alter all references to that function.
+
+- Spot-Coverage
+  Scripts using gcov and vim to identify untested portions of primitives.
+
+- Removal of buffers from core
+  No wasp_printf, wasp_formatf, and controlled use of wasp_errf.  Put all that in top-level error
+  handlers.
+
 - Incremental VM Loop
   - Create a variant of spawn that suspends after each instruction.
   - Add accessors for all of the process members.
