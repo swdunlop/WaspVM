@@ -71,14 +71,14 @@
        symbols))
 
 (define (make-actual-context parent symbols)
-  (let ((new-context (make-context #t parent symbols #f (dict) #f)))
+  (let ((new-context (make-context #t parent symbols #f (make-dict) #f)))
     (set-context-slots! new-context 
                         (make-slots new-context symbols))
     new-context))
 
 (define (make-top-context)
   (define top (make-actual-context #f '()))
-  (define syn (apply dict (waspvm-syntax)))
+  (define syn (apply make-dict (waspvm-syntax)))
   (let ((old-set-macro set-macro!))
     (set! set-macro! (lambda (key func)
                        (dict-set! syn key func)
@@ -115,7 +115,7 @@
     (else (find-actual-context (context-parent context)))))
 
 (define (make-virtual-context parent symbols)
-  (let ((new-context (make-context #f parent symbols #f (dict) #f))
+  (let ((new-context (make-context #f parent symbols #f (make-dict) #f))
         (actual-context (find-actual-context parent)))
     (set-context-slots! actual-context
                         (append (context-slots actual-context)

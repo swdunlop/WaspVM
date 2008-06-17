@@ -1101,7 +1101,7 @@ WASP_BEGIN_PRIM( "set->list", set_to_list )
     RESULT( wasp_car( tc ) );
 WASP_END_PRIM( set_to_list )
 
-WASP_BEGIN_PRIM( "dict", dict )
+WASP_BEGIN_PRIM( "make-dict", make_dict )
     wasp_dict dict = wasp_make_dict( );
 
     for(;;){
@@ -1111,7 +1111,7 @@ WASP_BEGIN_PRIM( "dict", dict )
     }
     
     RESULT( wasp_vf_dict( dict ) );
-WASP_END_PRIM( dict )
+WASP_END_PRIM( make_dict )
 
 WASP_BEGIN_PRIM( "dict->list", dict_to_list )
     REQ_DICT_ARG( dict );
@@ -1915,7 +1915,7 @@ void wasp_bind_core_prims( ){
     WASP_BIND_PRIM( set_memberq );
     WASP_BIND_PRIM( set_to_list );
     
-    WASP_BIND_PRIM( dict );
+    WASP_BIND_PRIM( make_dict );
     WASP_BIND_PRIM( dict_setd );
     WASP_BIND_PRIM( dict_ref );
     WASP_BIND_PRIM( dict_removed );

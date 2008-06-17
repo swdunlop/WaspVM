@@ -80,7 +80,7 @@
   (define module-id #f)
   (define module-exports (make-set))
   (define module-members (make-tc))
-  (define exported-members (dict))
+  (define exported-members (make-dict))
   (define module-imports (make-tc))
 
   (define (parse-module-expr expr)

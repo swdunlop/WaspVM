@@ -16,7 +16,7 @@
 (define *waspvm?* #t)
 (export *waspvm?*)
 
-(define *config* (dict))
+(define *config* (make-dict))
 
 (define (site-config key)
   (dict-ref *config* key))

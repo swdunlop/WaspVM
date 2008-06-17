@@ -24,7 +24,7 @@ SYS_REGEX ?= $(SYS)/regex$(SO)
 SYS_FILESYSTEM ?= $(SYS)/filesystem$(SO)
 SUBSYSTEMS += $(SYS_REGEX) $(SYS_FILESYSTEM)
 
-build: $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE) $(SUBSYSTEMS)
+build: $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 
 install: $(WASP_EXE)
 	cd mod && $(WASP_EXE) bin/install.ms
@@ -32,7 +32,7 @@ install: $(WASP_EXE)
 repl: $(WASP_EXE)
 	if which rlwrap; then cd mod && rlwrap $(WASP_EXE); else cd mod && $(WASP_EXE); fi
 
-$(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE)
+$(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE) $(SUBSYSTEMS)
 	cd mod && $(WASPC_EXE) -exe $(WASP_EXE) -stub $(WASPVM_EXE) bin/wasp
 	chmod +rx $(WASP_EXE)
 

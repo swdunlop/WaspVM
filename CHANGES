@@ -1,6 +1,6 @@
 ????/??/?? Namespace Cleanup
   - Renamed set primitive to make-set.
-  + Renamed dict primitive to make-dict.
+  - Renamed dict primitive to make-dict.
   + Renamed tc-append! primitive to tc-add!
   + Modified tc-add! to accept multiple items, not just one.
 

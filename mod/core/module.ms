@@ -60,7 +60,7 @@
 
 (export load-mo load)
 
-(define *imports* (dict))
+(define *imports* (make-dict))
 
 (define (imported? key)
   (dict-set? *imports* key))
