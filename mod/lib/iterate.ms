@@ -77,11 +77,12 @@
 
   (cond
     ((function? value) value)
+    ((tc? value)       (list-iter (tc->list value)))
     ((list? value)     (list-iter value))
     ((input? value)    (input-iter value))
     ((vector? value)   (vector-iter value))
     ((dict? value)     (list-iter (dict->list value)))
-    ((set? value)     (list-iter (set->list value)))
+    ((set? value)      (list-iter (set->list value)))
     (else (error 'seq "no standard sequence iterator"
                       value))))
 

@@ -28,9 +28,6 @@
 - WaspDoc renders markup to HTML
 - WaspDoc renders markup to PDF
 
-- Add tc-append! multiple terms.
-- Add set-append! multiple terms.
-
 - Add for-each and iter support for tc's.
 - Move string mutation back into buffer subsystem.
   Too complicated to explain to users why they shouldn't mutate borrowed strings.
