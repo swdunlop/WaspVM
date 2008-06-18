@@ -95,14 +95,14 @@ wasp_error wasp_make_error( wasp_symbol key, wasp_list info, wasp_list context )
 }
 
 wasp_list wasp_frame_context( wasp_callframe cp ){
-    wasp_pair t1 = wasp_make_tc( );
+    wasp_tc t1 = wasp_make_tc( );
 
     while( cp ){
         wasp_tc_add( t1, wasp_vf_pair( cp->head ) );
         cp = cp->cp;
     }
 
-    return wasp_list_fv( wasp_car( t1 ) );
+    return t1->head;
 }
 
 void wasp_trace_error( wasp_error e ){

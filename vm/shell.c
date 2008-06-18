@@ -122,5 +122,5 @@ void wasp_init_shell_subsystem( ){
         wasp_tc_add( tc, wasp_vf_string( wasp_string_fs( *env ) ) );
         env++;
     }
-    wasp_set_global( wasp_symbol_fs( "*environ*" ), wasp_car( tc ) );
+    wasp_set_global( wasp_symbol_fs( "*environ*" ), wasp_vf_list( tc->head ) );
 }

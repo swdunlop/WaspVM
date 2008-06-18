@@ -64,7 +64,7 @@ wasp_string wasp_locate_util( wasp_string utilname ){
         if( strlen( pathstr ) < 5 )continue;
         if( memcmp( pathstr, "PATH=", 5 ) )continue;
 
-        wasp_pair tc = wasp_make_tc( );
+        wasp_tc tc = wasp_make_tc( );
         
         pathstr += 5;
 
@@ -80,7 +80,7 @@ wasp_string wasp_locate_util( wasp_string utilname ){
         pathstr++;
         }
 
-        return wasp_locate_file( utilname, wasp_list_fv( wasp_car( tc ) ) );
+        return wasp_locate_file( utilname, tc->head );
     };
 
     return NULL;

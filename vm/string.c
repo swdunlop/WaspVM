@@ -181,7 +181,7 @@ void wasp_free_symbol( wasp_symbol sym ){
 WASP_GENERIC_COMPARE( symbol);
 WASP_C_TYPE( symbol );
 
-void wasp_globals_iter( wasp_value data, wasp_pair tc ){
+void wasp_globals_iter( wasp_value data, wasp_tc tc ){
     wasp_symbol sym = wasp_symbol_fv( data );
     if( wasp_has_global( sym ) ){ 
         wasp_tc_add( tc, wasp_vf_pair( wasp_cons( wasp_vf_symbol( sym ),
@@ -189,9 +189,9 @@ void wasp_globals_iter( wasp_value data, wasp_pair tc ){
     }
 }
 wasp_list wasp_get_globals( ){
-    wasp_pair tc = wasp_make_tc( );
+    wasp_tc tc = wasp_make_tc( );
     wasp_iter_tree( wasp_lexicon, (wasp_iter_mt)wasp_globals_iter, tc );
-    return wasp_list_fv( wasp_car( tc ) );
+    return tc->head;
 }
 void wasp_init_string_subsystem( ){
     wasp_root_obj( (wasp_object)wasp_lexicon );

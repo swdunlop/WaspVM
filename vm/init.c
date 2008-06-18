@@ -63,7 +63,7 @@ void wasp_init_core_subsystems( ){
 void wasp_init_waspvm( int argc, const char* argv[] ){
     wasp_init_core_subsystems( );
 
-    wasp_argv = wasp_make_tc( );
+    wasp_tc tc = wasp_make_tc( );
     wasp_argc = 0;
     int i;
 
@@ -75,12 +75,12 @@ void wasp_init_waspvm( int argc, const char* argv[] ){
         }else if( ! strcmp( argv[i], "-g" ) ){
             wasp_show_globals = 1;
         }else{
-            wasp_tc_add( wasp_argv, wasp_vf_string( wasp_string_fs( argv[i] ) ) );
+            wasp_tc_add( tc, wasp_vf_string( wasp_string_fs( argv[i] ) ) );
             wasp_argc ++;
         }
     };
 
-    wasp_argv = wasp_list_fv( wasp_car( wasp_argv ) );
+    wasp_argv = tc->head;
     wasp_root_obj( (wasp_object) wasp_argv );
 }
 

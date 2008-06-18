@@ -6,8 +6,10 @@
   - Modified tc-add! to accept multiple items, not just one.
   - Modified tc-remove! to accept multiple items, not just one.
   - Modified iter in lib/iterate to generate tc iterators.
-  + tc no longer considered a list by list predicate.
-  + tc no longer considered a pair by pair predicate.
+  - tc no longer considered a list by list predicate.
+  - tc no longer considered a pair by pair predicate.
+  - tc no longer a subtype of pair.
+  + Optimization: Where is wasp_frame_context used? Serious heap consumer..
 
 2008/06/11 WaspDoc Parses Module Files
   - Added waspdoc/waspdoc.ms

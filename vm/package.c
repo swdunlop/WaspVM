@@ -227,7 +227,7 @@ void wasp_freeze_val( wasp_tree index, wasp_string buf, wasp_value v ){
 wasp_string wasp_freeze( wasp_value root ){
     wasp_integer item_ct = 0;
     wasp_dict      index = wasp_make_dict( );
-    wasp_pair      items = wasp_make_tc( );
+    wasp_tc      items = wasp_make_tc( );
 
     wasp_boolean inlineq( wasp_value value ){
         if( wasp_is_integer( value ) ){
@@ -279,7 +279,7 @@ wasp_string wasp_freeze( wasp_value root ){
     int i;
     wasp_value item;
 
-    items = wasp_list_fv( wasp_car( items ) );
+    wasp_pair list = items->head;
 
     if( inlineq( root ) ){ 
         wasp_freeze_val( index, pkg, root ); 
@@ -287,8 +287,8 @@ wasp_string wasp_freeze( wasp_value root ){
         wasp_string_append_word( pkg, item_ct );
 
         for( i = 0; i < item_ct; i ++ ){
-            item = wasp_car( items );
-            items = wasp_list_fv( wasp_cdr( items ) );
+            item = wasp_car( list );
+            list = wasp_list_fv( wasp_cdr( list ) );
             if( wasp_is_integer( item ) ){
                 wasp_string_append_byte( pkg, PKG_IOBJ );
                 wasp_string_append_quad( pkg, wasp_integer_fv( item ) );

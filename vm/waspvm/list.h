@@ -27,7 +27,9 @@ WASP_END_TYPE( pair )
 #define PAIR_RESULT( vn ) TYPED_RESULT( vn, pair )
 #define OPT_PAIR_ARG( vn ) OPT_TYPED_ARG( vn, pair )
 
-WASP_H_SUBTYPE( tc, pair );
+WASP_BEGIN_TYPE( tc )
+    wasp_pair head, tail;
+WASP_END_TYPE( tc )
 
 #define REQ_TC_ARG( vn ) REQ_TYPED_ARG( vn, tc )
 #define TC_RESULT( vn ) TYPED_RESULT( vn, tc )

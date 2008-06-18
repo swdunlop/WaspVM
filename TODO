@@ -28,7 +28,6 @@
 - WaspDoc renders markup to HTML
 - WaspDoc renders markup to PDF
 
-- Add for-each and iter support for tc's.
 - Move string mutation back into buffer subsystem.
   Too complicated to explain to users why they shouldn't mutate borrowed strings.
   Remove -bang appellation for mutation.
@@ -66,11 +65,7 @@
   - Rename define of functions to def-fn
   - Rename define of methods to def-mt
   - Rename function to fn
-  - Rename set to make-set
   - Rename set! to set
-  - Rename vector to make-vector
-  - Rename list to make-list
-  - Rename cons to make-pair
   - Add var form
     var declares locality of a variable when def would not do.
   - Kill let / letrec / let* !
@@ -95,6 +90,8 @@
 
   (conc '(a b c) '(1 2 3)) -> (a b c 1 2 3)
   (append '(a b c) '(1 2 3)) -> (a b c (1 2 3))
+  
+  - Do we need to rename string-append-xxx! ??
 
 - Should equal? v. eq? be removed, too?
   Strings compared by length, hash then content.

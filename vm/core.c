@@ -739,7 +739,7 @@ WASP_BEGIN_PRIM( "map-car", map_car )
         wasp_tc_add( tc, wasp_car( p ) );
         src = wasp_req_list( wasp_cdr( src ) );
     }
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( map_car );
 
 WASP_BEGIN_PRIM( "map-cdr", map_cdr )
@@ -751,7 +751,7 @@ WASP_BEGIN_PRIM( "map-cdr", map_cdr )
         wasp_tc_add( tc, wasp_cdr( p ) );
         src = wasp_req_list( wasp_cdr( src ) );
     }
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( map_cdr );
 
 WASP_BEGIN_PRIM( "thaw", thaw )
@@ -908,8 +908,8 @@ WASP_BEGIN_PRIM( "make-tc", make_tc )
     wasp_tc tc = wasp_make_tc( );
 
     if( seed ){
-        wasp_set_car( tc, wasp_vf_pair( seed ) );
-        wasp_set_cdr( tc, wasp_vf_pair( wasp_last_pair( seed ) ) );
+        tc->head = seed;
+        tc->tail = wasp_last_pair( seed );
     };
 
     TC_RESULT( tc );
@@ -918,8 +918,7 @@ WASP_END_PRIM( make_tc )
 WASP_BEGIN_PRIM( "tc-clear!", tc_clear )
     REQ_TC_ARG( tc );
     NO_REST_ARGS( );
-    wasp_set_car( tc, wasp_vf_null() );
-    wasp_set_cdr( tc, wasp_vf_null() );
+    tc->head = tc->tail = (wasp_pair) NULL;
     TC_RESULT( tc );
 WASP_END_PRIM( tc_clear )
 
@@ -939,16 +938,15 @@ WASP_END_PRIM( tc_append )
 WASP_BEGIN_PRIM( "tc-next!", tc_next )
     REQ_TC_ARG( tc );
     NO_REST_ARGS( );
-    if( wasp_is_null( wasp_car( tc ) ) ){
+    if( ! tc->head ){
         wasp_errf( wasp_es_vm, "s", "tconc out of items" );
     }
-    wasp_pair next = wasp_list_fv( wasp_car( tc ) );
+    wasp_pair next = tc->head;
     wasp_pair lead = wasp_list_fv( wasp_cdr( next ) );
     if( lead ){
-        wasp_set_car( tc, wasp_vf_pair( lead ) );
+        tc->head = lead;
     }else{
-        wasp_set_car( tc, wasp_vf_null() );
-        wasp_set_cdr( tc, wasp_vf_null() );
+        tc->head = tc->tail = (wasp_pair) NULL;
     }
     RESULT( wasp_car( next ) );
 WASP_END_PRIM( tc_next );
@@ -956,7 +954,7 @@ WASP_END_PRIM( tc_next );
 WASP_BEGIN_PRIM( "tc-empty?", tc_emptyq )
     REQ_TC_ARG( tc );
     NO_REST_ARGS( );
-    RESULT( wasp_vf_boolean( wasp_is_null( wasp_car( tc ) ) ) );
+    RESULT( wasp_vf_boolean( tc->head == NULL ) );
 WASP_END_PRIM( tc_emptyq );
 
 WASP_BEGIN_PRIM( "tc-add!", tc_add )
@@ -979,19 +977,19 @@ WASP_BEGIN_PRIM( "tc-remove!", tc_remove )
     if( ! has_item ) break;
 
         wasp_list prev = NULL;
-        wasp_list list = wasp_list_fv( wasp_car( tc ) );
+        wasp_list list = tc->head;
 
         while( list ){
             if( wasp_eq( wasp_car( list ), item ) ){
                 wasp_list next = wasp_list_fv( wasp_cdr( list ) );
 
                 if( prev == NULL ){
-                    wasp_set_car( tc, wasp_vf_list( next ) );
+                    tc->head = next;
                 }else{
                     wasp_set_cdr( prev, wasp_vf_list( next ) );
                 };
 
-                if( ! next ){ wasp_set_cdr( tc, wasp_vf_list( prev ) ); };
+                if( ! next ){ tc->tail = prev; };
             };
 
             prev = list;
@@ -1006,12 +1004,12 @@ WASP_BEGIN_PRIM( "tc-prepend!", tc_prepend )
     REQ_TC_ARG( tc );
     REQ_ANY_ARG( item );
     NO_REST_ARGS( );
-    item = wasp_vf_pair( wasp_cons( item, wasp_car( tc ) ) );
+    wasp_pair pair = wasp_cons( item, wasp_vf_pair( tc->head ) );
 
-    if( wasp_is_null( wasp_car( tc ) ) ){
-        wasp_set_cdr( tc, item );
+    if( ! tc->head ){
+        tc->tail = pair;
     };
-    wasp_set_car( tc, item );
+    tc->head = pair;
 
     RESULT( wasp_vf_tc( tc ) );
 WASP_END_PRIM( tc_prepend )
@@ -1019,7 +1017,7 @@ WASP_END_PRIM( tc_prepend )
 WASP_BEGIN_PRIM( "tc->list", tc_to_list )
     REQ_TC_ARG( tc );
     NO_REST_ARGS( );
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( tc_to_list )
 
 wasp_symbol wasp_es_parse;
@@ -1102,7 +1100,7 @@ WASP_BEGIN_PRIM( "set->list", set_to_list )
     
     wasp_iter_tree( set, (wasp_iter_mt)wasp_untree_cb, tc );
 
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head  );
 WASP_END_PRIM( set_to_list )
 
 WASP_BEGIN_PRIM( "make-dict", make_dict )
@@ -1124,7 +1122,7 @@ WASP_BEGIN_PRIM( "dict->list", dict_to_list )
     wasp_tc tc = wasp_make_tc( );
     wasp_iter_tree( dict, (wasp_iter_mt)wasp_untree_cb, tc );
     
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( dict_to_list )
 
 void wasp_dict_keys_cb( wasp_value value, wasp_tc tc ){
@@ -1140,7 +1138,7 @@ WASP_BEGIN_PRIM( "dict-keys", dict_keys )
 
     wasp_iter_tree( dict, (wasp_iter_mt)wasp_dict_keys_cb, tc );
     
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( dict_keys )
 
 void wasp_dict_values_cb( wasp_value value, wasp_tc tc ){
@@ -1156,7 +1154,7 @@ WASP_BEGIN_PRIM( "dict-values", dict_values )
     
     wasp_iter_tree( dict, (wasp_iter_mt)wasp_dict_values_cb, tc );
     
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( dict_values )
 
 WASP_BEGIN_PRIM( "dict-set?", dict_setq )
@@ -1334,7 +1332,7 @@ WASP_BEGIN_PRIM( "split-lines", split_lines )
     
     const char* sp = wasp_sf_string( string );
     const char* bp = sp;
-    wasp_pair tc = wasp_make_tc( tc );
+    wasp_tc tc = wasp_make_tc( tc );
     char ch;
 
     void add_item( ){
@@ -1357,8 +1355,8 @@ WASP_BEGIN_PRIM( "split-lines", split_lines )
     };
 
     add_item( );
-
-    RESULT( wasp_car( tc ) );
+    
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( split_lines )
 
 WASP_BEGIN_PRIM( "string-split", string_split )
@@ -1443,7 +1441,7 @@ WASP_BEGIN_PRIM( "string-split*", string_splitm )
     
     wasp_tc_add( tc, wasp_vf_string( wasp_string_fm( sp, sl ) ) );
 
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( string_splitm )
 
 WASP_BEGIN_PRIM( "string-join", string_join )
@@ -1729,8 +1727,8 @@ WASP_BEGIN_PRIM( "append", append )
             list = wasp_req_list( wasp_cdr( list ) );
         }
     }
-
-    RESULT( wasp_car( tc ) );
+    
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( append )
 
 WASP_BEGIN_PRIM( "append!", appendd )

@@ -32,17 +32,17 @@ wasp_pair wasp_cons( wasp_value car, wasp_value cdr ){
     wasp_set_cdr( c, cdr );
     return c;    
 }
-void wasp_tc_add( wasp_pair tc, wasp_value v ){
+void wasp_tc_add( wasp_tc tc, wasp_value v ){
     wasp_pair it = wasp_cons( v, wasp_vf_null() );
-    wasp_value pv = wasp_cdr( tc );
+    wasp_pair lt = tc->tail;
     
-    if( wasp_is_pair( pv ) ){
-	wasp_set_cdr( wasp_pair_fv( pv ), wasp_vf_pair( it ) );
+    if( lt ){
+        wasp_set_cdr( lt, wasp_vf_pair( it ) );
     }else{
-	wasp_set_car( tc, wasp_vf_pair( it ) );
+        tc->head = it;
     }
     
-    wasp_set_cdr( tc, wasp_vf_pair( it ) );
+    tc->tail = it;
 }
 wasp_pair wasp_list_ref( wasp_pair p, wasp_integer offset ){
     while( p && offset ){
@@ -83,8 +83,8 @@ void wasp_trace_pair( wasp_pair p ){
 }
 
 void wasp_trace_tc( wasp_tc p ){
-    wasp_grey_val( wasp_car( p ) );
-    wasp_grey_val( wasp_cdr( p ) );
+    wasp_grey_obj( (wasp_object) p->head );
+    wasp_grey_obj( (wasp_object) p->tail );
 }
 
 void wasp_format_list_items( void* bbuf, wasp_pair p, wasp_boolean sp ){
@@ -153,7 +153,7 @@ WASP_GENERIC_COMPARE( tc );
 WASP_GENERIC_FORMAT( tc );
 WASP_GENERIC_FREE( tc );
 
-WASP_C_SUBTYPE( tc, pair );
+WASP_C_TYPE( tc );
 
 // A very complicated and sophisticated primitive..
 WASP_BEGIN_PRIM( "list", list )
@@ -163,6 +163,6 @@ WASP_END_PRIM( list )
 
 void wasp_init_list_subsystem( ){
     WASP_I_TYPE( pair );
-    WASP_I_SUBTYPE( tc, pair );
+    WASP_I_TYPE( tc );
     WASP_BIND_PRIM( list );
 }

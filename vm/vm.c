@@ -543,7 +543,7 @@ void wasp_chain( wasp_pair data ){
 }
 void wasp_chainf( wasp_value fn, wasp_word ct, ... ){
     va_list ap;
-    wasp_pair tc = wasp_make_tc( );
+    wasp_tc tc = wasp_make_tc( );
     va_start( ap, ct );
 
     wasp_tc_add( tc, fn );
@@ -552,7 +552,7 @@ void wasp_chainf( wasp_value fn, wasp_word ct, ... ){
         wasp_tc_add( tc, va_arg( ap, wasp_value ) );
     }
 
-    wasp_chain( wasp_pair_fv( wasp_car( tc ) ) );
+    wasp_chain( tc->head );
 }
 
 void wasp_trace_step( ){

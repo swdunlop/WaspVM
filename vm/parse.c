@@ -257,7 +257,7 @@ wasp_list wasp_parse_list( char** r_str, wasp_boolean* r_succ ){
     if( *str != '(' )goto fail;
 
     char ch;
-    wasp_pair tc = wasp_make_tc( );
+    wasp_tc tc = wasp_make_tc( );
     wasp_string buf = wasp_make_string( 64 );
     wasp_value x;
     str++;
@@ -266,7 +266,7 @@ wasp_list wasp_parse_list( char** r_str, wasp_boolean* r_succ ){
         str = wasp_skip_space( str );
         switch( *str ){
         case '.':
-            if( wasp_list_fv( wasp_car( tc ) ) ){
+            if( tc->head ){
                 str = wasp_skip_space( str + 1 );
                 if(( *str == '.' || *str == ')' )){
                     wasp_parse_errmsg = wasp_em_notail;
@@ -276,7 +276,7 @@ wasp_list wasp_parse_list( char** r_str, wasp_boolean* r_succ ){
                 x = wasp_parse_value( &str, r_succ );
 
                 if( *r_succ ){
-                    wasp_set_cdr( wasp_pair_fv( wasp_cdr( tc ) ), x );
+                    wasp_set_cdr( tc->tail, x );
                     str = wasp_skip_space( str );
                     if( *str == ')' ){
                         str ++;
@@ -319,7 +319,7 @@ succ:
     *r_succ = 1;
     *r_str = str;
 
-    return wasp_list_fv( wasp_car( tc ) );
+    return tc->head;
 fail:
     *r_succ = 0;
     return NULL;
@@ -400,7 +400,7 @@ wasp_value wasp_parse_value( char** r_str, wasp_boolean* r_succ ){
 }
 
 wasp_list wasp_parse_document( char* doc, wasp_boolean* r_succ ){
-    wasp_pair tc = wasp_make_tc( );
+    wasp_tc tc = wasp_make_tc( );
     wasp_parse_errmsg = NULL;
     wasp_parse_incomplete = 0;
     for(;;){
@@ -416,7 +416,7 @@ wasp_list wasp_parse_document( char* doc, wasp_boolean* r_succ ){
     }
 succ:
     *r_succ = 1;
-    return wasp_list_fv( wasp_car( tc ) );
+    return tc->head;
 fail:
     *r_succ = 0;
     return NULL;
