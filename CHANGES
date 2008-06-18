@@ -1,8 +1,10 @@
 ????/??/?? Namespace Cleanup
   - Renamed set primitive to make-set.
   - Renamed dict primitive to make-dict.
-  + Renamed tc-append! primitive to tc-add!
-  + Modified tc-add! to accept multiple items, not just one.
+  - Renamed tc-append! primitive to tc-add!
+  - Renamed tc-splice! primitive to tc-append!
+  - Modified tc-add! to accept multiple items, not just one.
+  - Modified tc-remove! to accept multiple items, not just one.
 
 2008/06/11 WaspDoc Parses Module Files
   - Added waspdoc/waspdoc.ms

@@ -164,7 +164,7 @@
   (define tc (make-tc))
   (compile-defines env block)
   (for-each (lambda (expr)
-              (tc-splice! tc (compile-lisp-expr env expr)))
+              (tc-append! tc (compile-lisp-expr env expr)))
             (compile-macros env block))
   (tc->list tc))
 
@@ -212,11 +212,11 @@
 
 (define (compile-lisp-call env call)
   (define tc (make-tc))
-  (tc-append! tc '(newf))
+  (tc-add! tc '(newf))
   (for-each (lambda (term) 
-              (tc-splice! tc (compile-lisp-arg env term)))
+              (tc-append! tc (compile-lisp-arg env term)))
             call)
-  (tc-append! tc '(call))
+  (tc-add! tc '(call))
   (tc->list tc))
 
 (define (compile-lisp-arg env arg)
@@ -254,7 +254,7 @@
   ;;;(newline)
 
   (for-each (lambda (expr)
-              (tc-splice! tc (compile-asm-expr env expr)))
+              (tc-append! tc (compile-asm-expr env expr)))
             block)
   (tc->list tc))
 
@@ -278,20 +278,20 @@
                        (tc (make-tc)))
                    (for-each 
                      (lambda (x) 
-                       (tc-splice! tc (compile-lisp-block env (cdr x)))
-                       (tc-append! tc 
+                       (tc-append! tc (compile-lisp-block env (cdr x)))
+                       (tc-add! tc 
                                    (cons 'stb 
                                          (context-symbol-addr n-env (car x)))))
                      defns)
-                   (tc-splice! tc (compile-lisp-block n-env body))
+                   (tc-append! tc (compile-lisp-block n-env body))
                    (cons 'asm (tc->list tc)))))
     (cons 'set!  (lambda (env term . body)
                    (unless (symbol? term)
                      (error 'compile "set! requires a symbol term" term))
                    (let ((addr (context-symbol-addr env term))
                          (tc (make-tc)))
-                     (tc-splice! tc (compile-lisp-block env body))
-                     (tc-append! tc (if addr (cons 'stb addr)
+                     (tc-append! tc (compile-lisp-block env body))
+                     (tc-add! tc (if addr (cons 'stb addr)
                                              (list 'stg term)))
                      (cons 'asm (tc->list tc)))))
 
@@ -543,11 +543,11 @@
                     
 (set-macro! 'apply (lambda (fn . terms)
                      (define tc (make-tc))
-                     (tc-append! tc fn)
+                     (tc-add! tc fn)
                      (until (null? terms)
                             (let ((term (car terms)))
                               (set! terms (cdr terms))
-                              (tc-append! tc 
+                              (tc-add! tc 
                                           (if (null? terms)
                                             (list 'scatter term)
                                             term))))
@@ -579,7 +579,7 @@
   (define tc (make-tc))
 
   ;TODO: This needs to be a set.
-  (for-each (lambda (x) (tc-splice! tc (cdr x)))
+  (for-each (lambda (x) (tc-append! tc (cdr x)))
             (filter is-export? code))
 
   (unless (tc-empty? tc)
@@ -756,19 +756,19 @@
 
   (until (null? formals)
     (cond ((symbol? formals)
-           (tc-append! rs formals)
-           (tc-append! sg #t)
+           (tc-add! rs formals)
+           (tc-add! sg #t)
            (set! formals '())
            (set! op 'usea))
 ;          ((pair? (car formals))
 ;           (let ((arg (car formals)))
-;             (tc-append! sg (car arg))
-;             (tc-append! rs (cadr arg))
+;             (tc-add! sg (car arg))
+;             (tc-add! rs (cadr arg))
 ;             (set! formals '())
 ;             (set! mt #t)))
           (else
-            (tc-append! sg #t)
-            (tc-append! rs (car formals))
+            (tc-add! sg #t)
+            (tc-add! rs (car formals))
             (set! formals (cdr formals)))))
 
   (list op (tc->list rs) (and mt (tc->list sg))))

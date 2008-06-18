@@ -56,7 +56,7 @@
        (set! args (cdr args)))
       ((string-begins-with? arg "-")
        (parse-fail (string-append "Unrecognized option: " arg)))
-      (else (tc-append! mods arg))) 
+      (else (tc-add! mods arg))) 
   
     (parse-args args))
   

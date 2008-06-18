@@ -98,7 +98,7 @@ wasp_list wasp_frame_context( wasp_callframe cp ){
     wasp_pair t1 = wasp_make_tc( );
 
     while( cp ){
-        wasp_tc_append( t1, wasp_vf_pair( cp->head ) );
+        wasp_tc_add( t1, wasp_vf_pair( cp->head ) );
         cp = cp->cp;
     }
 

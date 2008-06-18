@@ -245,7 +245,7 @@ wasp_string wasp_freeze( wasp_value root ){
         wasp_tree_insert( index, 
                          wasp_vf_pair( 
                             wasp_cons( value, wasp_vf_integer( item_ct ) ) ) );
-        wasp_tc_append( items, value );
+        wasp_tc_add( items, value );
         item_ct ++;
 
         if( wasp_is_pair( value ) ){
@@ -407,7 +407,7 @@ wasp_pair wasp_thaw_tail( const char *name ) {
         if (memcmp(sig,wasp_frag_tag,wasp_frag_taglen)!=0) break;
         v = wasp_thaw_frag( f, inset );
         p = wasp_cons( v, wasp_vf_list( p ) ); 
-        // wasp_tc_append( tc, v );
+        // wasp_tc_add( tc, v );
     }
 
     fclose(f);

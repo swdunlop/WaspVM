@@ -110,7 +110,7 @@ WASP_BEGIN_PRIM( "percent-decode", percent_decode )
 WASP_END_PRIM( percent_decode )
 
 void wasp_untree_cb( wasp_value value, wasp_tc tc ){
-    wasp_tc_append( tc, value );
+    wasp_tc_add( tc, value );
 }
 
 WASP_BEGIN_PRIM( "string->integer", string_to_integer )
@@ -736,7 +736,7 @@ WASP_BEGIN_PRIM( "map-car", map_car )
     wasp_tc tc = wasp_make_tc();
     while( src ){
         wasp_pair p = wasp_req_pair( wasp_car( src ) );
-        wasp_tc_append( tc, wasp_car( p ) );
+        wasp_tc_add( tc, wasp_car( p ) );
         src = wasp_req_list( wasp_cdr( src ) );
     }
     RESULT( wasp_car( tc ) );
@@ -748,7 +748,7 @@ WASP_BEGIN_PRIM( "map-cdr", map_cdr )
     wasp_tc tc = wasp_make_tc();
     while( src ){
         wasp_pair p = wasp_req_pair( wasp_car( src ) );
-        wasp_tc_append( tc, wasp_cdr( p ) );
+        wasp_tc_add( tc, wasp_cdr( p ) );
         src = wasp_req_list( wasp_cdr( src ) );
     }
     RESULT( wasp_car( tc ) );
@@ -923,18 +923,18 @@ WASP_BEGIN_PRIM( "tc-clear!", tc_clear )
     TC_RESULT( tc );
 WASP_END_PRIM( tc_clear )
 
-WASP_BEGIN_PRIM( "tc-splice!", tc_splice )
+WASP_BEGIN_PRIM( "tc-append!", tc_append )
     REQ_TC_ARG( tc );
     REQ_LIST_ARG( list );
     NO_REST_ARGS( );
 
     while( list ){
-        wasp_tc_append( tc, wasp_car( list ) );
+        wasp_tc_add( tc, wasp_car( list ) );
         list = wasp_req_list( wasp_cdr( list ) );
     }
 
     RESULT( wasp_vf_tc( tc ) );
-WASP_END_PRIM( tc_splice )
+WASP_END_PRIM( tc_append )
 
 WASP_BEGIN_PRIM( "tc-next!", tc_next )
     REQ_TC_ARG( tc );
@@ -959,40 +959,44 @@ WASP_BEGIN_PRIM( "tc-empty?", tc_emptyq )
     RESULT( wasp_vf_boolean( wasp_is_null( wasp_car( tc ) ) ) );
 WASP_END_PRIM( tc_emptyq );
 
-WASP_BEGIN_PRIM( "tc-append!", tc_append )
+WASP_BEGIN_PRIM( "tc-add!", tc_add )
     REQ_TC_ARG( tc );
-    REQ_ANY_ARG( item );
-    NO_REST_ARGS( );
+    
+    for(;;){
+        OPT_ANY_ARG( item );
+        if( ! has_item ) break;
+        wasp_tc_add( tc, item );
+    }
 
-    wasp_tc_append( tc, item );
-
-    assert( wasp_car( wasp_pair_fv( wasp_cdr( tc ) ) )  == item );
     RESULT( wasp_vf_tc( tc ) );
-WASP_END_PRIM( tc_append )
+WASP_END_PRIM( tc_add )
 
 WASP_BEGIN_PRIM( "tc-remove!", tc_remove )
     REQ_TC_ARG( tc );
-    REQ_ANY_ARG( item );
-    NO_REST_ARGS( );
 
-    wasp_list prev = NULL;
-    wasp_list list = wasp_list_fv( wasp_car( tc ) );
+    for(;;){
+    OPT_ANY_ARG( item );
+    if( ! has_item ) break;
 
-    while( list ){
-        if( wasp_eq( wasp_car( list ), item ) ){
-            wasp_list next = wasp_list_fv( wasp_cdr( list ) );
+        wasp_list prev = NULL;
+        wasp_list list = wasp_list_fv( wasp_car( tc ) );
 
-            if( prev == NULL ){
-                wasp_set_car( tc, wasp_vf_list( next ) );
-            }else{
-                wasp_set_cdr( prev, wasp_vf_list( next ) );
+        while( list ){
+            if( wasp_eq( wasp_car( list ), item ) ){
+                wasp_list next = wasp_list_fv( wasp_cdr( list ) );
+
+                if( prev == NULL ){
+                    wasp_set_car( tc, wasp_vf_list( next ) );
+                }else{
+                    wasp_set_cdr( prev, wasp_vf_list( next ) );
+                };
+
+                if( ! next ){ wasp_set_cdr( tc, wasp_vf_list( prev ) ); };
             };
 
-            if( ! next ){ wasp_set_cdr( tc, wasp_vf_list( prev ) ); };
-        };
-
-        prev = list;
-        list = wasp_list_fv( wasp_cdr( list ) );
+            prev = list;
+            list = wasp_list_fv( wasp_cdr( list ) );
+        }
     }
 
     NO_RESULT( );
@@ -1125,7 +1129,7 @@ WASP_END_PRIM( dict_to_list )
 
 void wasp_dict_keys_cb( wasp_value value, wasp_tc tc ){
     wasp_pair p = wasp_pair_fv( value );
-    wasp_tc_append( tc, wasp_car( p ) );
+    wasp_tc_add( tc, wasp_car( p ) );
 }
 
 WASP_BEGIN_PRIM( "dict-keys", dict_keys )
@@ -1141,7 +1145,7 @@ WASP_END_PRIM( dict_keys )
 
 void wasp_dict_values_cb( wasp_value value, wasp_tc tc ){
     wasp_pair p = wasp_pair_fv( value );
-    wasp_tc_append( tc, wasp_cdr( p ) );
+    wasp_tc_add( tc, wasp_cdr( p ) );
 }
 
 WASP_BEGIN_PRIM( "dict-values", dict_values )
@@ -1334,7 +1338,7 @@ WASP_BEGIN_PRIM( "split-lines", split_lines )
     char ch;
 
     void add_item( ){
-        wasp_tc_append( tc, wasp_vf_string( wasp_string_fm( bp, sp - bp ) ) );
+        wasp_tc_add( tc, wasp_vf_string( wasp_string_fm( bp, sp - bp ) ) );
     }
 
     while( ch = *sp ){
@@ -1432,12 +1436,12 @@ WASP_BEGIN_PRIM( "string-split*", string_splitm )
     while( pp = wasp_memmem( sp, sl, ip, il ) ){
         wasp_integer pl = pp - sp;
         item = wasp_string_fm( sp, pl );
-        wasp_tc_append( tc, wasp_vf_string( item ) );    
+        wasp_tc_add( tc, wasp_vf_string( item ) );    
         sl = sl - pl - il;
         sp = sp + pl + il;
     }
     
-    wasp_tc_append( tc, wasp_vf_string( wasp_string_fm( sp, sl ) ) );
+    wasp_tc_add( tc, wasp_vf_string( wasp_string_fm( sp, sl ) ) );
 
     RESULT( wasp_car( tc ) );
 WASP_END_PRIM( string_splitm )
@@ -1721,7 +1725,7 @@ WASP_BEGIN_PRIM( "append", append )
         OPT_LIST_ARG( list );
         if( ! has_list )break;
         while( list ){
-            wasp_tc_append( tc, wasp_car( list ) );
+            wasp_tc_add( tc, wasp_car( list ) );
             list = wasp_req_list( wasp_cdr( list ) );
         }
     }
@@ -1895,8 +1899,8 @@ void wasp_bind_core_prims( ){
     WASP_BIND_PRIM( disable_trace );
 
     WASP_BIND_PRIM( make_tc );
-    WASP_BIND_PRIM( tc_splice );
     WASP_BIND_PRIM( tc_append );
+    WASP_BIND_PRIM( tc_add );
     WASP_BIND_PRIM( tc_remove );
     WASP_BIND_PRIM( tc_prepend );
     WASP_BIND_PRIM( tc_to_list );

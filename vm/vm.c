@@ -546,10 +546,10 @@ void wasp_chainf( wasp_value fn, wasp_word ct, ... ){
     wasp_pair tc = wasp_make_tc( );
     va_start( ap, ct );
 
-    wasp_tc_append( tc, fn );
+    wasp_tc_add( tc, fn );
 
     while( ct -- ){
-        wasp_tc_append( tc, va_arg( ap, wasp_value ) );
+        wasp_tc_add( tc, va_arg( ap, wasp_value ) );
     }
 
     wasp_chain( wasp_pair_fv( wasp_car( tc ) ) );

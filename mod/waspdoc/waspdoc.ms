@@ -17,21 +17,21 @@
   (unless formals (return (format id)))
  
   (define items (make-tc))
-  (tc-append! items "(")
-  (tc-append! items (format id))
+  (tc-add! items "(")
+  (tc-add! items (format id))
 
   (until (null? formals)
-    (tc-append! items " ")
+    (tc-add! items " ")
 
     (cond ((symbol? formals)
-            (tc-append! items (format formals))
-            (tc-append! items " ...")
+            (tc-add! items (format formals))
+            (tc-add! items " ...")
             (set! formals '()))
           (else
-            (tc-append! items (format (car formals)))
+            (tc-add! items (format (car formals)))
             (set! formals (cdr formals)))))
 
-  (tc-append! items ")")
+  (tc-add! items ")")
   (apply string-append (tc->list items)))
 
 (define-class waspdoc-module <object>
@@ -45,8 +45,8 @@
   (define items (make-tc))
 
   (define (append-line . fields)
-    (for-each tc-append! (repeat items) fields)
-    (tc-append! items *line-sep*))
+    (for-each tc-add! (repeat items) fields)
+    (tc-add! items *line-sep*))
   
   (define (append-header . fields) ;TODO: Don't append-line, merge first one onto line.
     (append-line @fields ": "))
@@ -96,7 +96,7 @@
     (unless (pair? import) (return))
     (set! import (car import))
     (unless (string? import) (return))
-    (tc-append! module-imports import))
+    (tc-add! module-imports import))
 
   (define (parse-module-exports exports)
     (for-each parse-module-export exports))
@@ -123,10 +123,10 @@
       (else (parse-module-define-fn term))))
   
   (define (parse-module-define-var term defn)
-    (tc-append! module-members (cons term #f)))
+    (tc-add! module-members (cons term #f)))
 
   (define (parse-module-define-fn term)
-    (tc-append! module-members term))
+    (tc-add! module-members term))
   
   (define (bind-exported-members item)
     ;TODO: Handle the all exported case.

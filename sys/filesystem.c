@@ -93,7 +93,7 @@ WASP_BEGIN_PRIM( "dir-files", dir_files )
     for(;;){
         struct dirent* ent = readdir( dir );
         if( ! ent ) break;
-        wasp_tc_append( tc, wasp_vf_string( wasp_string_fs( ent->d_name ) ) );
+        wasp_tc_add( tc, wasp_vf_string( wasp_string_fs( ent->d_name ) ) );
     };
 
     closedir( dir );

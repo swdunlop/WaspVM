@@ -101,10 +101,10 @@
              (set-remove! scope item)
              (for-each (lambda (dep)
                          (when (set-member? scope dep)
-                           (tc-append! order dep)
+                           (tc-add! order dep)
                            (set-remove! scope dep)))
                        (code-dependencies item))
-             (tc-append! order item)))
+             (tc-add! order item)))
 
     (set! order (tc->list order))
     (for-each build-module order)

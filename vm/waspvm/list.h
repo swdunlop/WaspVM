@@ -79,7 +79,7 @@ wasp_pair wasp_cons( wasp_value car, wasp_value cdr );
 wasp_list wasp_list_ref( wasp_list p, wasp_integer ofs );
 
 wasp_tc wasp_make_tc( );
-void wasp_tc_append( wasp_tc tc, wasp_value v );
+void wasp_tc_add( wasp_tc tc, wasp_value v );
 
 wasp_boolean wasp_eqvp( wasp_pair a, wasp_pair b );
 wasp_boolean wasp_equalp( wasp_pair a, wasp_pair b );

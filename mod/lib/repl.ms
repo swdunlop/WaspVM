@@ -47,7 +47,7 @@
              (send ".. ")
              (read-exprs))
 
-      (tc-append! input-exprs (string->exprs input-buffer))
+      (tc-add! input-exprs (string->exprs input-buffer))
       (set! input-buffer (make-string 80))))
 
   (until done

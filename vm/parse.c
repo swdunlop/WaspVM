@@ -308,7 +308,7 @@ wasp_list wasp_parse_list( char** r_str, wasp_boolean* r_succ ){
         default:
             x = wasp_parse_value( &str, r_succ );
             if( *r_succ ){
-                wasp_tc_append( tc, x );
+                wasp_tc_add( tc, x );
             }else{
                 // Parse value was displeased.
                 goto fail;
@@ -408,7 +408,7 @@ wasp_list wasp_parse_document( char* doc, wasp_boolean* r_succ ){
         if( *doc ){
             wasp_value x = wasp_parse_value( &doc, r_succ );
             if( *r_succ ){
-                wasp_tc_append( tc, x );
+                wasp_tc_add( tc, x );
             }else{
                 goto fail;
             }

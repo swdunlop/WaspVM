@@ -32,7 +32,7 @@ wasp_pair wasp_cons( wasp_value car, wasp_value cdr ){
     wasp_set_cdr( c, cdr );
     return c;    
 }
-void wasp_tc_append( wasp_pair tc, wasp_value v ){
+void wasp_tc_add( wasp_pair tc, wasp_value v ){
     wasp_pair it = wasp_cons( v, wasp_vf_null() );
     wasp_value pv = wasp_cdr( tc );
     

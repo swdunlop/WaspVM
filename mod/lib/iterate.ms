@@ -90,7 +90,7 @@
 
   (define tc (make-tc))
   (while (pair? list)
-    (tc-append! tc (iter (car list)))
+    (tc-add! tc (iter (car list)))
     (set! list (cdr list)))
   (tc->list tc))
 
@@ -99,7 +99,7 @@
 
   (define tc (make-tc))
   (while (pair? generators)
-    (tc-append! tc ((car generators)))
+    (tc-add! tc ((car generators)))
     (set! generators (cdr generators)))
   (tc->list tc))
 
@@ -231,6 +231,6 @@
               (re-error err))
              (return (tc->list tc)))
     (forever
-      (tc-append! tc (iter)))))
+      (tc-add! tc (iter)))))
 
 (export integer-range join-iters iter->list)

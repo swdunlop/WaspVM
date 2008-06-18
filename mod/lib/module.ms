@@ -41,7 +41,7 @@
     (define module (cadr expr))
     (unless (set-member? ignore module)
       (set-add! ignore module)
-      (tc-append! imports module)))
+      (tc-add! imports module)))
 
   (for-each 
     add-import
@@ -64,7 +64,7 @@
   (define (add-export symbol)
     (unless (set-member? ignore symbol)
       (set-add! ignore symbol)
-      (tc-append! exports symbol)))
+      (tc-add! exports symbol)))
 
   (define (add-exports expr)
     (for-each add-export (cdr expr)))
@@ -89,7 +89,7 @@
     (unless (set-member? ignore module)
       (set-add! ignore module)
       (process-code (read-module-source module))
-      (tc-append! deps module)))
+      (tc-add! deps module)))
 
   (cond
     ((string? source) (process-module source))

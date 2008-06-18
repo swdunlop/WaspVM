@@ -74,7 +74,7 @@ wasp_string wasp_locate_util( wasp_string utilname ){
 #else 
             size_t endp = strcspn( pathstr, ":\0" ); 
 #endif
-        if( endp )wasp_tc_append( tc, wasp_vf_string( wasp_string_fm( pathstr, endp) ) );
+        if( endp )wasp_tc_add( tc, wasp_vf_string( wasp_string_fm( pathstr, endp) ) );
         pathstr += endp;
         if( ! *pathstr )break;
         pathstr++;

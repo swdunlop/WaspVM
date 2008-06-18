@@ -112,11 +112,11 @@ wasp_value  wasp_match_regex( wasp_regex regex,
         int ix;
         for( ix = 1; ix < ct; ix ++ ){
             if( mx[ix].rm_so == -1 ){
-                wasp_tc_append( tc, wasp_vf_false( ) );
+                wasp_tc_add( tc, wasp_vf_false( ) );
             }else{
                 b = str + mx[ix].rm_so;
                 e = str + mx[ix].rm_eo;
-                wasp_tc_append( 
+                wasp_tc_add( 
                     tc, wasp_vf_string( wasp_string_fm( b, e - b ) ) 
                 );
             }
@@ -168,7 +168,7 @@ WASP_BEGIN_PRIM( "match-regex*", match_regexm )
         wasp_value m = wasp_match_regex( regex, str, flagstr, NULL, &nxt );
         if( wasp_is_false( m ) ) break;
         has_matched = 1;
-        wasp_tc_append( tc, m );
+        wasp_tc_add( tc, m );
         str = nxt;
     }
     

@@ -75,7 +75,7 @@ void wasp_init_waspvm( int argc, const char* argv[] ){
         }else if( ! strcmp( argv[i], "-g" ) ){
             wasp_show_globals = 1;
         }else{
-            wasp_tc_append( wasp_argv, wasp_vf_string( wasp_string_fs( argv[i] ) ) );
+            wasp_tc_add( wasp_argv, wasp_vf_string( wasp_string_fs( argv[i] ) ) );
             wasp_argc ++;
         }
     };

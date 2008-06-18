@@ -119,7 +119,7 @@ void wasp_init_shell_subsystem( ){
     char** env = environ;
     wasp_tc tc = wasp_make_tc( );
     while( *env ){
-        wasp_tc_append( tc, wasp_vf_string( wasp_string_fs( *env ) ) );
+        wasp_tc_add( tc, wasp_vf_string( wasp_string_fs( *env ) ) );
         env++;
     }
     wasp_set_global( wasp_symbol_fs( "*environ*" ), wasp_car( tc ) );

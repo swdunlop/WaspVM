@@ -61,7 +61,7 @@
 (define (make-class-predicate class)
   (define ancestry (make-tc))
   (while class
-         (tc-append! ancestry class)
+         (tc-add! ancestry class)
          (set! class (super-class class)))
   (set! ancestry (tc->list ancestry))
 

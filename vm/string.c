@@ -184,7 +184,7 @@ WASP_C_TYPE( symbol );
 void wasp_globals_iter( wasp_value data, wasp_pair tc ){
     wasp_symbol sym = wasp_symbol_fv( data );
     if( wasp_has_global( sym ) ){ 
-        wasp_tc_append( tc, wasp_vf_pair( wasp_cons( wasp_vf_symbol( sym ),
+        wasp_tc_add( tc, wasp_vf_pair( wasp_cons( wasp_vf_symbol( sym ),
                                                   wasp_get_global( sym ) ) ) );
     }
 }

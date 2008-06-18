@@ -49,6 +49,10 @@ vm/%$(OBJ): vm/%.c
 
 sys/%$(SO): sys/%.c
 	$(CC) $(LDFLAGS) $(SOFLAGS) $(CFLAGS) $(CPPFLAGS) $< -o $@
+
+bootstrap:
+	cd mod && waspc */*.ms
+
 clean:
 	rm -f vm/*.o $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE) sys/*.so
 	

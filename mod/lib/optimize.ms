@@ -36,7 +36,7 @@
     (set! instr (tc-next! completed)))
 
   (define (yield instr)
-    (tc-append! result instr))
+    (tc-add! result instr))
 
   (define (pass)
     (yield instr))
@@ -81,7 +81,7 @@
       ((not (eq? instr branch)) (rewind) (pass))
       (else (rewind))))
     
-  (tc-splice! pending assembly)
+  (tc-append! pending assembly)
 
   (while (more?)
          (next)
