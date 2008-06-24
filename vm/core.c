@@ -29,6 +29,12 @@
 #include <arpa/inet.h>
 #endif
 
+WASP_BEGIN_PRIM( "exprs->string", exprs_to_string )
+    REQ_LIST_ARG( exprs );
+    NO_REST_ARGS( );
+    STRING_RESULT( wasp_exprs_to_string( exprs ) );
+WASP_END_PRIM( exprs_to_string )
+
 WASP_BEGIN_PRIM( "xml-escape", xml_escape )
     REQ_STRING_ARG( data );
     NO_REST_ARGS( );
@@ -1988,6 +1994,8 @@ void wasp_bind_core_prims( ){
     WASP_BIND_PRIM( error_key );
     WASP_BIND_PRIM( error_info );
     WASP_BIND_PRIM( error_context );
+
+    WASP_BIND_PRIM( exprs_to_string );
 
 WASP_BIND_PRIM( xml_escape );
 WASP_BIND_PRIM( percent_encode );

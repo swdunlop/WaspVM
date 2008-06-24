@@ -28,13 +28,14 @@
 (define (read-lisp-file path)
   (string->exprs (read-data-file path)))
 
+(define (write-lisp-file path data)
+  (write-data-file path (exprs->string data)))
+
 (define (path-join . items)
   (apply string-join *path-sep* items))
 
 (define (convert-path path)
   (apply path-join (string-split* path *path-sep*)))
 
-(export path-join convert-path)
-
-(export read-data-file write-data-file read-lisp-file path-join convert-path)
+(export read-data-file write-data-file read-lisp-file write-lisp-file path-join convert-path)
 

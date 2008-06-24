@@ -466,3 +466,63 @@ wasp_string wasp_reads_string( wasp_string string ){
     return wasp_string_fm( str, len );
 }
 
+void wasp_string_append_expr( wasp_string str, wasp_value expr ){
+    if( wasp_is_null( expr ) ){
+        wasp_string_append_cs( str, "()" );
+    }else if( wasp_is_string( expr ) ){
+        wasp_format_string( str, wasp_string_fv( expr ) );
+    }else if( wasp_is_symbol( expr ) ){
+        wasp_format_symbol( str, wasp_symbol_fv( expr ) );
+    }else if( wasp_is_integer( expr ) ){
+        wasp_string_append_signed( str, wasp_integer_fv( expr ) );
+    }else if( wasp_is_boolean( expr ) ){
+        wasp_format_boolean( str, expr );
+    }else if( wasp_is_pair( expr ) ){
+        wasp_string_append_byte( str, '(' );
+        wasp_pair p = wasp_pair_fv( expr );
+        for(;;){
+            wasp_string_append_expr( str, wasp_car( p ) );
+            wasp_value v = wasp_cdr( p );
+            if( wasp_is_pair( v ) ){
+                p = wasp_pair_fv( v );
+                wasp_string_append_byte( str, ' ' );
+            }else if( wasp_is_null( v ) ){
+                wasp_string_append_byte( str, ')' );
+                return;
+            }else{
+                wasp_string_append_cs( str, " . " );
+                wasp_string_append_expr( str, v );
+                wasp_string_append_byte( str, ')' );
+                return;
+            }
+        }
+    }else{
+        wasp_errf( wasp_es_vm, "sx", "cannot convert expression to lisp term", expr );
+    }
+}
+
+void wasp_string_append_exprs( wasp_string str, wasp_list list ){
+    if( list == NULL ) return;
+    wasp_pair p = list;
+    
+    for(;;){
+        wasp_string_append_expr( str, wasp_car( p ) );
+        wasp_string_append_newline( str );
+
+        wasp_value v = wasp_cdr( p );
+        if( wasp_is_pair( v ) ){
+            p = wasp_pair_fv( v );
+        }else if( wasp_is_null( v ) ){
+            return;
+        }else{
+            wasp_errf( wasp_es_vm, "sxx", "last pair cdr is not null", list, v );
+        }
+    };
+}
+
+wasp_string wasp_exprs_to_string( wasp_list exprs ){
+    wasp_string str = wasp_make_string( 256 );
+    wasp_string_append_exprs( str, exprs );
+    return str;
+}
+
