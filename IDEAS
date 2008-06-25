@@ -1,0 +1,80 @@
+- WaspDoc Markup Language
+  - Derived from HazeML
+  - Lines starting with * are list entries; subsequent indentation is a part of the line.
+  - Empty lines are breaks, continues current block.
+  - S-Exprs are code-formatted, from opening parenthesis to closing parenthesis.
+  - Lines starting with ! are headings.
+  - {}'s are references to nodes.
+  - ref:// URL's are references to WaspDoc reference entries.
+  - {url free flowing name}
+  - {url} -- Name comes from destination file.
+
+  If a line starts with parenthesis, it is code-format.
+
+  ! An Example of HazeML  
+  * List 1
+  * List 2
+    More about List 2.
+
+    Still more about List 2.
+    > The Code for List 2.
+
+  * List 3 (list3-expr "hello world")
+
+- HazeEx
+  (p -//-
+     Big, long paragraph of nois
+     text
+     -\\-)
+
+  (* "List Item 1")
+  (* "List Item 2")
+  (br)
+  (* "List Item 1-3")
+- Add string-read-expr! to string.c
+
+- Removal of buffers from core
+  No wasp_printf, wasp_formatf, and controlled use of wasp_errf.  Put all that in top-level error
+  handlers.
+
+- Incremental VM Loop
+  - Create a variant of spawn that suspends after each instruction.
+  - Add accessors for all of the process members.
+  - Write a process state decompiler.
+  - Write a shim routine for inserting procedures into the current call stack.
+
+- Add prim-map, prim-foreach, prim-filter
+  Uses prim chaining to avoid writing a lisp top level loop.
+
+- Add loaded-subsystems tracking to VM
+
+- Add preload-subsystems to build process for MOSREF capability
+
+- Flatten VM Loop 1
+  This will improve jump predictability and remove C stack overhead from instruction cycles.
+  
+  Use a select-based dispatch loop for instructions.
+
+- Flatten VM Loop 2
+  This will reduce heap complexity for NEWF / USEA / USEN / CALL
+
+  - Remove USEA / USEN instructions.
+  - Modify NEWF to consume RX for the function.
+  - Modify NEWF to create a call frame specialized to the function's needs, including
+    space for arguments, space for internal variables.
+  - Modify ARG and SCAT to intelligently use this space, using a special overflow slot for 
+    variable arity functions.
+  - Modify USEA and USEN to verify the number of arguments supplied to a procedure.
+  - Modify compiler to use this functionality.
+  - Modify optimizer to drop any load that is not followed by: NEWF, ARG, SCAT
+
+  Note, this will break the form: (@ list), which is sort of a ghetto eval.  It would have to
+  add a special form that translates to ((car list) @(cdr list)).
+
+- Primitive Iterator Loops
+  Generalize map-car and map-cdr with map-prim.
+
+  (map-prim primitive list)
+
+  Most common? map-format
+

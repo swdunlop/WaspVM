@@ -526,3 +526,18 @@ wasp_string wasp_exprs_to_string( wasp_list exprs ){
     return str;
 }
 
+wasp_value wasp_string_read_value( wasp_string string ){
+    char* begin = wasp_sf_string( string );
+    char* end = begin;
+    wasp_boolean succ = 0;
+    wasp_value result = wasp_parse_value( &end, &succ );
+    if( succ ){
+        wasp_string_skip( string, end - begin );
+        return result;
+    }else{
+        wasp_errf( wasp_es_vm, "sxx", 
+                   wasp_parse_errmsg, string, 
+                   wasp_vf_boolean( wasp_parse_incomplete ) 
+        );
+    }
+}

@@ -29,6 +29,13 @@
 #include <arpa/inet.h>
 #endif
 
+WASP_BEGIN_PRIM( "string-read-expr!", string_read_expr )
+    REQ_STRING_ARG( string );
+    NO_REST_ARGS( );
+
+    RESULT( wasp_string_read_value( string ) );
+WASP_END_PRIM( string_read_expr )
+
 WASP_BEGIN_PRIM( "exprs->string", exprs_to_string )
     REQ_LIST_ARG( exprs );
     NO_REST_ARGS( );
@@ -1038,9 +1045,9 @@ WASP_BEGIN_PRIM( "string->exprs", string_to_exprs )
     if( ok ){
         RESULT( wasp_vf_list( v ) );
     }else{
-        wasp_errf( wasp_parse_incomplete ? wasp_es_inc :
-                                         wasp_es_parse, 
-                  "s", wasp_parse_errmsg 
+        wasp_errf( 
+            wasp_parse_incomplete ? wasp_es_inc : wasp_es_parse, 
+            "s", wasp_parse_errmsg 
         );
     }
 WASP_END_PRIM( string_to_exprs )
@@ -1534,7 +1541,7 @@ WASP_BEGIN_PRIM( "string-skip-space!", string_skip_space )
     
     if( ix )wasp_string_skip( string, ix );
     
-    NO_RESULT( );
+    INTEGER_RESULT( ix );
 WASP_END_PRIM( string_skip_space );
 
 WASP_BEGIN_PRIM( "string-skip!", string_skip )
@@ -1997,10 +2004,12 @@ void wasp_bind_core_prims( ){
 
     WASP_BIND_PRIM( exprs_to_string );
 
-WASP_BIND_PRIM( xml_escape );
-WASP_BIND_PRIM( percent_encode );
-WASP_BIND_PRIM( percent_decode );
+    WASP_BIND_PRIM( xml_escape );
+    WASP_BIND_PRIM( percent_encode );
+    WASP_BIND_PRIM( percent_decode );
     
+    WASP_BIND_PRIM( string_read_expr );
+
     wasp_set_global( wasp_symbol_fs( "*version*" ), 
                     wasp_vf_string( wasp_string_fs( WASP_VERSION ) ) );
     wasp_es_parse = wasp_symbol_fs( "parse" );

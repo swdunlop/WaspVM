@@ -1,4 +1,11 @@
-????/??/?? Namespace Cleanup
+????/??/?? WaspDoc Integration
+  - Added exprs->string primitive.
+  - Added write-lisp-file to core/file module.
+  - Added string-read-expr! primitive to vm/core.c and vm/string.c
+  + Modified string-skip-space! to return number of spaces skipped.
+  + Reintegrated WaspDoc from pre-Rewind tree.
+
+2008/06/20 Namespace Cleanup
   - Renamed set primitive to make-set.
   - Renamed dict primitive to make-dict.
   - Renamed tc-append! primitive to tc-add!
@@ -9,7 +16,6 @@
   - tc no longer considered a list by list predicate.
   - tc no longer considered a pair by pair predicate.
   - tc no longer a subtype of pair.
-  + Optimization: Where is wasp_frame_context used? Serious heap consumer..
 
 2008/06/11 WaspDoc Parses Module Files
   - Added waspdoc/waspdoc.ms

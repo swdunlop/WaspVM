@@ -1,24 +1,45 @@
-- Refactor-Lite 
-  Write a tool that identifies all C, H and MS files that reference a given function, feeds it to
-  vim -p, and preseeds a regex to alter all references to that function.
+- BUG: parsing a single dot outside parenthesis should not be an incomplete error.
+
+- Answer This Riddle:
+  $ ./waspvm -g | grep primitive | wc
+      218     654    4962
+  $ grep WASP_BIND_PRIM vm/*.c | wc
+      194     788    8733
+  $ grep WASP_I_TYPE vm/*.c | wc
+       26     104    1008
+
+- Generalize I/O Loop
+  Version I: Tied into select(2)
+  Version II: Tied into poll(2)
+  Version III: Tied into Win32 Async Wait
+  Version IV: Tied into gtk loop
+  Version V: Tied into qt loop
+  
+  For each of these I/O loops, we want to do one of the following:
+     poll for pending handle events
+     poll for handle events, waiting forever
+     poll for handle events, waiting for no more than x milliseconds
+
+  Handles must include something like sockets.
+  Handles may also include GUI events.
+
+  This gets tied into things like unix domain sockets, mmap, DDE, gui callbacks, etc
+
+- WaspDoc Use dir-files in find-source-files
+
+- WaspDoc Document Macros
+
+- WaspDoc Document Primitives
+
+- WaspDoc Edit Module Export
+  - Backport editor support from MOSREF
 
 - Spot-Coverage
   Scripts using gcov and vim to identify untested portions of primitives.
 
-- Removal of buffers from core
-  No wasp_printf, wasp_formatf, and controlled use of wasp_errf.  Put all that in top-level error
-  handlers.
-
-- Incremental VM Loop
-  - Create a variant of spawn that suspends after each instruction.
-  - Add accessors for all of the process members.
-  - Write a process state decompiler.
-  - Write a shim routine for inserting procedures into the current call stack.
-
 - Does list append need to resemble set-append and string-append ?
 
 - WaspDoc documents exported macros.
-- WaspDoc documents exported types.
 - WaspDoc documents subsystems.
 - WaspDoc documents core primitives.
 

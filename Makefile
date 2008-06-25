@@ -8,6 +8,7 @@ SO = .so
 WASPVM_EXE ?= $(ROOT)/waspvm$(EXE)
 WASPC_EXE ?= $(ROOT)/waspc$(EXE)
 WASP_EXE ?= $(ROOT)/wasp$(EXE)
+WASPDOC_EXE ?= $(ROOT)/waspdoc$(EXE)
 WASPLD_EXE ?= $(ROOT)/waspld$(EXE)
 
 CFLAGS ?= 
@@ -24,13 +25,17 @@ SYS_REGEX ?= $(SYS)/regex$(SO)
 SYS_FILESYSTEM ?= $(SYS)/filesystem$(SO)
 SUBSYSTEMS += $(SYS_REGEX) $(SYS_FILESYSTEM)
 
-build: $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
+build: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 
-install: $(WASP_EXE)
+install: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 	cd mod && $(WASP_EXE) bin/install.ms
 
 repl: $(WASP_EXE)
 	if which rlwrap; then cd mod && rlwrap $(WASP_EXE); else cd mod && $(WASP_EXE); fi
+
+$(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE) $(SUBSYSTEMS)
+	cd mod && $(WASPC_EXE) -exe $(WASPDOC_EXE) -stub $(WASPVM_EXE) bin/waspdoc
+	chmod +rx $(WASPDOC_EXE)
 
 $(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE) $(SUBSYSTEMS)
 	cd mod && $(WASPC_EXE) -exe $(WASP_EXE) -stub $(WASPVM_EXE) bin/wasp

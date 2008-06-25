@@ -130,6 +130,7 @@
   (copy "core" mod-dir)
   (copy "lib" mod-dir)
   (copy "site" mod-dir)
+  (copy "waspdoc" mod-dir)
   (copy (string-append "sys/*" *plugin-ext*) mod-sys-dir)
 
   ;(copy "stubs/*" stub-dir)
@@ -144,6 +145,11 @@
     
   (write-data-file waspc-bin (build-exe *platform* "bin/waspc")) 
   
+  ; Re-link, so we have the new site config..
+  (define waspdoc-bin (string-append bin-dir "/waspdoc"))
+    
+  (write-data-file waspdoc-bin (build-exe *platform* "bin/waspdoc")) 
+
   (chmod "-R 0755" mod-dir) ;stub-dir 
   
   (chmod "0755" bin-dir wasp-bin waspc-bin))
