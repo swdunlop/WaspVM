@@ -75,6 +75,7 @@
 
 (define (output-chain xmit . filters)
   (define recv #f)
+  (set! xmit (output xmit))
   (for-each (function (chain-filter filter)
               (define queue (make-queue))
               (set! recv (queue-input queue))
@@ -86,6 +87,7 @@
 
 (define (input-chain recv . filters)
   (define xmit #f)
+  (set! recv (input recv))
   (for-each (function (chain-filter filter)
               (define queue (make-queue))
               (set! xmit (queue-output queue))

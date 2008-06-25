@@ -2,7 +2,10 @@
   - Added exprs->string primitive.
   - Added write-lisp-file to core/file module.
   - Added string-read-expr! primitive to vm/core.c and vm/string.c
-  + Modified string-skip-space! to return number of spaces skipped.
+  - Modified string-skip-space! to return number of spaces skipped.
+  - Fixed a bug in the parser that considered a single dot to be an incomplete expression; should
+    be an error.
+  + Fixed a bug in the REPL that caused it to crash when a bogus expression was suppled to it.
   + Reintegrated WaspDoc from pre-Rewind tree.
 
 2008/06/20 Namespace Cleanup
