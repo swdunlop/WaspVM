@@ -34,6 +34,7 @@ const char* wasp_em_notail = "expected value after \".\"";
 const char* wasp_em_extra_tail = "superfluous value after \".\"";
 const char* wasp_em_badsharp = "expected \"t\" or \"f\" after \"#\"";
 const char* wasp_em_begp = "\")\" unmatched by \"(\"";
+const char* wasp_em_baddot = "did not expect \".\"";
 
 wasp_quad wasp_parse_dec( char** r_str, wasp_boolean* r_succ ){
     char* str = *r_str;
@@ -330,50 +331,74 @@ wasp_symbol wasp_sym_quote = NULL;
 wasp_symbol wasp_sym_unquote = NULL;
 wasp_symbol wasp_sym_quasiquote = NULL;
 
-wasp_value wasp_parse_value( char** r_str, wasp_boolean* r_succ ){
-    char* str = wasp_skip_space( *r_str );
-    char ch = *str;
+wasp_value wasp_parse_value_inner( char** r_str, wasp_boolean* r_succ ){
     wasp_value x;
-    
-    if( ch == 0 ){
+    wasp_string s;
+    wasp_symbol sym;
+
+    char* str = *r_str;
+    char ch = *str;
+
+    switch( ch ){
+    case 0:
         *r_succ = 0;
         wasp_parse_errmsg = wasp_em_more;
         wasp_parse_incomplete = 1;
-    }else if( isdigit( ch )  || ch == '$' ){
+        break;
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '7':
+    case '8':
+    case '9':
+    case '$':
         x = wasp_vf_integer( wasp_parse_int( &str, r_succ ) );
-    }else if( ch == '@' ){
+        break;
+    case '@':
         str ++;
         x = wasp_vf_pair( wasp_listf( 2, wasp_sym_scatter,
                                        wasp_parse_value( &str, r_succ ) ) );
-    }else if( ch == '`' ){
+        break;
+    case '`':
         str ++;
         x = wasp_vf_pair( wasp_listf( 2, wasp_sym_quasiquote,
                                        wasp_parse_value( &str, r_succ ) ) );
-    }else if( ch == ',' ){
+        break;
+    case ',':
         str ++;
         x = wasp_vf_pair( wasp_listf( 2, wasp_sym_unquote,
                                        wasp_parse_value( &str, r_succ ) ) );
-    }else if( ch == '\'' ){
+        break;
+    case '\'': 
         str ++;
         x = wasp_vf_pair( wasp_listf( 2, wasp_sym_quote,
                                        wasp_parse_value( &str, r_succ ) ) );
-    }else if( ch == '-'|| ch == '+' ){
+        break;
+    case '-':
+    case '+':
         if( isdigit( *( str + 1 ) ) ){
             x = wasp_vf_integer( wasp_parse_int( &str, r_succ ) );
         }else{
             wasp_symbol s = wasp_parse_sym( &str, r_succ );
             if( *r_succ ) x = wasp_vf_symbol( s );
         }
-    }else if( ch == '(' ){
+        break;
+    case '(':
         x = wasp_vf_list( wasp_parse_list( &str, r_succ ) );
-    }else if( ch == '"' ){
-        wasp_string s = wasp_parse_str( &str, r_succ );
+        break;
+    case '"':
+        s = wasp_parse_str( &str, r_succ );
         if( *r_succ ) x = wasp_vf_string( s );
-    }else if( ch == ')' ){
+        break;
+    case ')':
         *r_succ = 0;
         wasp_parse_incomplete = 0;
         wasp_parse_errmsg = wasp_em_begp;
-    }else if( ch == '#' ){
+        break;
+    case '#':
         str ++;
         ch = *(str++);
         if( ch == 'f' ){
@@ -386,9 +411,10 @@ wasp_value wasp_parse_value( char** r_str, wasp_boolean* r_succ ){
             wasp_parse_errmsg = wasp_em_badsharp;
             wasp_parse_incomplete = ! ch;
         }
-    }else{
-        wasp_symbol s = wasp_parse_sym( &str, r_succ );
-        if( *r_succ ) x = wasp_vf_symbol( s );
+        break;
+    default:
+        sym = wasp_parse_sym( &str, r_succ );
+        if( *r_succ ) x = wasp_vf_symbol( sym );
     }
 
     if( *r_succ ){
@@ -399,6 +425,21 @@ wasp_value wasp_parse_value( char** r_str, wasp_boolean* r_succ ){
     }
 }
 
+wasp_value wasp_parse_toplevel( char** r_str, wasp_boolean* r_succ ){
+    *r_str = wasp_skip_space( *r_str );
+    char ch = **r_str;
+    if( ch == '.' ){
+        r_succ = 0;
+        wasp_parse_errmsg = wasp_em_baddot;
+        wasp_parse_incomplete = 0;
+    }else return wasp_parse_value_inner( r_str, r_succ ); 
+}
+
+wasp_value wasp_parse_value( char** r_str, wasp_boolean* r_succ ){
+    *r_str = wasp_skip_space( *r_str );
+    return wasp_parse_value_inner( r_str, r_succ );
+}
+
 wasp_list wasp_parse_document( char* doc, wasp_boolean* r_succ ){
     wasp_tc tc = wasp_make_tc( );
     wasp_parse_errmsg = NULL;
@@ -406,7 +447,7 @@ wasp_list wasp_parse_document( char* doc, wasp_boolean* r_succ ){
     for(;;){
         doc = wasp_skip_space( doc );
         if( *doc ){
-            wasp_value x = wasp_parse_value( &doc, r_succ );
+            wasp_value x = wasp_parse_toplevel( &doc, r_succ );
             if( *r_succ ){
                 wasp_tc_add( tc, x );
             }else{

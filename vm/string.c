@@ -530,7 +530,7 @@ wasp_value wasp_string_read_value( wasp_string string ){
     char* begin = wasp_sf_string( string );
     char* end = begin;
     wasp_boolean succ = 0;
-    wasp_value result = wasp_parse_value( &end, &succ );
+    wasp_value result = wasp_parse_toplevel( &end, &succ );
     if( succ ){
         wasp_string_skip( string, end - begin );
         return result;
