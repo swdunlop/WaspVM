@@ -351,6 +351,7 @@ wasp_value wasp_parse_value_inner( char** r_str, wasp_boolean* r_succ ){
     case '3':
     case '4':
     case '5':
+    case '6':
     case '7':
     case '8':
     case '9':
