@@ -13,13 +13,13 @@ WASPLD_EXE ?= $(ROOT)/waspld$(EXE)
 
 CFLAGS ?= 
 CFLAGS += -Ivm
-LDFLAGS +=
-CPPFLAGS += -DWASP_PLATFORM='"generic"' -DWASP_VERSION='"0.3"' -DWASP_USE_SYNC_TERM -DWASP_SO='".so"'
+LDFLAGS += -levent
+CPPFLAGS += -DWASP_PLATFORM='"generic"' -DWASP_VERSION='"0.3"' -DWASP_SO='".so"'
 
 EXEFLAGS += -rdynamic -ldl
 SOFLAGS += -shared
 
-WASPVM_OBJS += vm/boolean.o vm/channel.o vm/closure.o vm/connection.o vm/core.o vm/error.o vm/file.o vm/format.o vm/init.o vm/list.o vm/memory.o vm/mq.o vm/number.o vm/package.o vm/parse.o vm/primitive.o vm/print.o vm/procedure.o vm/process.o vm/queue.o vm/string.o vm/tag.o vm/tree.o vm/vector.o vm/vm.o vm/multimethod.o vm/plugin.o vm/shell.o
+WASPVM_OBJS += vm/boolean.o vm/channel.o vm/closure.o vm/connection.o vm/core.o vm/error.o vm/file.o vm/format.o vm/init.o vm/list.o vm/memory.o vm/mq.o vm/number.o vm/package.o vm/parse.o vm/primitive.o vm/print.o vm/procedure.o vm/process.o vm/queue.o vm/string.o vm/tag.o vm/tree.o vm/vector.o vm/vm.o vm/multimethod.o vm/plugin.o vm/shell.o vm/os.o
 
 SYS_REGEX ?= $(SYS)/regex$(SO)
 SYS_FILESYSTEM ?= $(SYS)/filesystem$(SO)
@@ -32,6 +32,8 @@ install: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 
 repl: $(WASP_EXE)
 	if which rlwrap; then cd mod && rlwrap $(WASP_EXE); else cd mod && $(WASP_EXE); fi
+
+objects: $(WASPVM_OBJS)
 
 $(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE) $(SUBSYSTEMS)
 	cd mod && $(WASPC_EXE) -exe $(WASPDOC_EXE) -stub $(WASPVM_EXE) bin/waspdoc

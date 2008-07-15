@@ -60,6 +60,7 @@
 #include "waspvm/time.h"
 #include "waspvm/plugin.h"
 #include "waspvm/queue.h"
+#include "waspvm/os.h"
 
 void wasp_init_wasp( );
 void wasp_init_crc32_subsystem( );

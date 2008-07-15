@@ -98,7 +98,7 @@ WASP_BEGIN_PRIM( "dir-files", dir_files )
 
     closedir( dir );
 
-    RESULT( wasp_car( tc ) );
+    LIST_RESULT( tc->head );
 WASP_END_PRIM( dir_files )
 
 WASP_BEGIN_PRIM( "rename-file", rename_file )

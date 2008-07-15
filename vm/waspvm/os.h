@@ -34,11 +34,27 @@ WASP_BEGIN_SUBTYPE( output, os_output )
     wasp_os_connection conn;
 WASP_END_SUBTYPE( os_output )
 
+WASP_BEGIN_SUBTYPE( input, os_service )
+    struct event event;
+    struct timeval timeval;
+
+    int handle;
+
+    int closed: 1;
+    int timeout: 1;
+WASP_END_SUBTYPE( os_service );
+
 #define REQ_OS_CONNECTION_ARG( x ) REQ_TYPED_ARG( x, os_connection )
 #define OPT_OS_CONNECTION_ARG( x ) OPT_TYPED_ARG( x, os_connection )
 #define OS_CONNECTION_RESULT( x )  TYPED_RESULT( os_connection, x )
 
+#define REQ_OS_SERVICE_ARG( x ) REQ_TYPED_ARG( x, os_service )
+#define OPT_OS_SERVICE_ARG( x ) OPT_TYPED_ARG( x, os_service )
+#define OS_SERVICE_RESULT( x )  TYPED_RESULT( os_service, x )
+
+wasp_os_service wasp_make_os_service( int handle );
 wasp_os_connection wasp_make_os_connection( int handle );
+
 void wasp_init_os_subsystem( );
 
 #endif

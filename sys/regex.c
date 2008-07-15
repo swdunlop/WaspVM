@@ -108,7 +108,7 @@ wasp_value  wasp_match_regex( wasp_regex regex,
         if( ct == 1 ){
             return wasp_vf_string( wasp_string_fm( b, e - b ) );
         }
-        wasp_pair tc = wasp_make_tc( );
+        wasp_tc tc = wasp_make_tc( );
         int ix;
         for( ix = 1; ix < ct; ix ++ ){
             if( mx[ix].rm_so == -1 ){
@@ -121,7 +121,7 @@ wasp_value  wasp_match_regex( wasp_regex regex,
                 );
             }
         }
-        return wasp_car( tc );
+        return wasp_vf_pair( tc->head );
     }else if( rs == REG_NOMATCH ){
         return wasp_vf_false( );
     }else{
@@ -172,7 +172,7 @@ WASP_BEGIN_PRIM( "match-regex*", match_regexm )
         str = nxt;
     }
     
-    RESULT( has_matched ? wasp_car( tc ) : wasp_vf_false( ) );
+    RESULT( has_matched ? wasp_vf_pair( tc->head ) : wasp_vf_false( ) );
 WASP_END_PRIM( match_regexm )
 
 WASP_BEGIN_PRIM( "make-regex", make_regex )
