@@ -11,7 +11,7 @@ WASP_EXE ?= $(ROOT)/wasp$(EXE)
 WASPDOC_EXE ?= $(ROOT)/waspdoc$(EXE)
 WASPLD_EXE ?= $(ROOT)/waspld$(EXE)
 
-CFLAGS ?= 
+CFLAGS ?= -g
 CFLAGS += -Ivm
 LDFLAGS += -levent
 CPPFLAGS += -DWASP_PLATFORM='"generic"' -DWASP_VERSION='"0.3"' -DWASP_SO='".so"'

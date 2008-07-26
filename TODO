@@ -1,3 +1,6 @@
+- The wait-input primitive accepts an optional timeout argument.
+- The wait multimethod in core/io also accepts an optional timeout argument.
+
 - BUG: parsing a single dot outside parenthesis should not be an incomplete error.
 
 - Answer This Riddle:

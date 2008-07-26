@@ -4,6 +4,7 @@
   t Added os-service type to vm, derived from input, yields os-connections.
   t Added (tcp-serve portno) -> os-service to vm/os.c
     + BUG: Cannot transmit to os-connections from listener.
+    + BUG: Received data appears to be bleeding.
   + BUG: Crash on waiting for a close.
   + Implemented timeout scheduling.
   + Implemented wait-timeout function.
