@@ -21,20 +21,32 @@
 #include "memory.h"
 #include <event.h>
 
-WASP_BEGIN_TYPE( timeout )
+struct wasp_task_data;
+typedef struct wasp_task_data* wasp_task;
+
+typedef int (*wasp_task_mt)( wasp_task task );
+
+struct wasp_task_data{ 
+    struct wasp_object_data header;
+
     struct timeval time;
     struct event   event;
-    wasp_input     input;
-WASP_END_TYPE( timeout )
+    wasp_task_mt   task_mt;
+    wasp_value     context;
+};
 
-wasp_timeout wasp_make_timeout( wasp_quad ms, wasp_input input );
+WASP_H_TYPE( task )
+
+#define REQ_TASK_ARG( x ) REQ_TYPED_ARG( x, task )
+#define OPT_TASK_ARG( x ) OPT_TYPED_ARG( x, task )
+#define TASK_RESULT( x )  TYPED_RESULT( task, x )
+
+extern wasp_symbol wasp_ss_task;
+
+wasp_task wasp_make_task( wasp_task_mt mt, wasp_value context );
+wasp_task wasp_schedule_task( wasp_task task, wasp_quad ms );
+void wasp_cancel_task( wasp_task task );
 
 void wasp_init_time_subsystem( );
-
-#define REQ_TIMEOUT_ARG( x ) REQ_TYPED_ARG( x, timeout )
-#define OPT_TIMEOUT_ARG( x ) OPT_TYPED_ARG( x, timeout )
-#define TIMEOUT_RESULT( x )  TYPED_RESULT( timeout, x )
-
-extern wasp_symbol wasp_ss_timeout;
 
 #endif

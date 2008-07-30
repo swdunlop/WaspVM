@@ -55,6 +55,7 @@ void wasp_os_xmit_mt( wasp_os_output outp, wasp_value data ){
         close( outp->conn->handle );
         outp->conn->closed = 1;
         //TODO: Capture and report any errors.
+        //TODO: Close down the connection, and unroot it.
     }else if(  outp->conn->closed ){
         // No transmissions are possible to a closed socket.
         wasp_errf( wasp_es_vm, "sxx", "cannot transmit to closed OS connections", outp, data );
@@ -116,6 +117,7 @@ void wasp_os_error_cb( struct bufferevent* ev, short what, wasp_os_connection co
     wasp_disable_os_loop( );
     wasp_wake_monitor( input, wasp_vf_symbol( wasp_ss_close ) );
     //TODO: Probably need to store a symbol describing the real error..
+        //TODO: Close down the connection, and unroot it.
 }
 
 int wasp_svc_recv_mt( wasp_os_service svc, wasp_value* data ){
@@ -134,6 +136,7 @@ void wasp_svc_read_cb( int handle, short event, void* service ){
     int sz = sizeof( addr );
     int fd = accept( handle, &addr, &sz);
     if( fd == -1 ) return; //TODO: Close? Fail?
+        //TODO: Close down the connection, and unroot it.
     wasp_os_connection conn = wasp_make_os_connection( fd );
     
     wasp_disable_os_loop( );
@@ -144,10 +147,10 @@ wasp_os_service wasp_make_os_service( int handle ){
     wasp_os_service svc = WASP_OBJALLOC( os_service );
     ((wasp_input)svc)->recv = (wasp_input_mt)wasp_svc_recv_mt;
     
-    //TODO: Service needs to be rooted, as event has a reference to it.
     svc->timeout = svc->closed = 0;
     svc->timeval.tv_sec = svc->timeval.tv_usec = 0;
     event_set( &( svc->event ), handle, EV_READ, wasp_svc_read_cb, (void*)svc );
+    wasp_root_obj( svc ); //TODO: Need unroot on close.
 
     return svc;
 }

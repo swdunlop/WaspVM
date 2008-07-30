@@ -176,7 +176,6 @@ void wasp_collect_garbage( ){
     wasp_trace_registers();
     wasp_trace_actives();
     // TODO: Not used, atm. wasp_trace_network();
-    // TODO: REWOUND OUT: wasp_trace_timeouts();
 
     while( obj = wasp_greys->head ){
         wasp_new_tolerance++;
@@ -216,10 +215,6 @@ wasp_pool wasp_whites = &( wasp_whites_data );
 
 struct wasp_pool_data wasp_roots_data = { NULL };
 wasp_pool wasp_roots = &( wasp_roots_data );
-
-void wasp_root_object( wasp_object obj ){
-    wasp_unpool_obj( obj );
-}
 
 wasp_type wasp_make_type( wasp_value name, wasp_type parent ){
     wasp_type direct, type = WASP_OBJALLOC( type );

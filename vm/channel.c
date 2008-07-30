@@ -164,8 +164,7 @@ WASP_BEGIN_PRIM( "wait-input", wait_input )
     NO_REST_ARGS( );
 
     if( ! has_input ){
-        input = wasp_req_input( 
-                   wasp_process_input( wasp_active_process ));
+        input = wasp_req_input( wasp_process_input( wasp_active_process ) );
     };
 
     if( ! input->recv( input, &data ) ){

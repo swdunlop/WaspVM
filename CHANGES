@@ -1,3 +1,8 @@
+????/??/?? Timeout System Improvements
+  - Generalized timeouts to tasks
+  - Modified timeout primitive to create a task with the timeout method.
+  - Modified pause primitive to accept an optional timeout in milliseconds.
+
 2008/07/28 LibEvent Restoration
   - Restored event loop from future.
   - Modified core/io module to handle os-connection outputs and inputs.
@@ -10,7 +15,8 @@
   - Added timeout multimethod to core/io to overlay the primitive.
   - Added timeout option to wait multimethod.
   - Fixed (input process) and (output process) methods in core/io.
-  - Aliased <number> to <integer>, since eventually integers will be a subset of <number>.
+  - Aliased <number> to <integer>, since eventually integers will be a 
+    subset of <number>.
   - Added timeout argument to wait multimethod.
 
 2008/06/24 WaspDoc Integration
@@ -18,8 +24,8 @@
   - Added write-lisp-file to core/file module.
   - Added string-read-expr! primitive to vm/core.c and vm/string.c
   - Modified string-skip-space! to return number of spaces skipped.
-  - Fixed a bug in the parser that considered a single dot to be an incomplete expression; should
-    be an error.
+  - Fixed a bug in the parser that considered a single dot to be an incomplete 
+    expression; should be an error.
   - Reintegrated WaspDoc from pre-Rewind tree.
 
 2008/06/20 Namespace Cleanup

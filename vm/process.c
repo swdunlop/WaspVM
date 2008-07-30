@@ -322,16 +322,6 @@ WASP_BEGIN_PRIM( "halt", halt )
     NO_RESULT( );
 WASP_END_PRIM( halt )
 
-WASP_BEGIN_PRIM( "pause", pause )
-    NO_REST_ARGS( );
-    WASP_CP = WASP_CP->cp;
-    WASP_RX = wasp_vf_null( );
-    wasp_process p = wasp_active_process;
-    wasp_disable_process( p );
-    wasp_enable_process( p );
-    wasp_proc_loop( );
-WASP_END_PRIM( pause )
-
 WASP_BEGIN_PRIM( "current-input", current_input )
     NO_REST_ARGS( );
 
@@ -360,7 +350,6 @@ void wasp_init_process_subsystem( ){
     wasp_sym_program = wasp_symbol_fs( "program" );
 
     WASP_BIND_PRIM( spawn );
-    WASP_BIND_PRIM( pause );
     WASP_BIND_PRIM( halt );
     WASP_BIND_PRIM( active_process );
     WASP_BIND_PRIM( current_input );
