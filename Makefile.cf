@@ -11,8 +11,7 @@ CFLAGS += -DWASP_USE_SYNC_TERM
 CFLAGS += -mno-cygwin 
 CFLAGS += -DWASP_PLATFORM='"winnt"' 
 CFLAGS += -DWASP_SO='".dll"'
-EXEFLAGS += -lws2_32
-SOFLAGS += -lgnurx -liberty -lregex -lws2_32
+EXEFLAGS += -lws2_32 -lregex 
 
 else # Assuming we're in UNIX..
 

@@ -11,24 +11,20 @@ CPPFLAGS += -DWASP_VERSION='"0.3"'
 
 SOFLAGS += -shared
 
-WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$(OBJ) vm/core$(OBJ) vm/error$(OBJ) vm/file$(OBJ) vm/format$(OBJ) vm/init$(OBJ) vm/list$(OBJ) vm/memory$(OBJ) vm/mq$(OBJ) vm/number$(OBJ) vm/package$(OBJ) vm/parse$(OBJ) vm/primitive$(OBJ) vm/print$(OBJ) vm/procedure$(OBJ) vm/process$(OBJ) vm/queue$(OBJ) vm/string$(OBJ) vm/tag$(OBJ) vm/tree$(OBJ) vm/vector$(OBJ) vm/vm$(OBJ) vm/multimethod$(OBJ) vm/plugin$(OBJ) vm/shell$(OBJ) vm/os$(OBJ) vm/time$(OBJ)
+WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$(OBJ) vm/core$(OBJ) vm/error$(OBJ) vm/file$(OBJ) vm/format$(OBJ) vm/init$(OBJ) vm/list$(OBJ) vm/memory$(OBJ) vm/mq$(OBJ) vm/number$(OBJ) vm/package$(OBJ) vm/parse$(OBJ) vm/primitive$(OBJ) vm/print$(OBJ) vm/procedure$(OBJ) vm/process$(OBJ) vm/queue$(OBJ) vm/string$(OBJ) vm/tag$(OBJ) vm/tree$(OBJ) vm/vector$(OBJ) vm/vm$(OBJ) vm/multimethod$(OBJ) vm/plugin$(OBJ) vm/shell$(OBJ) vm/os$(OBJ) vm/time$(OBJ) vm/regex$(OBJ) vm/filesystem$(OBJ)
 
 LIBWASPVM ?= libwaspvm$(SO)
-
-SYS_REGEX ?= $(SYS)/regex$(SO)
-SYS_FILESYSTEM ?= $(SYS)/filesystem$(SO)
-SUBSYSTEMS += $(SYS_REGEX) $(SYS_FILESYSTEM)
 
 repl: $(WASP_EXE)
 	if which rlwrap; then cd mod && rlwrap $(WASP_EXE); else cd mod && $(WASP_EXE); fi
 
 objects: $(WASPVM_OBJS)
 
-$(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE) $(SUBSYSTEMS)
+$(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE)
 	cd mod && $(WASPC_EXE) -exe $(WASPDOC_EXE) -stub $(WASPVM_EXE) bin/waspdoc
 	chmod +rx $(WASPDOC_EXE)
 
-$(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE) $(SUBSYSTEMS)
+$(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE) 
 	cd mod && $(WASPC_EXE) -exe $(WASP_EXE) -stub $(WASPVM_EXE) bin/wasp
 	chmod +rx $(WASP_EXE)
 
@@ -43,15 +39,9 @@ $(WASPC_EXE): $(WASPVM_EXE) $(WASPLD_EXE)
 vm/%$(OBJ): vm/%.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-$(SYS)/%$(OBJ): $(SYS)/%.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
-	
-$(SYS)/%$(SO): $(SYS)/%$(OBJ)
-	$(LD) $(LDFLAGS) $< $(SOFLAGS) $(WASPVM_EXE) -o $@
-
 bootstrap:
 	cd mod && waspc */*.ms
 
 clean:
-	rm -f vm/*$(OBJ) $(WASPDOC_EXE) $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE) $(SYS)/*$(SO)
+	rm -f vm/*$(OBJ) $(WASPDOC_EXE) $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE) 
 	

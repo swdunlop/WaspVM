@@ -13,3 +13,7 @@ waspc
 waspld
 waspdoc
 *.dll
+wasp.exe
+waspc.exe
+waspld.exe
+waspvm.exe
