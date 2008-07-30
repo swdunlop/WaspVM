@@ -131,6 +131,14 @@ void wasp_root_obj( wasp_object obj ){
     wasp_pool_obj( obj, wasp_roots );
 }
 
+void wasp_unroot_obj( wasp_object obj ){
+    if( obj == NULL )return;
+    assert( obj->type );
+    //TODO: Assertions against rooting during garbage collection.
+    wasp_unpool_obj( obj );
+    wasp_pool_obj( obj, wasp_blacks );
+}
+
 void wasp_grey_obj( wasp_object obj ){
     if( obj == NULL )return;
 
@@ -354,6 +362,13 @@ wasp_value wasp_req_arg( wasp_type type ){
     }
     wasp_errf( wasp_es_vm, "sxx", "argument type mismatch", type, x );
 }
+wasp_value wasp_req_st_arg( wasp_type type ){
+    wasp_value x = wasp_req_any( );
+    if( wasp_is_subtype( wasp_value_type( x ),  type ) ){
+        return x;
+    }
+    wasp_errf( wasp_es_vm, "sxx", "argument type mismatch", type, x );
+}
 wasp_value wasp_opt_any( wasp_boolean* found ){
     if( wasp_arg_ptr ){
         wasp_value x = wasp_car( wasp_arg_ptr );
@@ -366,6 +381,17 @@ wasp_value wasp_opt_any( wasp_boolean* found ){
     }
 }
 wasp_value wasp_opt_arg( wasp_type type, wasp_boolean* found ){
+    wasp_value x = wasp_opt_any( found );
+    if( *found ){
+        if( wasp_value_type( x ) == type ){
+            return x;
+        }
+        wasp_errf( wasp_es_vm, "sxx", "argument type mismatch", type, x );
+    }else{ 
+        return 0;
+    }
+}
+wasp_value wasp_opt_st_arg( wasp_type type, wasp_boolean* found ){
     wasp_value x = wasp_opt_any( found );
     if( *found ){
         if( wasp_is_subtype( wasp_value_type( x ),  type ) ){

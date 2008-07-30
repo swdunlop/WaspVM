@@ -151,6 +151,7 @@ WASP_END_PRIM( bit_not )
 
 void wasp_init_number_subsystem( ){
     WASP_I_TYPE( number );
+    wasp_set_global( wasp_symbol_fs( "<integer>" ), wasp_number_type );
     WASP_BIND_PRIM( plus );
     WASP_BIND_PRIM( minus );
     WASP_BIND_PRIM( bit_and );

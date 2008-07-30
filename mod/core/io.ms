@@ -29,6 +29,11 @@
     (wait-input src)
     (wait (input src))))
     
+(define (wait (<integer> ms) (#t src))
+  (define inp (if (input? src) src (input src)))
+  (timeout ms inp)
+  (wait-input inp))
+    
 (define (input)
   (input (current-process-input)))
 
@@ -44,8 +49,8 @@
 (define (input (<os-connection> c))
   (os-connection-input c))
 
-(define (input (<process> q))
-  (queue-input q))
+(define (input (<process> p))
+  (process-input p))
   
 (define (output)
   (output (current-process-output)))
@@ -63,5 +68,22 @@
   (os-connection-output c))
 
 (define (output (<process> q))
-  (queue-output q))
+  (process-output q))
+
+(define timeout-input timeout)
+
+(define (timeout (<integer> ms))
+  (timeout-input ms (current-process-input)))
+
+(define (timeout (<integer> ms) (<queue> q))
+  (timeout-input ms (queue-input q)))
+
+(define (timeout (<integer> ms) (<connection> q))
+  (timeout-input ms (connection-input q)))
+
+(define (timeout (<integer> ms) (<os-connection> q))
+  (timeout-input ms (os-connection-input q)))
+
+(define (timeout (<integer> ms) (<process> q))
+  (timeout-input ms (process-input q)))
 

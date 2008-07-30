@@ -12,14 +12,14 @@ WASPDOC_EXE ?= $(ROOT)/waspdoc$(EXE)
 WASPLD_EXE ?= $(ROOT)/waspld$(EXE)
 
 CFLAGS ?= -g
-CFLAGS += -Ivm
+CFLAGS += -Ivm -DNDEBUG
 LDFLAGS += -levent
 CPPFLAGS += -DWASP_PLATFORM='"generic"' -DWASP_VERSION='"0.3"' -DWASP_SO='".so"'
 
 EXEFLAGS += -rdynamic -ldl
 SOFLAGS += -shared
 
-WASPVM_OBJS += vm/boolean.o vm/channel.o vm/closure.o vm/connection.o vm/core.o vm/error.o vm/file.o vm/format.o vm/init.o vm/list.o vm/memory.o vm/mq.o vm/number.o vm/package.o vm/parse.o vm/primitive.o vm/print.o vm/procedure.o vm/process.o vm/queue.o vm/string.o vm/tag.o vm/tree.o vm/vector.o vm/vm.o vm/multimethod.o vm/plugin.o vm/shell.o vm/os.o
+WASPVM_OBJS += vm/boolean.o vm/channel.o vm/closure.o vm/connection.o vm/core.o vm/error.o vm/file.o vm/format.o vm/init.o vm/list.o vm/memory.o vm/mq.o vm/number.o vm/package.o vm/parse.o vm/primitive.o vm/print.o vm/procedure.o vm/process.o vm/queue.o vm/string.o vm/tag.o vm/tree.o vm/vector.o vm/vm.o vm/multimethod.o vm/plugin.o vm/shell.o vm/os.o vm/time.o
 
 SYS_REGEX ?= $(SYS)/regex$(SO)
 SYS_FILESYSTEM ?= $(SYS)/filesystem$(SO)
@@ -61,5 +61,5 @@ bootstrap:
 	cd mod && waspc */*.ms
 
 clean:
-	rm -f vm/*.o $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE) sys/*.so
+	rm -f vm/*.o $(WASPDOC_EXE) $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE) sys/*.so
 	

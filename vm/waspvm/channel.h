@@ -22,6 +22,7 @@
 #define WASP_CLOSE_EVT 1
 #define WASP_XMIT_EVT  2
 #define WASP_RECV_EVT  3
+#define WASP_TIMEOUT_EVT 4
 
 extern wasp_symbol wasp_ss_close;
 extern wasp_symbol wasp_ss_channel; 
@@ -36,7 +37,6 @@ WASP_END_TYPE( channel )
 
 WASP_BEGIN_SUBTYPE( channel, input )
     wasp_input_mt recv;
-
     wasp_process first_mon, last_mon;
 WASP_END_SUBTYPE( input )
 
@@ -67,17 +67,17 @@ WASP_BEGIN_SUBTYPE( output, raw_output )
     wasp_object context;
 WASP_END_SUBTYPE( raw_output )
 
-#define REQ_CHANNEL_ARG( vn ) REQ_TYPED_ARG( vn, channel )
-#define CHANNEL_RESULT( vn ) TYPED_RESULT( channel, vn )
-#define OPT_CHANNEL_ARG( vn ) OPT_TYPED_ARG( vn, channel )
+#define REQ_CHANNEL_ARG( vn ) REQ_SUBTYPED_ARG( vn, channel )
+#define OPT_CHANNEL_ARG( vn ) OPT_SUBTYPED_ARG( vn, channel )
+#define CHANNEL_RESULT( vn )  TYPED_RESULT( channel, vn )
 
-#define REQ_INPUT_ARG( vn ) REQ_TYPED_ARG( vn, input )
-#define INPUT_RESULT( vn ) TYPED_RESULT( input, vn )
-#define OPT_INPUT_ARG( vn ) OPT_TYPED_ARG( vn, input )
+#define REQ_INPUT_ARG( vn ) REQ_SUBTYPED_ARG( vn, input )
+#define OPT_INPUT_ARG( vn ) OPT_SUBTYPED_ARG( vn, input )
+#define INPUT_RESULT( vn )  TYPED_RESULT( input, vn )
 
-#define REQ_OUTPUT_ARG( vn ) REQ_TYPED_ARG( vn, output )
-#define OUTPUT_RESULT( vn ) TYPED_RESULT( output, vn )
-#define OPT_OUTPUT_ARG( vn ) OPT_TYPED_ARG( vn, output )
+#define REQ_OUTPUT_ARG( vn ) REQ_SUBTYPED_ARG( vn, output )
+#define OPT_OUTPUT_ARG( vn ) OPT_SUBTYPED_ARG( vn, output )
+#define OUTPUT_RESULT( vn )  TYPED_RESULT( output, vn )
 
 /* Called when we need to initalize a raw input */
 

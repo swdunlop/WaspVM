@@ -1,5 +1,8 @@
-- The wait-input primitive accepts an optional timeout argument.
-- The wait multimethod in core/io also accepts an optional timeout argument.
+- Add special os-connection-timeout primitive to avoid redundancies in scheduling timeouts.
+
+- Port event handling work to Win32
+  Should we write an alternative poll loop since libevent won't work on win32 for serial / console
+  I/O ?
 
 - BUG: parsing a single dot outside parenthesis should not be an incomplete error.
 

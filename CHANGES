@@ -1,13 +1,17 @@
-????/??/?? LibEvent Restoration
+2008/07/28 LibEvent Restoration
   - Restored event loop from future.
   - Modified core/io module to handle os-connection outputs and inputs.
-  t Added os-service type to vm, derived from input, yields os-connections.
-  t Added (tcp-serve portno) -> os-service to vm/os.c
-    + BUG: Cannot transmit to os-connections from listener.
-    + BUG: Received data appears to be bleeding.
-  + BUG: Crash on waiting for a close.
-  + Implemented timeout scheduling.
-  + Implemented wait-timeout function.
+  - Added os-service type to vm, derived from input, yields os-connections.
+  - Added (tcp-serve portno) -> os-service to vm/os.c
+  - Corrected optional arguments to be type-specific and refuse subtypes.
+  - Added macros for requiring subtype'd arguments.
+  - Implemented timeout scheduling.
+  - Made makefile default to -DNDEBUG.
+  - Added timeout multimethod to core/io to overlay the primitive.
+  - Added timeout option to wait multimethod.
+  - Fixed (input process) and (output process) methods in core/io.
+  - Aliased <number> to <integer>, since eventually integers will be a subset of <number>.
+  - Added timeout argument to wait multimethod.
 
 2008/06/24 WaspDoc Integration
   - Added exprs->string primitive.

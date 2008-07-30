@@ -19,24 +19,22 @@
 #define WASP_TIME_H 1
 
 #include "memory.h"
+#include <event.h>
 
 WASP_BEGIN_TYPE( timeout )
-    wasp_quad secs, nsecs;
-    wasp_output output;
-    wasp_value   signal;
-    wasp_timeout prev, next;
+    struct timeval time;
+    struct event   event;
+    wasp_input     input;
 WASP_END_TYPE( timeout )
 
-wasp_timeout wasp_make_timeout( 
-    wasp_quad ms, wasp_output output, wasp_value signal  
-);
+wasp_timeout wasp_make_timeout( wasp_quad ms, wasp_input input );
 
-void wasp_trace_timeouts();
 void wasp_init_time_subsystem( );
-int wasp_any_timeouts();
 
 #define REQ_TIMEOUT_ARG( x ) REQ_TYPED_ARG( x, timeout )
 #define OPT_TIMEOUT_ARG( x ) OPT_TYPED_ARG( x, timeout )
 #define TIMEOUT_RESULT( x )  TYPED_RESULT( timeout, x )
+
+extern wasp_symbol wasp_ss_timeout;
 
 #endif

@@ -68,6 +68,9 @@ typedef int wasp_boolean;
 #define REQ_ANY_ARG( vn ) \
     wasp_value vn = wasp_req_any();
 
+#define REQ_SUBTYPED_ARG( vn, tn ) \
+    wasp_##tn vn = wasp_##tn##_fv( wasp_req_st_arg( wasp_##tn##_type ) );
+
 #define REQ_TYPED_ARG( vn, tn ) \
     wasp_##tn vn = wasp_##tn##_fv( wasp_req_arg( wasp_##tn##_type ) );
 
@@ -88,12 +91,21 @@ typedef int wasp_boolean;
     wasp_boolean has_##vn; \
     wasp_##tn vn = wasp_##tn##_fv( wasp_opt_arg( wasp_##tn##_type, &has_##vn ) );
 
+#define OPT_SUBTYPED_ARG( vn, tn ) \
+    wasp_boolean has_##vn; \
+    wasp_##tn vn = wasp_##tn##_fv( wasp_opt_st_arg( wasp_##tn##_type, &has_##vn ) );
+
 #else
 // The fv assertions may freak out when they see a null..
 
 #define OPT_TYPED_ARG( vn, tn ) \
     wasp_boolean has_##vn; \
     wasp_value vvv_##vn = wasp_opt_arg( wasp_##tn##_type, &has_##vn ); \
+    wasp_##tn vn = has_##vn ? wasp_##tn##_fv( vvv_##vn ) : ( (wasp_##tn) 0 );
+
+#define OPT_SUBTYPED_ARG( vn, tn ) \
+    wasp_boolean has_##vn; \
+    wasp_value vvv_##vn = wasp_opt_st_arg( wasp_##tn##_type, &has_##vn ); \
     wasp_##tn vn = has_##vn ? wasp_##tn##_fv( vvv_##vn ) : ( (wasp_##tn) 0 );
 
 #endif
@@ -226,6 +238,7 @@ void wasp_set_pool( wasp_object obj, wasp_pool pool );
 void wasp_trace_obj( wasp_object obj );
 void wasp_grey_obj( wasp_object obj );
 void wasp_root_obj( wasp_object obj );
+void wasp_unroot_obj( wasp_object obj );
 void wasp_trace_all( );
 
 WASP_H_TP( null );
@@ -373,7 +386,9 @@ void wasp_init_memory_subsystem( );
 
 wasp_value wasp_req_any( );
 wasp_value wasp_req_arg( wasp_type type );
+wasp_value wasp_req_st_arg( wasp_type type );
 wasp_value wasp_opt_any( wasp_boolean* found );
+wasp_value wasp_opt_st_arg( wasp_type type, wasp_boolean* found );
 wasp_value wasp_opt_arg( wasp_type type, wasp_boolean* found );
 
 void wasp_no_more_args( );

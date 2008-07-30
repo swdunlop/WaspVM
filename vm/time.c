@@ -16,18 +16,7 @@
 
 #include "waspvm.h"
 
-
-wasp_timeout wasp_first_timeout = NULL;
-wasp_timeout wasp_last_timeout = NULL;
-wasp_process wasp_timemon;
-
-int wasp_timeout_compare( wasp_timeout t1, wasp_timeout t2 ){
-    if( t1->secs > t2->secs ) return 1;
-    if( t1->secs < t2->secs ) return -1;
-    if( t1->nsecs < t2->nsecs ) return 1;
-    if( t1->nsecs < t2->nsecs ) return -1;
-    return 0;
-}
+wasp_symbol wasp_ss_timeout;
 
 /*
 
@@ -57,121 +46,56 @@ void wasp_get_now( wasp_quad* secs, wasp_quad* nsecs ){
     *nsecs = ts.tv_usec * 1000;
 }
 #endif
-wasp_timeout wasp_make_timeout( 
-    wasp_quad ms, wasp_output output, wasp_value signal  
-){
-    wasp_quad secs, nsecs; wasp_get_now( &secs, &nsecs );
-    secs += (ms / 1000);
-    nsecs += ((ms % 1000) * 1000); // 1,000 ns per ms
+
+void wasp_cancel_timeout( wasp_timeout timeout ){
+    evtimer_del( &( timeout->event ) );
+    //TODO: How to unroot an atomic bomb?
+    wasp_unroot_obj( (wasp_object) timeout );
+}
+
+void wasp_timeout_cb( int fd, short evt, void* context ){
+    wasp_timeout timeout = (wasp_timeout) context; 
+
+    if( wasp_input_monitored( timeout->input ) ){
+        wasp_wake_monitor( timeout->input, wasp_vf_symbol( wasp_ss_timeout ) );
+    };
+
+    wasp_cancel_timeout( timeout );
+}
+
+wasp_timeout wasp_make_timeout( wasp_quad ms, wasp_input input ){
     wasp_timeout timeout = WASP_OBJALLOC( timeout );
-    timeout->secs = secs;
-    timeout->nsecs = nsecs;
-    timeout->output = output;
-    timeout->signal = signal;
+    evtimer_set( &( timeout->event ), wasp_timeout_cb, timeout );
+    timeout->input = input;
     return timeout;
 }
 
-void wasp_enable_timeout( wasp_timeout new ){
-    wasp_timeout timeout, next, prev;
-
-    if( wasp_first_timeout == NULL ){
-        wasp_enable_process( wasp_timemon );
-    }else for( timeout = wasp_first_timeout; timeout; timeout = next ){
-        next = timeout->next;
-
-        if( wasp_timeout_compare( new, timeout ) < 0 ){
-            prev = timeout->prev;
-            if( prev ){
-                prev->next = new;
-            }else{
-                wasp_first_timeout = new;
-            }
-            new->prev = prev;
-            timeout->prev = new;
-            new->next = timeout;
-
-            return;
-        }
-    }
-
-    if( wasp_last_timeout  ){
-        wasp_last_timeout->next = new;
-    }else{
-        wasp_first_timeout = new;
-    }
-
-    new->prev = wasp_last_timeout;
-    wasp_last_timeout = new;
+wasp_timeout wasp_schedule_timeout( wasp_timeout timeout, wasp_quad ms ){
+    wasp_root_obj( (wasp_object) timeout );
+    gettimeofday( &( timeout->time ), NULL );
+    timeout->time.tv_sec = ms / 1000;
+    timeout->time.tv_usec = ((ms % 1000)) * 1000;
+    evtimer_add( &( timeout->event ), &( timeout->time ) );
 }
 
-void wasp_disable_timeout( wasp_timeout timeout ){
-    wasp_timeout prev = timeout->prev;
-    wasp_timeout next = timeout->next;
-    if( prev ){
-        prev->next = next;
-    }else{
-        wasp_first_timeout = next;
-    };
-    if( next ){
-        next->prev = prev;
-    }else{
-        wasp_last_timeout = prev;
-    }
-    timeout->prev = timeout->next = NULL;
-}
 void wasp_trace_timeout( wasp_timeout timeout ){
-    wasp_grey_obj( (wasp_object) timeout->output );
-    wasp_grey_val( timeout->signal );
-}
-void wasp_trace_timeouts( ){
-    wasp_timeout timeout, next;
-    
-    for( timeout = wasp_first_timeout; timeout; timeout = next ){
-        next = timeout->next;
-        wasp_grey_obj( (wasp_object) timeout );
-    }
-}
-void wasp_invoke_timeout( wasp_timeout timeout ){
-    timeout->output->xmit( timeout->output, timeout->signal );
-    wasp_disable_timeout( timeout );
+    wasp_grey_obj( (wasp_object) timeout->input );
 }
 
-void wasp_activate_timemon( wasp_process process, wasp_value context ){
-    wasp_timeout timeout, next;
-    
-    wasp_quad secs, nsecs; wasp_get_now( &secs, &nsecs );
-    
-    for( timeout = wasp_first_timeout; timeout; timeout = next ){
-        next = timeout->next;
-        if( timeout->secs < secs ){
-            wasp_invoke_timeout( timeout );
-        }else if( timeout->secs == secs ){
-            if( timeout->nsecs <= nsecs ){
-                wasp_invoke_timeout( timeout );
-            }
-        };
-    }
-
-    if( wasp_first_timeout == NULL ){
-        assert( wasp_last_timeout == NULL );
-        wasp_disable_process( wasp_timemon );
-    }
-}
-
-void wasp_deactivate_timemon( wasp_process process, wasp_value context ){ }
-
+WASP_GENERIC_COMPARE( timeout );
 WASP_GENERIC_FORMAT( timeout );
 WASP_GENERIC_FREE( timeout );
 WASP_C_TYPE( timeout )
 
 WASP_BEGIN_PRIM( "timeout", timeout )
     REQ_INTEGER_ARG( ms );
-    REQ_OUTPUT_ARG( output );
-    REQ_ANY_ARG( message );
+    REQ_INPUT_ARG( input );
     NO_REST_ARGS( );
     
-    wasp_timeout timeout = ( wasp_make_timeout( ms, output, message ) ); 
-    wasp_enable_timeout( timeout );
+    wasp_timeout timeout = wasp_make_timeout( ms, input );
+    if( ms < 0 ) wasp_errf( wasp_es_vm, "si", "Negative timeouts are not allowed", ms );
+
+    wasp_schedule_timeout( timeout, ms );
     TIMEOUT_RESULT( timeout ); 
 WASP_END_PRIM( timeout )
 
@@ -179,23 +103,15 @@ WASP_BEGIN_PRIM( "cancel-timeout", cancel_timeout )
     REQ_TIMEOUT_ARG( timeout )
     NO_REST_ARGS( );
     
-    wasp_disable_timeout( timeout );
+    wasp_cancel_timeout( timeout );
     
     NO_RESULT( );
 WASP_END_PRIM( cancel_timeout )
 
-int wasp_any_timeouts( ){
-    return wasp_first_timeout != NULL;
-}
-
 void wasp_init_time_subsystem( ){
     WASP_I_TYPE( timeout );
-    wasp_timemon = wasp_make_process( 
-        (wasp_proc_fn) wasp_activate_timemon, 
-        (wasp_proc_fn) wasp_deactivate_timemon, 
-        wasp_vf_null( ) 
-    );
-    wasp_root_obj( (wasp_object) wasp_timemon );
+    wasp_ss_timeout = wasp_symbol_fs( "timeout" );
+
     WASP_BIND_PRIM( timeout );
     WASP_BIND_PRIM( cancel_timeout );
 }
