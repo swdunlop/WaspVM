@@ -309,7 +309,7 @@ wasp_os_connection wasp_tcp_connect( wasp_integer host, wasp_integer port ){
     return wasp_make_os_connection( fd );
 }
 
-#ifdef WASP_USE_SYNC_TERM    
+#ifndef WASP_USE_SYNC_TERM    
 wasp_input wasp_stdin;
 wasp_output wasp_stdout;
 
@@ -479,7 +479,7 @@ void wasp_init_os_subsystem( ){
 
     WASP_BIND_PRIM( serve_tcp );
 
-#ifdef WASP_USE_SYNC_TERM    
+#ifndef WASP_USE_SYNC_TERM    
     wasp_set_global( wasp_symbol_fs( "*console*" ), 
                      wasp_vf_connection( wasp_make_stdio( ) ) );
 #endif
