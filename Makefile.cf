@@ -1,0 +1,48 @@
+OS=$(shell uname -s | sed 's:_.*::')
+ROOT=$(shell pwd)
+SYS=mod/sys
+
+ifeq ($(OS),MINGW32)
+
+EXE = .exe
+OBJ = .o
+SO  = .dll
+CFLAGS += -DWASP_USE_SYNC_TERM
+CFLAGS += -mno-cygwin 
+CFLAGS += -DWASP_PLATFORM='"winnt"' 
+CFLAGS += -DWASP_SO='".dll"'
+EXEFLAGS += -lws2_32
+SOFLAGS += -lgnurx -liberty -lregex -lws2_32
+
+else # Assuming we're in UNIX..
+
+EXE = 
+OBJ = .o
+SO  = .so
+
+CFLAGS += -DWASP_PLATFORM='"generic"' 
+CFLAGS += -DWASP_SO='".so"'
+LDFLAGS += -levent
+EXEFLAGS += -rdynamic -ldl
+
+endif
+
+ifdef DEBUG
+
+CFLAGS += -g
+
+else
+
+CFLAGS += -DNDEBUG
+
+endif
+
+ifdef COMPACT
+CFLAGS += -Os
+else
+ifdef FAST
+CFLAGS += -O3
+else
+CFLAGS += -O
+endif
+endif

@@ -23,7 +23,7 @@
 #define PKG_STR     4
 #define PKG_SYM     5
 
-#ifdef WASP_IN_MINGW
+#ifdef WASP_IN_WIN32
 // We need hton and ntoh
 #include <winsock2.h>
 #else

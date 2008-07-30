@@ -21,10 +21,15 @@
 #include <string.h>
 //TODO: Win32 incompat alert!
 #include <unistd.h>
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#include <winsock2.h>
+#else
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netdb.h>
+#endif
 #include <errno.h>
 
 wasp_process wasp_os_loop_process;
@@ -43,8 +48,12 @@ void wasp_disable_os_loop( ){
 }
 
 void wasp_activate_os_loop( ){ 
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
     event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE );
-    if( ! wasp_os_loop_process->enabled ) wasp_proc_loop( );
+#endif
+	if( ! wasp_os_loop_process->enabled ) wasp_proc_loop( );
 }
 void wasp_deactivate_os_loop( ){ }
 
@@ -61,15 +70,22 @@ void wasp_os_xmit_mt( wasp_os_output outp, wasp_value data ){
         wasp_errf( wasp_es_vm, "sxx", "cannot transmit to closed OS connections", outp, data );
     }else if( wasp_is_string( data ) ){
         wasp_string str = wasp_string_fv( data );
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
         int status = bufferevent_write( outp->conn->event, 
                                         wasp_sf_string( str ), 
                                         wasp_string_length( str ) );
         //TODO: Capture and report any errors if status == -1
-    }else{
+#endif
+	}else{
         wasp_errf( wasp_es_vm, "sxx", "OS outputs can only send strings", outp, data );
     }
 }
 
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
 wasp_string wasp_read_bufferevent( struct bufferevent* ev ){
     static char data[4096];
     int len = bufferevent_read( ev, data, sizeof( data ) );
@@ -80,6 +96,7 @@ wasp_string wasp_read_bufferevent( struct bufferevent* ev ){
 
     return str;
 }
+#endif
 
 int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
     if( inp->conn->closed ){
@@ -87,6 +104,9 @@ int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
         return 1;
     }
 
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
     wasp_string str = wasp_read_bufferevent( inp->conn->event );  
     if( ! str ){
         wasp_enable_os_loop( );
@@ -95,16 +115,20 @@ int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
     }
 
     *data = wasp_vf_string( str );
+#endif
     return 1;
 }
 
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
 void wasp_os_read_cb( struct bufferevent* ev, wasp_os_connection conn ){
     wasp_os_input input = (wasp_os_input)(((wasp_connection)conn)->input);
     if( ! wasp_input_monitored( (wasp_input) input ) ) return;
     wasp_string str = wasp_read_bufferevent( ev );  
     if( ! str ) return;
-    wasp_wake_monitor( (wasp_input)input, wasp_vf_string( str ) );
     bufferevent_disable( conn->event, EV_READ );
+    wasp_wake_monitor( (wasp_input)input, wasp_vf_string( str ) );
     wasp_disable_os_loop( );
 }
 
@@ -120,17 +144,26 @@ void wasp_os_error_cb( struct bufferevent* ev, short what, wasp_os_connection co
         //TODO: Close down the connection, and unroot it.
 }
 
+#endif
+
 int wasp_svc_recv_mt( wasp_os_service svc, wasp_value* data ){
     if( svc->closed ){
         *data = wasp_vf_symbol( wasp_ss_close );
         return 1;
     }else{
         wasp_enable_os_loop( );
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
         event_add( &( svc->event ), svc->timeout ? &( svc->timeval ) : NULL );
+#endif
         return 0;
     }
 }
 
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
 void wasp_svc_read_cb( int handle, short event, void* service ){
     struct sockaddr addr;
     int sz = sizeof( addr );
@@ -142,15 +175,20 @@ void wasp_svc_read_cb( int handle, short event, void* service ){
     wasp_disable_os_loop( );
     wasp_wake_monitor( (wasp_input)service, wasp_vf_os_connection( conn ) );
 }
+#endif
 
 wasp_os_service wasp_make_os_service( int handle ){
     wasp_os_service svc = WASP_OBJALLOC( os_service );
     ((wasp_input)svc)->recv = (wasp_input_mt)wasp_svc_recv_mt;
     
     svc->timeout = svc->closed = 0;
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
     svc->timeval.tv_sec = svc->timeval.tv_usec = 0;
     event_set( &( svc->event ), handle, EV_READ, wasp_svc_read_cb, (void*)svc );
-    wasp_root_obj( svc ); //TODO: Need unroot on close.
+#endif
+    wasp_root_obj( (wasp_object) svc ); //TODO: Need unroot on close.
 
     return svc;
 }
@@ -173,19 +211,23 @@ wasp_os_connection wasp_make_os_connection( int handle ){
                           (wasp_output) osout );
 
     oscon->handle = handle;
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
     oscon->event = bufferevent_new( handle, 
                                     (evbuffercb) wasp_os_read_cb, 
                                     NULL, 
                                     (everrorcb) wasp_os_error_cb, 
                                     oscon);
-    wasp_root_obj( (wasp_object) oscon ); //TODO: Needs unroot on close.
     bufferevent_enable( oscon->event, EV_WRITE );
+#endif
+    wasp_root_obj( (wasp_object) oscon ); //TODO: Needs unroot on close.
 
     return oscon;
 }
  
 void wasp_report_host_error( ){
-#if defined(_WIN32)||defined(__CYGWIN__)
+#ifdef WASP_IN_WIN32
     wasp_errf( wasp_es_vm, "s", strerror( WSAGetLastError() ) );
 #else
     wasp_errf( wasp_es_vm, "s", hstrerror( h_errno ) );
@@ -193,7 +235,7 @@ void wasp_report_host_error( ){
 }
 
 void wasp_report_net_error( ){
-#if defined(_WIN32)||defined(__CYGWIN__)
+#ifdef WASP_IN_WIN32
     wasp_errf( wasp_es_vm, "s", strerror( WSAGetLastError() ) );
 #else
     if( errno == EINPROGRESS )return;
@@ -267,7 +309,7 @@ wasp_os_connection wasp_tcp_connect( wasp_integer host, wasp_integer port ){
     return wasp_make_os_connection( fd );
 }
 
-#ifndef WASP_USE_SYNC_TERM    
+#ifdef WASP_USE_SYNC_TERM    
 wasp_input wasp_stdin;
 wasp_output wasp_stdout;
 
@@ -295,7 +337,11 @@ wasp_connection wasp_make_stdio( ){
 #endif
 
 wasp_free_os_connection( wasp_os_connection oscon ){ 
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
     bufferevent_free( oscon->event );
+#endif
     wasp_objfree( (wasp_object) oscon );
 }
 
@@ -306,7 +352,11 @@ WASP_GENERIC_COMPARE( os_connection )
 WASP_C_SUBTYPE2( os_connection, "os-connection", connection );
 
 wasp_free_os_service( wasp_os_service svc ){ 
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
     event_del( &(svc->event) ); //TODO: We sure this is necessary?
+#endif
     wasp_objfree( (wasp_object) svc );
 }
 
@@ -388,6 +438,7 @@ WASP_BEGIN_PRIM( "serve-tcp", serve_tcp )
     wasp_net_error( listen( server_fd, 5 ) );
 
 #if defined( _WIN32 )||defined( __CYGWIN__ )
+	//TODO:WIN32:IO Probably doesn't work on nonsockets.
     unsigned long unblocking = 1;
     wasp_net_error( ioctlsocket( server_fd, FIONBIO, &unblocking ) );
 #else
@@ -404,8 +455,11 @@ WASP_END_PRIM( serve_tcp )
 //TODO: EvDNS Wrapper
 
 void wasp_init_os_subsystem( ){
+#ifdef WASP_IN_WIN32
+//TODO:WIN32:IO
+#else
     event_init( );
-
+#endif
     wasp_process p = wasp_make_process( wasp_activate_os_loop, 
                                         wasp_deactivate_os_loop, 
                                         wasp_vf_null( ) );
@@ -425,7 +479,7 @@ void wasp_init_os_subsystem( ){
 
     WASP_BIND_PRIM( serve_tcp );
 
-#ifndef WASP_USE_SYNC_TERM    
+#ifdef WASP_USE_SYNC_TERM    
     wasp_set_global( wasp_symbol_fs( "*console*" ), 
                      wasp_vf_connection( wasp_make_stdio( ) ) );
 #endif

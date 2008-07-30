@@ -20,7 +20,7 @@ wasp_symbol wasp_es_plugin;
 
 typedef void (*init_func) ();
 
-#ifdef WASP_IN_MINGW
+#ifdef WASP_IN_WIN32
 
 #include <windows.h>
 

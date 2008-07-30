@@ -21,7 +21,7 @@
 
 #include "waspvm.h"
 
-#ifdef _WIN32
+#ifdef WASP_IN_WIN32
 // We need hton and ntoh
 #include <winsock2.h>
 #else

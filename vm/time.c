@@ -30,29 +30,13 @@ void wasp_get_now( wasp_quad* secs, wasp_quad* nsecs ){
 */
 
 #ifdef WASP_IN_WIN32
-#include <windows.h>
-void wasp_get_now( wasp_quad* secs, wasp_quad* nsecs ){
-    wasp_quad ms = GetTickCount( );
-    *secs = ms / 1000;
-    // 1,000,00 nanoseconds per millisecond
-    *nsecs = ( ms % 1000 ) * 1000000; 
-}
+//TODO:WIN32:TASK
 #else
-#include <sys/time.h>
-void wasp_get_now( wasp_quad* secs, wasp_quad* nsecs ){
-    struct timeval ts;
-    gettimeofday( &ts, NULL );
-    *secs = ts.tv_sec;
-    *nsecs = ts.tv_usec * 1000;
-}
-#endif
-
 void wasp_task_cb( int fd, short evt, void* context ){
     wasp_task task = (wasp_task) context; 
     int ms = task->task_mt( task );
 
     if( ms ){
-        gettimeofday( &( task->time ), NULL );
         task->time.tv_sec = ms / 1000;
         task->time.tv_usec = ((ms % 1000)) * 1000;
         evtimer_add( &( task->event ), &( task->time ) );
@@ -60,10 +44,15 @@ void wasp_task_cb( int fd, short evt, void* context ){
         wasp_unroot_obj( (wasp_object) task );
     };
 }
+#endif
 
 wasp_task wasp_make_task( wasp_task_mt mt, wasp_value context ){
     wasp_task task = WASP_OBJALLOC( task );
+#ifdef WASP_IN_WIN32
+	//TODO:WIN32:TASK
+#else
     evtimer_set( &( task->event ), wasp_task_cb, task );
+#endif
     task->task_mt = mt;
     task->context = context;
     return task;
@@ -71,14 +60,21 @@ wasp_task wasp_make_task( wasp_task_mt mt, wasp_value context ){
 
 wasp_task wasp_schedule_task( wasp_task task, wasp_quad ms ){
     wasp_root_obj( (wasp_object) task );
-    gettimeofday( &( task->time ), NULL );
+#ifdef WASP_IN_WIN32
+	//TODO:WIN32:TASK
+#else
     task->time.tv_sec = ms / 1000;
     task->time.tv_usec = ((ms % 1000)) * 1000;
     evtimer_add( &( task->event ), &( task->time ) );
+#endif
 }
 
 void wasp_cancel_task( wasp_task task ){
+#ifdef WASP_IN_WIN32
+	//TODO:WIN32:TASK
+#else
     evtimer_del( &( task->event ) );
+#endif
     wasp_unroot_obj( (wasp_object) task );
 }
 
