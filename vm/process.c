@@ -309,12 +309,6 @@ WASP_BEGIN_PRIM( "spawn", spawn )
     PROCESS_RESULT( p );
 WASP_END_PRIM( spawn )
 
-WASP_BEGIN_PRIM( "active-process", active_process )
-    NO_REST_ARGS( );
-    
-    RESULT( wasp_vf_process( wasp_active_process ) );
-WASP_END_PRIM( active_process )
-
 WASP_BEGIN_PRIM( "halt", halt )
     NO_REST_ARGS( );
     wasp_disable_process( wasp_active_process );
@@ -334,6 +328,59 @@ WASP_BEGIN_PRIM( "current-output", current_output )
     RESULT( wasp_active_process->output );
 WASP_END_PRIM( current_output )
 
+WASP_BEGIN_PRIM( "process-input", process_input )
+    REQ_PROCESS_ARG( process );
+    NO_REST_ARGS( );
+
+    RESULT( process->input );
+WASP_END_PRIM( process_input )
+
+WASP_BEGIN_PRIM( "process-output", process_output )
+    REQ_PROCESS_ARG( process );
+    NO_REST_ARGS( );
+
+    RESULT( process->output );
+WASP_END_PRIM( process_output )
+
+WASP_BEGIN_PRIM( "set-current-input!", set_current_input )
+    REQ_INPUT_ARG( input );
+    NO_REST_ARGS( );
+    
+    wasp_active_process->input = wasp_vf_input( input );
+    NO_RESULT( );
+WASP_END_PRIM( set_current_input )
+
+WASP_BEGIN_PRIM( "set-current-output!", set_current_output )
+    REQ_OUTPUT_ARG( output );
+    NO_REST_ARGS( );
+
+    wasp_active_process->output = wasp_vf_output( output );
+    NO_RESULT( );
+WASP_END_PRIM( set_current_output )
+
+WASP_BEGIN_PRIM( "set-process-input!", set_process_input )
+    REQ_PROCESS_ARG( process );
+    REQ_INPUT_ARG( input );
+    NO_REST_ARGS( );
+    
+    process->input = wasp_vf_input( input );
+    NO_RESULT( );
+WASP_END_PRIM( set_process_input )
+
+WASP_BEGIN_PRIM( "set-process-output!", set_process_output )
+    REQ_PROCESS_ARG( process );
+    REQ_OUTPUT_ARG( output );
+    NO_REST_ARGS( );
+
+    process->output = wasp_vf_output( output );
+    NO_RESULT( );
+WASP_END_PRIM( set_process_output )
+
+WASP_BEGIN_PRIM( "current-process", current_process )
+    NO_REST_ARGS( );
+    PROCESS_RESULT( wasp_active_process );
+WASP_END_PRIM( current_process )
+
 WASP_BEGIN_PRIM( "dump-actives", dump_actives )
     NO_REST_ARGS( );
     
@@ -351,8 +398,15 @@ void wasp_init_process_subsystem( ){
 
     WASP_BIND_PRIM( spawn );
     WASP_BIND_PRIM( halt );
-    WASP_BIND_PRIM( active_process );
+    WASP_BIND_PRIM( current_process );
     WASP_BIND_PRIM( current_input );
     WASP_BIND_PRIM( current_output );
+    WASP_BIND_PRIM( process_input );
+    WASP_BIND_PRIM( process_output );
+    WASP_BIND_PRIM( set_current_input )
+    WASP_BIND_PRIM( set_current_output )
+    WASP_BIND_PRIM( set_process_input )
+    WASP_BIND_PRIM( set_process_output )
+
     WASP_BIND_PRIM( dump_actives );
 }

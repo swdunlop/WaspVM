@@ -1,4 +1,20 @@
-????/??/?? Timeout System Improvements
+????/??/?? Process System Cleanup and Improvement
+  - Added set-current-input! primitive.
+  - Added set-current-output! primitive.
+  - Added set-process-input! primitive.
+  - Added set-process-output! primitive.
+  - Added process-input primitive.
+  - Added process-output primitive.
+  - Renamed active-process to current-process.
+  - Restored lib/tcp-server from Mosquito.
+  - Modified lib/tcp-server to pass ancilliary arguments, much like spawn.
+  + Restored lib/http-server from Mosquito.
+  + Restored lib/http-file-server from Mosquito.
+  + Ensured os-connections can be supplied to connection primitives.
+  + Removed mention of sys/filesystem and sys/regex from modules.
+  t Modified dir-files to work under Windows.
+
+2008/08/01 Timeout System Improvements
   - Generalized timeouts to tasks
   - Modified timeout primitive to create a task with the timeout method.
   - Modified pause primitive to accept an optional timeout in milliseconds.
@@ -7,14 +23,8 @@
     ways to export symbols to DLLs than using the all-in-one-dll method.
   - WaspC works, Wasp doesn't, as expected.
   - BUG: (pause 100) at REPL causes halt.
-  t Modified dir-files to work under Windows.
   - Restored lib/url from Mosquito.
   - Restored lib/http-url from Mosquito.
-  t Restored lib/tcp-server from Mosquito.
-  + Restored lib/http-server from Mosquito.
-  + Restored lib/http-file-server from Mosquito.
-  + Ensure os-connections can be supplied to connection primitives.
-  + Removed mention of sys/filesystem and sys/regex from modules.
 
 2008/07/28 LibEvent Restoration
   - Restored event loop from future.

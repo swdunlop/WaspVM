@@ -17,7 +17,7 @@
 (module "lib/tcp-server")
 (import "lib/with-io")
 
-(define (spawn-tcp-server portno fn)
+(define (spawn-tcp-server portno fn . rest)
   (define server (serve-tcp portno))
   (spawn (function (tcp-server)
             (forever
@@ -26,7 +26,7 @@
                 (return)
                 (with-io (os-connection-input conn)
                          (os-connection-output conn)
-                  (spawn fn))))))
+                  (apply spawn fn rest))))))
   server)
 
 (export spawn-tcp-server)
