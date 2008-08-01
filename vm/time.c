@@ -41,6 +41,7 @@ void wasp_task_cb( int fd, short evt, void* context ){
         task->time.tv_usec = ((ms % 1000)) * 1000;
         evtimer_add( &( task->event ), &( task->time ) );
     }else{
+        wasp_disable_os_loop( );
         wasp_unroot_obj( (wasp_object) task );
     };
 }
@@ -60,6 +61,7 @@ wasp_task wasp_make_task( wasp_task_mt mt, wasp_value context ){
 
 wasp_task wasp_schedule_task( wasp_task task, wasp_quad ms ){
     wasp_root_obj( (wasp_object) task );
+    wasp_enable_os_loop( );    
 #ifdef WASP_IN_WIN32
 	//TODO:WIN32:TASK
 #else
@@ -139,7 +141,6 @@ WASP_BEGIN_PRIM( "pause", pause )
 
     wasp_process p = wasp_active_process;
     wasp_disable_process( p );
-        
     if( ! has_ms ){
         wasp_enable_process( p );
     }else{ 

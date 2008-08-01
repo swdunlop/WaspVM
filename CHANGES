@@ -6,6 +6,7 @@
   - Note, moved all subsystems back into the core vm; need to explore better
     ways to export symbols to DLLs than using the all-in-one-dll method.
   - WaspC works, Wasp doesn't, as expected.
+  - BUG: (pause 100) at REPL causes halt.
 
 2008/07/28 LibEvent Restoration
   - Restored event loop from future.
