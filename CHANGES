@@ -7,6 +7,14 @@
     ways to export symbols to DLLs than using the all-in-one-dll method.
   - WaspC works, Wasp doesn't, as expected.
   - BUG: (pause 100) at REPL causes halt.
+  t Modified dir-files to work under Windows.
+  - Restored lib/url from Mosquito.
+  - Restored lib/http-url from Mosquito.
+  t Restored lib/tcp-server from Mosquito.
+  + Restored lib/http-server from Mosquito.
+  + Restored lib/http-file-server from Mosquito.
+  + Ensure os-connections can be supplied to connection primitives.
+  + Removed mention of sys/filesystem and sys/regex from modules.
 
 2008/07/28 LibEvent Restoration
   - Restored event loop from future.

@@ -15,11 +15,6 @@ WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$
 
 LIBWASPVM ?= libwaspvm$(SO)
 
-repl: $(WASP_EXE)
-	if which rlwrap; then cd mod && rlwrap $(WASP_EXE); else cd mod && $(WASP_EXE); fi
-
-objects: $(WASPVM_OBJS)
-
 $(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE)
 	cd mod && $(WASPC_EXE) -exe $(WASPDOC_EXE) -stub $(WASPVM_EXE) bin/waspdoc
 	chmod +rx $(WASPDOC_EXE)
@@ -27,6 +22,14 @@ $(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE)
 $(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE) 
 	cd mod && $(WASPC_EXE) -exe $(WASP_EXE) -stub $(WASPVM_EXE) bin/wasp
 	chmod +rx $(WASP_EXE)
+
+install: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
+	cd mod && $(WASP_EXE) bin/install.ms
+
+repl: $(WASP_EXE)
+	if which rlwrap; then cd mod && rlwrap $(WASP_EXE); else cd mod && $(WASP_EXE); fi
+
+objects: $(WASPVM_OBJS)
 
 #TODO: This currently relies on a precompiled set of modules.
 $(WASPC_EXE): $(WASPVM_EXE) $(WASPLD_EXE)
