@@ -1,8 +1,14 @@
 - Add special os-connection-timeout primitive to avoid redundancies in scheduling timeouts.
 
-- Port event handling work to Win32
-  Should we write an alternative poll loop since libevent won't work on win32 for serial / console
-  I/O ?
+- Factor out event handling into poll.c
+
+- Implement poll.c using pure win32 api's.
+  Supporting console as well as sockets.  Also supporting timeouts.
+
+- Add "dump-object" which dumps a lib/object object field by field.
+
+- Add system channels
+  UNIX and WIN32 named pipes, serial ports.
 
 - BUG: parsing a single dot outside parenthesis should not be an incomplete error.
 
@@ -13,23 +19,6 @@
       194     788    8733
   $ grep WASP_I_TYPE vm/*.c | wc
        26     104    1008
-
-- Generalize I/O Loop
-  Version I: Tied into select(2)
-  Version II: Tied into poll(2)
-  Version III: Tied into Win32 Async Wait
-  Version IV: Tied into gtk loop
-  Version V: Tied into qt loop
-  
-  For each of these I/O loops, we want to do one of the following:
-     poll for pending handle events
-     poll for handle events, waiting forever
-     poll for handle events, waiting for no more than x milliseconds
-
-  Handles must include something like sockets.
-  Handles may also include GUI events.
-
-  This gets tied into things like unix domain sockets, mmap, DDE, gui callbacks, etc
 
 - WaspDoc Use dir-files in find-source-files
 
