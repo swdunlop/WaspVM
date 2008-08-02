@@ -1,3 +1,16 @@
+????/??/?? I/O System Refactor
+  - Refactored OS loop so libevent and windows loop can be interchanged.
+    + BUG: Does not offer a 404.
+    + BUG: Appears to be closing before writing.
+    + BUG: Listeners not closing at shutdown.
+  + Ensured os-connections can be supplied to connection primitives.
+  + Removed mention of sys/filesystem and sys/regex from modules.
+  + Modified zero byte reads to properly close I/O.
+  + BUG: Crashes after loading test/http-server two or three in a row.
+    + Is there a GC problem with queues?
+    + Does this happen with GC trace and free off? (bloat-mode)
+    + Does this happen with GC free off? (leak-mode)
+  
 ????/??/?? Process System Cleanup and Improvement
   - Added set-current-input! primitive.
   - Added set-current-output! primitive.
@@ -8,17 +21,9 @@
   - Renamed active-process to current-process.
   - Restored lib/tcp-server from Mosquito.
   - Modified lib/tcp-server to pass ancilliary arguments, much like spawn.
-  t Restored lib/http-server from Mosquito.
-    + BUG: Does not like GET /\n\n; wants that version badly.
-  + Restored lib/http-file-server from Mosquito.
-  + Ensured os-connections can be supplied to connection primitives.
-  + Removed mention of sys/filesystem and sys/regex from modules.
-  + Modified zero byte reads to properly close I/O.
+  - Restored lib/http-server from Mosquito.
+  - Restored lib/http-file-server from Mosquito.
   t Modified dir-files to work under Windows.
-  + BUG: Crashes after loading test/http-server two or three in a row.
-    + Is there a GC problem with queues?
-    + Does this happen with GC trace and free off? (bloat-mode)
-    + Does this happen with GC free off? (leak-mode)
 
 2008/08/01 Timeout System Improvements
   - Generalized timeouts to tasks

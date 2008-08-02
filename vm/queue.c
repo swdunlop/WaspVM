@@ -50,8 +50,9 @@ void wasp_trace_queue( wasp_queue q ){
 }
 
 void wasp_free_queue( wasp_queue q ){
-    wasp_decref_mq( q->mq );
-    free( q );
+    //TODO:QUEUELEAK
+     wasp_decref_mq( q->mq );
+    wasp_objfree( (wasp_object) q );
 }
 
 void wasp_trace_queue_input( wasp_queue_input i ){
