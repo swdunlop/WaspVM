@@ -163,11 +163,8 @@ void wasp_write_file( wasp_file file, const void* data, wasp_integer datalen ){
         written += wasp_os_error( write( file->fd, data, datalen ) );     
     }        
 }
-void wasp_close_file( wasp_file file ){
-    wasp_os_error( close( file->fd ) ); 
-    file->closed = 1;
-}
-wasp_file wasp_open_file( const char* path, const char* flags, wasp_integer mode ){
+
+int wasp_parse_filemode( const char* flags ){
     int flag = 0;
 #ifdef WASP_IN_WIN32
     flag |= O_BINARY;
@@ -255,10 +252,20 @@ wasp_file wasp_open_file( const char* path, const char* flags, wasp_integer mode
         };
     };
 
+    return flag;
+}
+
+void wasp_close_file( wasp_file file ){
+    wasp_os_error( close( file->fd ) ); 
+    file->closed = 1;
+}
+
+wasp_file wasp_open_file( const char* path, const char* flags, wasp_integer mode ){
     return wasp_make_file( 
         wasp_string_fs( path ), 
-        wasp_os_error( open( path, flag, mode ) ) 
-    );
+        wasp_os_error( open( path, 
+                             wasp_parse_filemode( flags ), 
+                             mode ) ) );
 }
 
 WASP_BEGIN_PRIM( "open-file", open_file )
