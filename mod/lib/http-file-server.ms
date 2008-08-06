@@ -61,13 +61,13 @@
   (spawn-http-server portno
     (lambda (req)
       (define path (url-path (http-request-url req)))
-      (print "GET: ")
-      (print (format path))
-      (print "\n")
+      ;(print "GET: ")
+      ;(print (format path))
+      ;(print "\n")
       (define file (dict-ref files path))
-      (print "File is: ")
-      (print (format file))
-      (print "\n")
+      ;(print "File is: ")
+      ;(print (format file))
+      ;(print "\n")
       (if file
         (apply write-http-response req 200 "OK" file)
         (write-http-response req 404 

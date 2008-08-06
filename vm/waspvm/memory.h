@@ -168,8 +168,8 @@ typedef int wasp_boolean;
     WASP_H_RQ( tn ); \
     WASP_H_IS( tn ); \
     WASP_H_FV( tn ); \
-    WASP_H_VF( tn ); 
-
+    WASP_H_VF( tn ); \
+    
 #define WASP_C_TYPE2( tn, ts ) \
     WASP_C_TP2( tn, ts ); \
     WASP_C_RQ( tn ); \

@@ -29,20 +29,24 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netdb.h>
+#include <sys/time.h>
+
 #endif
 #include <errno.h>
+
+//TODO: Shutdown manifest for all services.
 
 wasp_process wasp_os_loop_process;
 unsigned int wasp_os_loop_use = 0;
 
 void wasp_enable_os_loop( ){
-    printf( "OS Loop Enabled, Use Ct: %i\n", wasp_os_loop_use + 1 );
+    // printf( "OS Loop Enabled, Use Ct: %i\n", wasp_os_loop_use + 1 );
     if( wasp_os_loop_use ++ ) return;
     wasp_enable_process( wasp_os_loop_process );
 }
 
 void wasp_disable_os_loop( ){
-    printf( "OS Loop Disabled, Use Ct: %i\n", wasp_os_loop_use - 1 );
+    // printf( "OS Loop Disabled, Use Ct: %i\n", wasp_os_loop_use - 1 );
     if( -- wasp_os_loop_use ) return;
     wasp_disable_process( wasp_os_loop_process );
 }
@@ -51,7 +55,12 @@ void wasp_activate_os_loop( ){
 #ifdef WASP_IN_WIN32
 //TODO:WIN32:IO
 #else
-    event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE );
+    if( wasp_first_enabled == wasp_last_enabled ){
+        // printf( "I am.. Alone!");
+        event_loop( EVLOOP_ONCE );
+    }else{
+        event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE );
+    }
 #endif
 	if( ! wasp_os_loop_process->enabled ) wasp_proc_loop( );
 }
@@ -62,7 +71,7 @@ void wasp_os_start_writing( wasp_os_connection conn, wasp_string data ){
     int   len = wasp_string_length( data );
     
     if( ! conn->writing ){
-        printf( "Started writing for connection %x\n", conn );
+        // printf( "Started writing for connection %x\n", conn );
         //TODO: Try writing directly, first.. Sometimes it works!
         conn->writing = 1;
         wasp_enable_os_loop( );
@@ -78,7 +87,7 @@ void wasp_os_start_writing( wasp_os_connection conn, wasp_string data ){
 
 void wasp_os_start_reading( wasp_os_connection conn ){
     if( conn->reading ) return;
-    printf( "Started reading for connection %x\n", conn );
+    // printf( "Started reading for connection %x\n", conn );
     
     conn->reading = 1;
     wasp_enable_os_loop( );
@@ -87,7 +96,7 @@ void wasp_os_start_reading( wasp_os_connection conn ){
 
 void wasp_os_stop_writing( wasp_os_connection conn ){
     if( ! conn->writing ) return;
-    printf( "Stopped writing for connection %x\n", conn );
+    // printf( "Stopped writing for connection %x\n", conn );
     conn->writing = 0;
     wasp_disable_os_loop( );
     wasp_unroot_obj( (wasp_object) conn );
@@ -95,14 +104,16 @@ void wasp_os_stop_writing( wasp_os_connection conn ){
 
 void wasp_os_stop_reading( wasp_os_connection conn ){
     if( ! conn->reading ) return;
-    printf( "Stopped reading for connection %x\n", conn );
+    // printf( "Stopped reading for connection %x\n", conn );
     conn->reading = 0;
     wasp_disable_os_loop( );
 }
 
 
-void wasp_os_closed( wasp_os_connection conn ){
+void wasp_os_closed( wasp_os_connection conn ){    
     if( conn->state < WASP_CLOSED ){
+        // printf( "OS Closed for connection %x\n", conn );
+        
         close( conn->handle );
         conn->state = WASP_CLOSED;
         
@@ -121,6 +132,7 @@ int wasp_os_xmit_complete( wasp_os_connection conn ){
 
 void wasp_os_close( wasp_os_connection conn ){
     if( conn->state < WASP_CLOSING ){
+        // printf( "OS Closing for connection %x\n", conn );
         if( wasp_os_xmit_complete( conn ) ){
             wasp_os_closed( conn );
         }else{
@@ -204,11 +216,19 @@ void wasp_os_read_cb(
     wasp_wake_monitor( (wasp_input)input, wasp_vf_string( str ) );
 }
 
+void wasp_os_xmit_cb( 
+    struct bufferevent* ev, wasp_os_connection conn 
+){
+    // printf( "Detected write completion for %x\n", conn );
+    if( conn->state == WASP_CLOSING ) wasp_os_closed( conn );
+    //TODO: Write completion notification.
+}
+
 void wasp_os_error_cb( 
     struct bufferevent* ev, short what, wasp_os_connection conn 
 ){
     wasp_os_closed( conn );
-    printf( "OS Error on %i: %i\n", conn->handle, what );
+    // printf( "OS Error on %i: %i\n", conn->handle, what );
     //TODO: Probably need to store a symbol describing the real error..
 }
 
@@ -284,7 +304,7 @@ wasp_os_connection wasp_make_os_connection( int handle ){
 #else
     oscon->event = bufferevent_new( handle, 
                                     (evbuffercb) wasp_os_read_cb, 
-                                    NULL, //TODO:WRITE-COMPLETION
+                                    (evbuffercb) wasp_os_xmit_cb, 
                                     (everrorcb) wasp_os_error_cb, 
                                     oscon);
     bufferevent_enable( oscon->event, EV_WRITE );
@@ -411,47 +431,58 @@ wasp_free_os_connection( wasp_os_connection oscon ){
 #else
     bufferevent_free( oscon->event );
 #endif
-    wasp_objfree( (wasp_object) oscon );
+    wasp_objfree( oscon );
 }
 
-WASP_GENERIC_TRACE( os_connection )
+void wasp_trace_os_connection( wasp_os_connection oscon ){ 
+    wasp_trace_connection( (wasp_connection) oscon );
+}
+
 WASP_GENERIC_FORMAT( os_connection )
 WASP_GENERIC_COMPARE( os_connection )
 
 WASP_C_SUBTYPE2( os_connection, "os-connection", connection );
 
-wasp_free_os_service( wasp_os_service svc ){ 
+void wasp_free_os_service( wasp_os_service svc ){ 
 #ifdef WASP_IN_WIN32
 //TODO:WIN32:IO
 #else
     event_del( &(svc->event) ); 
 #endif
-    wasp_objfree( (wasp_object) svc );
+    wasp_objfree( (wasp_object)svc );
 }
 
-WASP_GENERIC_TRACE( os_service )
+void wasp_trace_os_service( wasp_os_service svc ){
+    wasp_trace_input( (wasp_input)svc );
+}
 WASP_GENERIC_FORMAT( os_service )
 WASP_GENERIC_COMPARE( os_service )
 
 WASP_C_SUBTYPE2( os_service, "os-service", input );
 
-void wasp_trace_os_input( wasp_os_input input ){ 
-    wasp_grey_obj( (wasp_object) input->conn );
+void wasp_trace_os_output( wasp_os_output output ){ 
+    wasp_grey_obj( (wasp_object) output->conn );
 }
 
-WASP_GENERIC_FREE( os_input )
-WASP_GENERIC_FORMAT( os_input )
-WASP_GENERIC_COMPARE( os_input )
+void wasp_free_os_output( wasp_os_output output ){
+    wasp_objfree( (wasp_object)output );
+}
+
+WASP_GENERIC_FORMAT( os_output )
+WASP_GENERIC_COMPARE( os_output )
 
 WASP_C_SUBTYPE2( os_input, "os-input", input );
 
-void wasp_trace_os_output( wasp_os_output output ){ 
-    wasp_grey_obj( (wasp_object) output->conn ); 
+void wasp_trace_os_input( wasp_os_input input ){ 
+    wasp_grey_obj( (wasp_object) input->conn );
+    wasp_trace_input( (wasp_input) input ); 
+}
+void wasp_free_os_input( wasp_os_input input ){
+    wasp_objfree( (wasp_object)input );
 }
 
-WASP_GENERIC_FREE( os_output )
-WASP_GENERIC_FORMAT( os_output )
-WASP_GENERIC_COMPARE( os_output )
+WASP_GENERIC_FORMAT( os_input )
+WASP_GENERIC_COMPARE( os_input )
 
 WASP_C_SUBTYPE2( os_output, "os-output", output );
 
