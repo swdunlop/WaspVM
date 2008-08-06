@@ -14,12 +14,6 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
  */
 
-/*  The following logic does not belong in Connection
-#include <sys/types.h>
-#include <sys/time.h>
-#include <event.h>
-*/
-
 #include "waspvm.h"
 
 void wasp_init_connection( wasp_connection c, wasp_input i, wasp_output o ){

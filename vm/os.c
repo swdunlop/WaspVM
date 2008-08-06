@@ -58,9 +58,8 @@ void wasp_activate_os_loop( ){
 void wasp_deactivate_os_loop( ){ }
 
 void wasp_os_xmit_mt( wasp_os_output outp, wasp_value data ){
-    //wasp_printf( "sxs", "XMIT-MT: ", data, "\n" );
-    
     if( wasp_is_symbol( data ) && wasp_ss_close == wasp_symbol_fv( data ) ){
+	//TODO: Make sure we know we are closing, and not closed per se.
         close( outp->conn->handle );
         outp->conn->closed = 1;
         //TODO: Capture and report any errors.
