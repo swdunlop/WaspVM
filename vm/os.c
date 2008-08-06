@@ -36,13 +36,13 @@ wasp_process wasp_os_loop_process;
 unsigned int wasp_os_loop_use = 0;
 
 void wasp_enable_os_loop( ){
-    // printf( "OS Loop Enabled, Use Ct: %i\n", wasp_os_loop_use + 1 );
+    printf( "OS Loop Enabled, Use Ct: %i\n", wasp_os_loop_use + 1 );
     if( wasp_os_loop_use ++ ) return;
     wasp_enable_process( wasp_os_loop_process );
 }
 
 void wasp_disable_os_loop( ){
-    // printf( "OS Loop Disabled, Use Ct: %i\n", wasp_os_loop_use - 1 );
+    printf( "OS Loop Disabled, Use Ct: %i\n", wasp_os_loop_use - 1 );
     if( -- wasp_os_loop_use ) return;
     wasp_disable_process( wasp_os_loop_process );
 }
@@ -57,28 +57,96 @@ void wasp_activate_os_loop( ){
 }
 void wasp_deactivate_os_loop( ){ }
 
-void wasp_os_xmit_mt( wasp_os_output outp, wasp_value data ){
-    if( wasp_is_symbol( data ) && wasp_ss_close == wasp_symbol_fv( data ) ){
-	//TODO: Make sure we know we are closing, and not closed per se.
-        close( outp->conn->handle );
-        outp->conn->closed = 1;
-        //TODO: Capture and report any errors.
-        //TODO: Close down the connection, and unroot it.
-    }else if(  outp->conn->closed ){
-        // No transmissions are possible to a closed socket.
-        wasp_errf( wasp_es_vm, "sxx", "cannot transmit to closed OS connections", outp, data );
-    }else if( wasp_is_string( data ) ){
-        wasp_string str = wasp_string_fv( data );
+void wasp_os_start_writing( wasp_os_connection conn, wasp_string data ){
+    char* str = wasp_sf_string( data );
+    int   len = wasp_string_length( data );
+    
+    if( ! conn->writing ){
+        printf( "Started writing for connection %x\n", conn );
+        //TODO: Try writing directly, first.. Sometimes it works!
+        conn->writing = 1;
+        wasp_enable_os_loop( );
+        wasp_root_obj( (wasp_object) conn );
+    }
+    
 #ifdef WASP_IN_WIN32
 //TODO:WIN32:IO
 #else
-        int status = bufferevent_write( outp->conn->event, 
-                                        wasp_sf_string( str ), 
-                                        wasp_string_length( str ) );
-        //TODO: Capture and report any errors if status == -1
+    bufferevent_write( conn->event, str, len );
 #endif
+}
+
+void wasp_os_start_reading( wasp_os_connection conn ){
+    if( conn->reading ) return;
+    printf( "Started reading for connection %x\n", conn );
+    
+    conn->reading = 1;
+    wasp_enable_os_loop( );
+    bufferevent_enable( conn->event, EV_READ );
+}
+
+void wasp_os_stop_writing( wasp_os_connection conn ){
+    if( ! conn->writing ) return;
+    printf( "Stopped writing for connection %x\n", conn );
+    conn->writing = 0;
+    wasp_disable_os_loop( );
+    wasp_unroot_obj( (wasp_object) conn );
+}
+
+void wasp_os_stop_reading( wasp_os_connection conn ){
+    if( ! conn->reading ) return;
+    printf( "Stopped reading for connection %x\n", conn );
+    conn->reading = 0;
+    wasp_disable_os_loop( );
+}
+
+
+void wasp_os_closed( wasp_os_connection conn ){
+    if( conn->state < WASP_CLOSED ){
+        close( conn->handle );
+        conn->state = WASP_CLOSED;
+        
+        wasp_wake_all_monitors( 
+            ((wasp_connection)conn)->input, wasp_vf_symbol( wasp_ss_close ) 
+        );
+        
+        wasp_os_stop_writing( conn );
+        wasp_os_stop_reading( conn );
+    }
+}
+
+int wasp_os_xmit_complete( wasp_os_connection conn ){
+    return ( ! EVBUFFER_LENGTH( EVBUFFER_OUTPUT( conn->event ) ) ); 
+}
+
+void wasp_os_close( wasp_os_connection conn ){
+    if( conn->state < WASP_CLOSING ){
+        if( wasp_os_xmit_complete( conn ) ){
+            wasp_os_closed( conn );
+        }else{
+            conn->state = WASP_CLOSING;
+        }
+    }
+}
+
+void wasp_os_xmit_mt( wasp_os_output outp, wasp_value data ){
+    wasp_os_connection conn = outp->conn;
+    
+    if( wasp_is_symbol( data ) && wasp_ss_close == wasp_symbol_fv( data ) ){
+        wasp_os_close( conn );
+    }else if(  conn->state >= WASP_CLOSING ){
+        // No transmissions are possible to a closed socket.
+        wasp_errf( 
+            wasp_es_vm, "sxx", "cannot transmit to closed outputs",
+            outp, data 
+        );
+    }else if( wasp_is_string( data ) ){
+        wasp_os_start_writing( conn, wasp_string_fv( data ) );
 	}else{
-        wasp_errf( wasp_es_vm, "sxx", "OS outputs can only send strings", outp, data );
+        wasp_errf( 
+            wasp_es_vm, "sxx", "OS outputs can only send strings", 
+            outp, data 
+        );
     }
 }
 
@@ -98,7 +166,9 @@ wasp_string wasp_read_bufferevent( struct bufferevent* ev ){
 #endif
 
 int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
-    if( inp->conn->closed ){
+    wasp_os_connection conn = inp->conn;
+    
+    if( conn->state >= WASP_CLOSING ){
         *data = wasp_vf_symbol( wasp_ss_close );
         return 1;
     }
@@ -108,39 +178,38 @@ int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
 #else
     wasp_string str = wasp_read_bufferevent( inp->conn->event );  
     if( ! str ){
-        wasp_enable_os_loop( );
-        bufferevent_enable( inp->conn->event, EV_READ );
+        wasp_os_start_reading( conn );
         return 0;
     }
 
     *data = wasp_vf_string( str );
 #endif
+
     return 1;
 }
 
 #ifdef WASP_IN_WIN32
 //TODO:WIN32:IO
 #else
-void wasp_os_read_cb( struct bufferevent* ev, wasp_os_connection conn ){
+
+void wasp_os_read_cb( 
+    struct bufferevent* ev, wasp_os_connection conn 
+){
     wasp_os_input input = (wasp_os_input)(((wasp_connection)conn)->input);
     if( ! wasp_input_monitored( (wasp_input) input ) ) return;
     wasp_string str = wasp_read_bufferevent( ev );  
     if( ! str ) return;
+    wasp_os_stop_reading( conn );
     bufferevent_disable( conn->event, EV_READ );
     wasp_wake_monitor( (wasp_input)input, wasp_vf_string( str ) );
-    wasp_disable_os_loop( );
 }
 
-void wasp_os_error_cb( struct bufferevent* ev, short what, wasp_os_connection conn ){
-    conn->closed = 1;
+void wasp_os_error_cb( 
+    struct bufferevent* ev, short what, wasp_os_connection conn 
+){
+    wasp_os_closed( conn );
     printf( "OS Error on %i: %i\n", conn->handle, what );
-    bufferevent_disable( conn->event, EV_READ );
-    wasp_input input = ((wasp_connection) conn)->input;
-    if( ! wasp_input_monitored( input) ) return;
-    wasp_disable_os_loop( );
-    wasp_wake_monitor( input, wasp_vf_symbol( wasp_ss_close ) );
     //TODO: Probably need to store a symbol describing the real error..
-        //TODO: Close down the connection, and unroot it.
 }
 
 #endif
@@ -215,7 +284,7 @@ wasp_os_connection wasp_make_os_connection( int handle ){
 #else
     oscon->event = bufferevent_new( handle, 
                                     (evbuffercb) wasp_os_read_cb, 
-                                    NULL, 
+                                    NULL, //TODO:WRITE-COMPLETION
                                     (everrorcb) wasp_os_error_cb, 
                                     oscon);
     bufferevent_enable( oscon->event, EV_WRITE );
@@ -293,6 +362,7 @@ wasp_os_connection wasp_tcp_connect( wasp_integer host, wasp_integer port ){
     struct sockaddr_in addr;
     int fd;
    
+    //TODO: Move this to use getaddrinfo.
     addr.sin_family = AF_INET;
     addr.sin_port = htons( port );
     addr.sin_addr.s_addr = htonl( host );
@@ -313,9 +383,9 @@ wasp_input wasp_stdin;
 wasp_output wasp_stdout;
 
 wasp_connection wasp_make_stdio( ){
-    // The problem: STDIN and STDOUT have different file descriptors.  We create a connection
-    // for each, then take the resulting input and output and bind them into a new connection
-    // to represent the console.
+    // The problem: STDIN and STDOUT have different file descriptors.  We 
+    // create a connection for each, then take the resulting input and
+    // output and bind them into a new connection to represent the console.
     
     wasp_os_connection oc = wasp_make_os_connection( STDOUT_FILENO );
     wasp_os_connection ic = wasp_make_os_connection( STDIN_FILENO );
@@ -354,7 +424,7 @@ wasp_free_os_service( wasp_os_service svc ){
 #ifdef WASP_IN_WIN32
 //TODO:WIN32:IO
 #else
-    event_del( &(svc->event) ); //TODO: We sure this is necessary?
+    event_del( &(svc->event) ); 
 #endif
     wasp_objfree( (wasp_object) svc );
 }

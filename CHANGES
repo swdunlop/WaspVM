@@ -1,17 +1,21 @@
-????/??/?? I/O System Refactor
-  - Refactored OS loop so libevent and windows loop can be interchanged.
+????/??/?? UNIX I/O System Refactor
+  - Fixed error in queue free method.
+  + Refactored OS loop so libevent and windows loop can be interchanged.
     + BUG: Does not offer a 404.
     + BUG: Appears to be closing before writing.
     + BUG: Listeners not closing at shutdown.
   - Removed raw-input, raw-output and channel types as they are unused.
+  t Modifies OS connections with three-phase logic: connected, closing,
+    closed.
   + Ensured os-connections can be supplied to connection primitives.
   + Removed mention of sys/filesystem and sys/regex from modules.
   + Modified zero byte reads to properly close I/O.
-  + BUG: Crashes after loading test/http-server two or three in a row.
-    + Is there a GC problem with queues?
-    + Does this happen with GC trace and free off? (bloat-mode)
-    + Does this happen with GC free off? (leak-mode)
-  
+    ? Not sure this is necessary.
+  + Removed multiple processes waiting on a single channel; confuses os 
+    handling.
+  + Moved tcp-connect to use GAI.
+  + Added write-completion notification
+    
 ????/??/?? Process System Cleanup and Improvement
   - Added set-current-input! primitive.
   - Added set-current-output! primitive.
@@ -24,7 +28,7 @@
   - Modified lib/tcp-server to pass ancilliary arguments, much like spawn.
   - Restored lib/http-server from Mosquito.
   - Restored lib/http-file-server from Mosquito.
-  t Modified dir-files to work under Windows.
+  - Modified dir-files to work under Windows.
 
 2008/08/01 Timeout System Improvements
   - Generalized timeouts to tasks

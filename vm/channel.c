@@ -85,6 +85,10 @@ wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message ){
     return 0;
 }
 
+void wasp_wake_all_monitors( wasp_input channel, wasp_value message ){
+again:
+    if( wasp_wake_monitor( channel, message ) ) goto again;
+}
 wasp_boolean wasp_input_monitored( wasp_input channel ){
     return (wasp_boolean)channel->first_mon;
 }

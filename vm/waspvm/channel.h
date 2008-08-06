@@ -40,10 +40,6 @@ WASP_BEGIN_TYPE( output )
     wasp_output_mt xmit;
 WASP_END_TYPE( output )
 
-/* A raw output accepts strings of data, or 'close to direct the output to 
-   close.  The notify method is called when data is appended to the buffer, 
-   or when the channel is close'd with an empty buffer. */
-
 wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message );
 
 /* Predicate testing whether an input is being monitored by one or more
