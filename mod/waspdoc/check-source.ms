@@ -1,4 +1,3 @@
-(import "sys/filesystem")
 (import "waspdoc/source")
 (import "waspdoc/dump")
 (import "waspdoc/ms-file")

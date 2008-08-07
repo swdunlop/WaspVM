@@ -1,6 +1,5 @@
 (module "lib/import")
 (import "lib/waspc")
-(import "sys/filesystem")
 
 (define core-import import)
 

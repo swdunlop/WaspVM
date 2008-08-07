@@ -18,7 +18,6 @@
 ; port, compiles and outputs a frozen file.
 
 (import "lib/build")
-(import "sys/filesystem")
 
 (define (main . args)
   (when (null? args)

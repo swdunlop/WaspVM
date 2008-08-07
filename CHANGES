@@ -5,12 +5,13 @@
   - Modifies OS connections with three-phase logic: connected, closing,
     closed.
   - Corrected a lot of missed traces in os-* types.
-  + Ensured os-connections can be supplied to connection primitives.
-  + Removed mention of sys/filesystem and sys/regex from modules.
+  t Ensured os-connections can be supplied to connection primitives.
+  t Removed mention of sys/filesystem and sys/regex from modules.
+  ? BUG: For some reason, install is hanging at the end..  Is there an excess 
+         OS loop running? Putting an exit in seems to fix it..
   + Removed multiple processes waiting on a single channel; confuses os 
     handling.
-  + Moved tcp-connect to use GAI.
-  + Added write-completion notification
+  + Moved tcp-connect and resolve-ipv4 to use GAI.
     
 ????/??/?? Process System Cleanup and Improvement
   - Added set-current-input! primitive.

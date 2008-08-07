@@ -1,6 +1,5 @@
 (import "lib/waspc")
 (import "lib/build")
-(import "sys/filesystem")
 
 (define (main . args)
   (define base-dir #f)
@@ -131,7 +130,7 @@
   (copy "lib" mod-dir)
   (copy "site" mod-dir)
   (copy "waspdoc" mod-dir)
-  (copy (string-append "sys/*" *plugin-ext*) mod-sys-dir)
+  ;(copy (string-append "sys/*" *plugin-ext*) mod-sys-dir)
 
   ;(copy "stubs/*" stub-dir)
   
@@ -152,5 +151,7 @@
 
   (chmod "-R 0755" mod-dir) ;stub-dir 
   
-  (chmod "0755" bin-dir wasp-bin waspc-bin))
+  (chmod "0755" bin-dir wasp-bin waspc-bin)
+  
+  (exit 0))
 

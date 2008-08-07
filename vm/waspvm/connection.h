@@ -25,8 +25,8 @@ WASP_BEGIN_TYPE( connection )
     wasp_output output;
 WASP_END_TYPE( connection );
 
-#define REQ_CONNECTION_ARG( x ) REQ_TYPED_ARG( x, connection )
-#define OPT_CONNECTION_ARG( x ) OPT_TYPED_ARG( x, connection )
+#define REQ_CONNECTION_ARG( x ) REQ_SUBTYPED_ARG( x, connection )
+#define OPT_CONNECTION_ARG( x ) OPT_SUBTYPED_ARG( x, connection )
 #define CONNECTION_RESULT( x )  TYPED_RESULT( connection, x )
 
 void wasp_init_connection( wasp_connection conn, wasp_input input, wasp_output output );

@@ -1,3 +1,7 @@
+- Fix serious problems in trace / free inheritance.
+  This is seriously not working, and could be disastrous if a later 
+  change to a root class isn't accounted for by a derived class.
+
 - Add special os-connection-timeout primitive to avoid redundancies in scheduling timeouts.
 
 - Factor out event handling into poll.c

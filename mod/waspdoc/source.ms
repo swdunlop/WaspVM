@@ -1,7 +1,5 @@
 (module "waspdoc/source")
-
 (import "lib/object")
-(import "sys/regex")
 
 (define-class waspdoc-source <object>
               (make-waspdoc-source id name imports exports)
