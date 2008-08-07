@@ -52,5 +52,6 @@ bootstrap:
 	cd mod && waspc */*.ms
 
 clean:
-	rm -f vm/*$(OBJ) $(WASPDOC_EXE) $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE) 
+	rm -f vm/*$(OBJ) $(WASPDOC_EXE) $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE)
+	rm -rf package
 	

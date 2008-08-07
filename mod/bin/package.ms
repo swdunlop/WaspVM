@@ -22,8 +22,8 @@
     (chmod "0755" path))
 
 
-  (mkdir "package")
-  (chdir "package")
+  (mkdir "../package")
+  (chdir "../package")
 
   (copy "../waspvm*" ".")
   (copy "../mod/*" ".")
