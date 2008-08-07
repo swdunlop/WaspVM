@@ -2,6 +2,8 @@ OS=$(shell uname -s | sed 's:_.*::')
 ROOT=$(shell pwd)
 SYS=mod/sys
 
+CFLAGS += -DWASP_VERSION='"0.4"' 
+
 ifeq ($(OS),MINGW32)
 
 EXE = .exe

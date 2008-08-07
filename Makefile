@@ -7,7 +7,6 @@ WASPDOC_EXE ?= $(ROOT)/waspdoc$(EXE)
 WASPLD_EXE ?= $(ROOT)/waspld$(EXE)
 
 CFLAGS += -Ivm -I.
-CPPFLAGS += -DWASP_VERSION='"0.3"' 
 
 SOFLAGS += -shared
 
