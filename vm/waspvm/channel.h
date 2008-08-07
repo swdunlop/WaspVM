@@ -33,13 +33,15 @@ typedef void (*wasp_event_mt)( wasp_object context, unsigned int event );
 
 WASP_BEGIN_TYPE( input )
     wasp_input_mt recv;
-    wasp_process first_mon, last_mon;
+    wasp_process  monitor;
 WASP_END_TYPE( input )
 
 WASP_BEGIN_TYPE( output )
     wasp_output_mt xmit;
 WASP_END_TYPE( output )
 
+void wasp_set_monitor( wasp_input channel, wasp_process process );
+void wasp_clear_monitor( wasp_input channel );
 wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message );
 
 /* Predicate testing whether an input is being monitored by one or more

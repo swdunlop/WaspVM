@@ -117,7 +117,7 @@ void wasp_os_closed( wasp_os_connection conn ){
         close( conn->handle );
         conn->state = WASP_CLOSED;
         
-        wasp_wake_all_monitors( 
+        wasp_wake_monitor( 
             ((wasp_connection)conn)->input, wasp_vf_symbol( wasp_ss_close ) 
         );
         

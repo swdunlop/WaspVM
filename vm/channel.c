@@ -20,60 +20,38 @@
 
 wasp_symbol wasp_ss_close;
 
-void wasp_add_monitor( wasp_process process, wasp_input channel ){
+void wasp_set_monitor( wasp_input channel, wasp_process process ){
     if( process->monitoring ){
-        wasp_errf( wasp_es_vm, "sxxx", 
+        wasp_errf( wasp_es_vm, "sxx", 
                 "a process may only monitor one input at a time",
                 process, 
-                process->monitoring,
                 channel );
     };
+    
+    if( channel->monitor ){
+        wasp_errf( wasp_es_vm, "sxx", 
+                "another process is already monitoring this channel",
+                process, 
+                channel->monitor,
+                channel );
+    }
 
     wasp_disable_process( process );
     process->monitoring = (wasp_object) channel;
-   
-    wasp_process prev = channel->last_mon;
-    process->prev = prev;
-
-    if( prev ){
-        prev->next = process;
-    }else{
-        channel->first_mon = process;
-    };
-    
-    channel->last_mon = process;
+    channel->monitor = process;
 }
 
-void wasp_remove_monitor( wasp_process process, wasp_input channel ){
-    wasp_process first, prev, next;
-
-    assert( channel == (wasp_input)(process->monitoring) );
-
-    first = channel->first_mon;
-    next = process->next;
-    prev = process->prev;
-
-    assert( first );
-
-    if( prev ){ prev->next = next; process->prev = NULL; }else{
-        channel->first_mon = next;
-    };
-    if( next ){ next->prev = prev; process->next = NULL; }else{
-        channel->last_mon = prev;
-    };
-
-    process->monitoring = NULL;
-}
-
-void wasp_clear_monitor( wasp_process process ){
-    wasp_remove_monitor( process, (wasp_input) process->monitoring );
+void wasp_clear_monitor( wasp_input channel ){
+    if( channel->monitor == NULL ) return;
+    channel->monitor->monitoring = NULL;
+    channel->monitor = NULL;
 }
 
 wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message ){   
-    wasp_process process = channel->first_mon;
+    wasp_process process = channel->monitor;
 
     if( process ){ 
-        wasp_clear_monitor( process );
+        wasp_clear_monitor( channel );
         wasp_enable_process( process );
         if( wasp_is_vm( process->context ) ){
             // A courtesy to vm processes..
@@ -85,12 +63,8 @@ wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message ){
     return 0;
 }
 
-void wasp_wake_all_monitors( wasp_input channel, wasp_value message ){
-again:
-    if( wasp_wake_monitor( channel, message ) ) goto again;
-}
 wasp_boolean wasp_input_monitored( wasp_input channel ){
-    return (wasp_boolean)channel->first_mon;
+    return (wasp_boolean)channel->monitor;
 }
 
 void wasp_channel_xmit( wasp_output channel, wasp_value data ){
@@ -98,11 +72,7 @@ void wasp_channel_xmit( wasp_output channel, wasp_value data ){
 }
 
 void wasp_trace_input( wasp_input input ){
-    wasp_process m;
-
-    for( m = input->first_mon; m; m = m->next ){
-        wasp_grey_obj( (wasp_object) m );
-    }
+    if( wasp_input_monitored ) wasp_grey_obj( (wasp_object) input->monitor );
 }
 
 WASP_GENERIC_FREE( input );
@@ -122,8 +92,8 @@ WASP_BEGIN_PRIM( "send-output", send_output )
     
     if( ! has_output ){
         output = wasp_req_output( 
-                   wasp_process_output( wasp_active_process )
-                 );
+            wasp_process_output( wasp_active_process )
+        );
     };
 
     output->xmit( output, data );
@@ -142,7 +112,7 @@ WASP_BEGIN_PRIM( "wait-input", wait_input )
     };
 
     if( ! input->recv( input, &data ) ){
-        wasp_add_monitor( wasp_active_process, input );
+        wasp_set_monitor( input, wasp_active_process );
 	
         // The following statement ensures that wait will not be called again
         // when we return.
