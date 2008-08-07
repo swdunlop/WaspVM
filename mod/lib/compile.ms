@@ -25,7 +25,7 @@
 (import "lib/iterate")
 (import "lib/record")
 
-(export compile)
+(export compile waspvm-special-forms)
 
 (define-record-type context
                     (make-context reality parent symbols slots rules exports)
@@ -270,6 +270,8 @@
         ((eq? (car expr) 'mos)
          (compile-lisp-block env (cdr expr)))
         (else (list expr))))
+
+(define (waspvm-special-forms) *waspvm-special-forms*)
 
 (define *waspvm-special-forms*
   (list
