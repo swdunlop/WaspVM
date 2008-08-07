@@ -29,9 +29,6 @@ void wasp_get_now( wasp_quad* secs, wasp_quad* nsecs ){
 
 */
 
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:TASK
-#else
 void wasp_task_cb( int fd, short evt, void* context ){
     wasp_task task = (wasp_task) context; 
     int ms = task->task_mt( task );
@@ -45,15 +42,10 @@ void wasp_task_cb( int fd, short evt, void* context ){
         wasp_unroot_obj( (wasp_object) task );
     };
 }
-#endif
 
 wasp_task wasp_make_task( wasp_task_mt mt, wasp_value context ){
     wasp_task task = WASP_OBJALLOC( task );
-#ifdef WASP_IN_WIN32
-	//TODO:WIN32:TASK
-#else
     evtimer_set( &( task->event ), wasp_task_cb, task );
-#endif
     task->task_mt = mt;
     task->context = context;
     return task;
@@ -62,21 +54,13 @@ wasp_task wasp_make_task( wasp_task_mt mt, wasp_value context ){
 wasp_task wasp_schedule_task( wasp_task task, wasp_quad ms ){
     wasp_root_obj( (wasp_object) task );
     wasp_enable_os_loop( );    
-#ifdef WASP_IN_WIN32
-	//TODO:WIN32:TASK
-#else
     task->time.tv_sec = ms / 1000;
     task->time.tv_usec = ((ms % 1000)) * 1000;
     evtimer_add( &( task->event ), &( task->time ) );
-#endif
 }
 
 void wasp_cancel_task( wasp_task task ){
-#ifdef WASP_IN_WIN32
-	//TODO:WIN32:TASK
-#else
     evtimer_del( &( task->event ) );
-#endif
     wasp_unroot_obj( (wasp_object) task );
 }
 

@@ -17,22 +17,28 @@
  */
 
 #include "waspvm.h"
+
 #include <stdio.h>
 #include <string.h>
-//TODO: Win32 incompat alert!
-#include <unistd.h>
+
 #ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
+
+#include <windows.h>
 #include <winsock2.h>
+#include <ws2tcpip.h>
+#include <wspiapi.h>
+
 #else
+
+#include <unistd.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netdb.h>
 #include <sys/time.h>
+#include <errno.h>
 
 #endif
-#include <errno.h>
 
 //TODO: Shutdown manifest for all services.
 
@@ -52,17 +58,22 @@ void wasp_disable_os_loop( ){
 }
 
 void wasp_activate_os_loop( ){ 
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
+    if( wasp_first_enabled == wasp_last_enabled ){
+        SleepEx( 100, TRUE );
+    }else{
+        SleepEx( 0, TRUE );
+    }
+    event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE );
+
+#ifdef WASP_USE_WIN32
 #else
     if( wasp_first_enabled == wasp_last_enabled ){
-        // printf( "I am.. Alone!");
         event_loop( EVLOOP_ONCE );
     }else{
         event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE );
     }
 #endif
-	if( ! wasp_os_loop_process->enabled ) wasp_proc_loop( );
+    if( ! wasp_os_loop_process->enabled ) wasp_proc_loop( );
 }
 void wasp_deactivate_os_loop( ){ }
 
@@ -78,11 +89,7 @@ void wasp_os_start_writing( wasp_os_connection conn, wasp_string data ){
         wasp_root_obj( (wasp_object) conn );
     }
     
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
     bufferevent_write( conn->event, str, len );
-#endif
 }
 
 void wasp_os_start_reading( wasp_os_connection conn ){
@@ -162,9 +169,6 @@ void wasp_os_xmit_mt( wasp_os_output outp, wasp_value data ){
     }
 }
 
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
 wasp_string wasp_read_bufferevent( struct bufferevent* ev ){
     static char data[4096];
     int len = bufferevent_read( ev, data, sizeof( data ) );
@@ -175,7 +179,6 @@ wasp_string wasp_read_bufferevent( struct bufferevent* ev ){
 
     return str;
 }
-#endif
 
 int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
     wasp_os_connection conn = inp->conn;
@@ -185,9 +188,6 @@ int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
         return 1;
     }
 
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
     wasp_string str = wasp_read_bufferevent( inp->conn->event );  
     if( ! str ){
         wasp_os_start_reading( conn );
@@ -195,14 +195,9 @@ int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
     }
 
     *data = wasp_vf_string( str );
-#endif
 
     return 1;
 }
-
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
 
 void wasp_os_read_cb( 
     struct bufferevent* ev, wasp_os_connection conn 
@@ -232,26 +227,17 @@ void wasp_os_error_cb(
     //TODO: Probably need to store a symbol describing the real error..
 }
 
-#endif
-
 int wasp_svc_recv_mt( wasp_os_service svc, wasp_value* data ){
     if( svc->closed ){
         *data = wasp_vf_symbol( wasp_ss_close );
         return 1;
     }else{
         wasp_enable_os_loop( );
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
         event_add( &( svc->event ), svc->timeout ? &( svc->timeval ) : NULL );
-#endif
         return 0;
     }
 }
 
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
 void wasp_svc_read_cb( int handle, short event, void* service ){
     struct sockaddr addr;
     int sz = sizeof( addr );
@@ -263,19 +249,14 @@ void wasp_svc_read_cb( int handle, short event, void* service ){
     wasp_disable_os_loop( );
     wasp_wake_monitor( (wasp_input)service, wasp_vf_os_connection( conn ) );
 }
-#endif
 
 wasp_os_service wasp_make_os_service( int handle ){
     wasp_os_service svc = WASP_OBJALLOC( os_service );
     ((wasp_input)svc)->recv = (wasp_input_mt)wasp_svc_recv_mt;
     
     svc->timeout = svc->closed = 0;
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
     svc->timeval.tv_sec = svc->timeval.tv_usec = 0;
     event_set( &( svc->event ), handle, EV_READ, wasp_svc_read_cb, (void*)svc );
-#endif
     wasp_root_obj( (wasp_object) svc ); //TODO: Need unroot on close.
 
     return svc;
@@ -299,27 +280,15 @@ wasp_os_connection wasp_make_os_connection( int handle ){
                           (wasp_output) osout );
 
     oscon->handle = handle;
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
     oscon->event = bufferevent_new( handle, 
                                     (evbuffercb) wasp_os_read_cb, 
                                     (evbuffercb) wasp_os_xmit_cb, 
                                     (everrorcb) wasp_os_error_cb, 
                                     oscon);
     bufferevent_enable( oscon->event, EV_WRITE );
-#endif
     wasp_root_obj( (wasp_object) oscon ); //TODO: Needs unroot on close.
 
     return oscon;
-}
- 
-void wasp_report_host_error( ){
-#ifdef WASP_IN_WIN32
-    wasp_errf( wasp_es_vm, "s", strerror( WSAGetLastError() ) );
-#else
-    wasp_errf( wasp_es_vm, "s", hstrerror( h_errno ) );
-#endif
 }
 
 void wasp_report_net_error( ){
@@ -330,53 +299,6 @@ void wasp_report_net_error( ){
     wasp_errf( wasp_es_vm, "s", strerror( errno ) );
 #endif
 }
-
-/*
-int wasp_parse_dotted_quad( wasp_string quad, wasp_integer* addr ){
-    wasp_byte* bytes = (wasp_byte*)addr;
-
-    int ct = 0;
-    const char* ptr = wasp_sf_string( quad );
-    const char* tail = ptr + wasp_string_length( quad );
-    char* next; 
-
-    while(( ct < 4 )&&( ptr != tail )){
-        wasp_quad x = strtoul( ptr, &next, 10 );  
-        if( ptr == next ) break; // *ptr wasn't a digit
-        if(( x > 255 )||( x < 0 )) return 0; // Not a byte.
-        bytes[ ct ++ ] = (wasp_byte)x; // Otherwise, we've got one more byte.
-        ptr = next;              // Advance our base-pointer.
-        if( *ptr != '.' ) break; // A dot indicates we've got another quad
-        ptr ++;
-    }
-    
-    if( ct != 4 ) return 0;        // Not enough bytes were found.
-    if( ptr != tail ) return 0; // Not all of the string was parsed.
-
-    *addr = ntohl( *addr );
-    return 1;
-}
-
-wasp_integer wasp_resolve_ipv4_addr( wasp_string name ){
-    if( ! wasp_parse_dotted_quad( name, &addr ) ){
-        struct hostent *entry = gethostbyname( wasp_sf_string( name ) );
-        if( !entry ){
-            wasp_report_host_error( );
-            //TODO }else if( entry->h_addrtype != ... ){
-            //TODO: Signal an error.
-        }else if( entry->h_length != 4 ){
-            //TODO: Signal an error.
-        }else{
-            //TODO: A better version of resolve would return a list of
-            //      addresses..
-            addr = ntohl( *(wasp_integer*)(entry->h_addr) );
-        }
-    }
-
-    return addr;
-}
-
-*/
 
 char* utoa (char* buf, unsigned int n){
     int d;
@@ -427,21 +349,129 @@ wasp_os_connection wasp_tcp_connect( wasp_string host, wasp_value service ){
     result = socket( addr->ai_family, addr->ai_socktype, addr->ai_protocol );
 
     if( result == -1 ){
-        freeaddrinfo( addr ); //TODO: Use strerror.
-        wasp_errf( wasp_es_vm, "s", "could not create file descriptor" );
+        freeaddrinfo( addr ); 
+        wasp_report_net_error( );
     }
 
     if( connect( result, addr->ai_addr, (int) addr->ai_addrlen ) ){
-        freeaddrinfo( addr ); //TODO: Use strerror.
-        wasp_errf( wasp_es_vm, "sxx", "could not connect", host, service );
+        freeaddrinfo( addr ); 
+        wasp_report_net_error( );
     }
 
     return wasp_make_os_connection( result );
 }
 
-#ifndef WASP_USE_SYNC_TERM    
 wasp_input wasp_stdin;
 wasp_output wasp_stdout;
+
+#ifdef WASP_IN_WIN32
+
+wasp_connection wasp_console;
+HANDLE wasp_vm_thread;
+
+HANDLE wasp_stdin_fd;
+HANDLE wasp_stdin_more;
+char   wasp_stdin_buf[ 1024 ];
+DWORD  wasp_stdin_len;
+wasp_process wasp_stdin_mon = NULL;
+
+HANDLE wasp_stdout_fd;
+
+void wasp_console_xmit_mt( wasp_output output, wasp_value data ){
+    if( wasp_is_symbol( data ) && wasp_ss_close == wasp_symbol_fv( data ) ){
+        wasp_errf( 
+            wasp_es_vm, "s", "the win32 console cannot be closed"
+        );
+    }else if( wasp_is_string( data ) ){ 
+        const char* str = wasp_sf_string( wasp_string_fv( data ) );
+        int len = wasp_string_length( wasp_string_fv( data ) );
+        DWORD sent;
+        while( len > 0 ){
+            WriteFile( wasp_stdout_fd, str, len, &sent, NULL );
+            len -= sent; str += sent;
+        }
+    }else{
+        wasp_errf( 
+            wasp_es_vm, "sx", "can only send strings to console"
+        );
+    };
+}
+
+int wasp_console_recv_mt( wasp_input inp, wasp_value* data ){
+    wasp_stdin_mon = wasp_active_process;
+    
+    //TODO:WIN32 console should handle this..
+    wasp_root_obj( (wasp_object) wasp_stdin_mon ); 
+    
+    //printf( "Signaling STDIN to Resume..\n" );
+    SetEvent( wasp_stdin_more );
+    wasp_enable_os_loop( );
+    return 0;
+}
+
+CALLBACK void wasp_stdin_apc( DWORD ignored ){
+    //TODO: Note that this method can easily lose data, if the process has changed
+    //      what it is monitoring.  (Not that it is possible from userland, mind you.)
+ 
+    //printf( "Beginning STDIN Update..\n" );
+    if( ! wasp_stdin_mon ) 
+        wasp_errf( wasp_es_vm, "s", "STDIN APC arrived without consumer." );
+
+    //printf( "Waking Montoring Process..\n" );
+    wasp_wake_process( 
+        wasp_stdin_mon, 
+        wasp_vf_string( wasp_string_fm( wasp_stdin_buf, wasp_stdin_len ) )
+    );
+
+    //printf( "Disabling OS Loop..\n" );
+    wasp_disable_os_loop( );
+}
+
+CALLBACK int wasp_stdin_loop( void* param ){
+    for(;;){
+        //printf( "STDIN Waiting for Signal..\n");
+        WaitForSingleObject( wasp_stdin_more, INFINITE );
+        //printf( "STDIN Reading from User..\n" );
+        ReadFile( wasp_stdin_fd, wasp_stdin_buf, 1024, &wasp_stdin_len, NULL );
+        //printf( "STDIN Queueing Update..\n" );
+        QueueUserAPC( wasp_stdin_apc, wasp_vm_thread, 0 );
+    };
+}
+
+wasp_connection wasp_make_console( ){
+    if( wasp_console ) return wasp_console;
+
+    wasp_stdin = WASP_OBJALLOC( input );
+    wasp_stdout = WASP_OBJALLOC( output );
+    wasp_console = wasp_make_connection( wasp_stdin, wasp_stdout );
+    wasp_root_obj( (wasp_object) wasp_console );
+
+    wasp_stdin->recv = (wasp_input_mt)wasp_console_recv_mt;
+    wasp_stdout->xmit = (wasp_output_mt)wasp_console_xmit_mt;
+
+    wasp_stdin_fd = GetStdHandle( STD_INPUT_HANDLE );
+    wasp_stdout_fd = GetStdHandle( STD_OUTPUT_HANDLE );
+        
+    HANDLE process, thread;
+        
+    process = GetCurrentProcess( );
+    thread = GetCurrentThread( );
+        
+    DuplicateHandle( 
+        process, thread, process, & wasp_vm_thread, 0, 
+        TRUE, DUPLICATE_SAME_ACCESS
+    );
+        
+    wasp_stdin_more = CreateEvent( NULL, FALSE, FALSE, NULL );
+    CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE) wasp_stdin_loop, 
+                  NULL, 0, NULL );
+    
+    return wasp_console;
+}
+
+wasp_connection wasp_make_stdio( ){ return wasp_make_console( ); }
+
+#else
 
 wasp_connection wasp_make_stdio( ){
     // The problem: STDIN and STDOUT have different file descriptors.  We 
@@ -467,11 +497,7 @@ wasp_connection wasp_make_stdio( ){
 #endif
 
 wasp_free_os_connection( wasp_os_connection oscon ){ 
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
     bufferevent_free( oscon->event );
-#endif
     wasp_objfree( oscon );
 }
 
@@ -485,11 +511,7 @@ WASP_GENERIC_COMPARE( os_connection )
 WASP_C_SUBTYPE2( os_connection, "os-connection", connection );
 
 void wasp_free_os_service( wasp_os_service svc ){ 
-#ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
     event_del( &(svc->event) ); 
-#endif
     wasp_objfree( (wasp_object)svc );
 }
 
@@ -590,10 +612,11 @@ WASP_END_PRIM( serve_tcp )
 
 void wasp_init_os_subsystem( ){
 #ifdef WASP_IN_WIN32
-//TODO:WIN32:IO
-#else
-    event_init( );
+    WSADATA wsa_data;
+    WSAStartup( 0x0202, &wsa_data );
 #endif
+    event_init( );
+
     wasp_process p = wasp_make_process( wasp_activate_os_loop, 
                                         wasp_deactivate_os_loop, 
                                         wasp_vf_null( ) );
@@ -612,8 +635,6 @@ void wasp_init_os_subsystem( ){
 
     WASP_BIND_PRIM( serve_tcp );
 
-#ifndef WASP_USE_SYNC_TERM    
     wasp_set_global( wasp_symbol_fs( "*console*" ), 
                      wasp_vf_connection( wasp_make_stdio( ) ) );
-#endif
 }

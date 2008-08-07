@@ -18,9 +18,6 @@
 #define WASP_OS_H 1
 
 #include "memory.h"
-#ifdef WASP_IN_WIN32
-	//TODO:WIN32:IO
-#else
 #include <event.h>
 
 #define WASP_CONNECTING 1
@@ -28,14 +25,9 @@
 #define WASP_CLOSING    3
 #define WASP_CLOSED     4
 
-#endif
-
 WASP_BEGIN_SUBTYPE( connection, os_connection )
-#ifdef WASP_IN_WIN32
-	//TODO:WIN32:IO
-#else
     struct bufferevent* event;
-#endif
+
     int handle;
     int writing: 1;
     int reading: 1;
@@ -51,12 +43,8 @@ WASP_BEGIN_SUBTYPE( output, os_output )
 WASP_END_SUBTYPE( os_output )
 
 WASP_BEGIN_SUBTYPE( input, os_service )
-#ifdef WASP_IN_WIN32
-	//TODO:WIN32:IO
-#else
     struct event event;
     struct timeval timeval;
-#endif
     int handle;
 
     int closed: 1;

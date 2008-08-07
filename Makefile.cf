@@ -7,11 +7,11 @@ ifeq ($(OS),MINGW32)
 EXE = .exe
 OBJ = .o
 SO  = .dll
-CFLAGS += -DWASP_USE_SYNC_TERM
 CFLAGS += -mno-cygwin 
 CFLAGS += -DWASP_PLATFORM='"winnt"' 
 CFLAGS += -DWASP_SO='".dll"'
-EXEFLAGS += -lws2_32 -lregex 
+CFLAGS += -I/usr/local/include -L/usr/local/lib
+EXEFLAGS += -L/usr/local/lib -levent -lws2_32 -lregex 
 
 else # Assuming we're in UNIX..
 

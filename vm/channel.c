@@ -47,11 +47,10 @@ void wasp_clear_monitor( wasp_input channel ){
     channel->monitor = NULL;
 }
 
-wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message ){   
-    wasp_process process = channel->monitor;
-
+int wasp_wake_process( wasp_process process, wasp_value message ){
     if( process ){ 
-        wasp_clear_monitor( channel );
+        if( process->monitoring ) 
+            wasp_clear_monitor( (wasp_input) process->monitoring );
         wasp_enable_process( process );
         if( wasp_is_vm( process->context ) ){
             // A courtesy to vm processes..
@@ -61,6 +60,10 @@ wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message ){
     }
 
     return 0;
+}
+
+wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message ){   
+    return wasp_wake_process( channel->monitor, message );
 }
 
 wasp_boolean wasp_input_monitored( wasp_input channel ){

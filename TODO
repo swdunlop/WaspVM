@@ -1,3 +1,5 @@
+- Make sure that an input NEVER wakes up a process that has stopped monitoring.
+
 - BUG: For some reason, install is hanging at the end..  Is there an excess 
   OS loop running? Putting an exit in seems to fix it..  This is on Linux.
     

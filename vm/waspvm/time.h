@@ -19,12 +19,7 @@
 #define WASP_TIME_H 1
 
 #include "memory.h"
-
-#ifdef WASP_IN_WIN32
-#include <windows.h>
-#else
 #include <event.h>
-#endif
 
 struct wasp_task_data;
 typedef struct wasp_task_data* wasp_task;
@@ -34,13 +29,9 @@ typedef int (*wasp_task_mt)( wasp_task task );
 struct wasp_task_data{ 
     struct wasp_object_data header;
 
-#ifdef WASP_IN_WIN32
-	wasp_quad      time;
-	//TODO:WIN32:TASK
-#else
     struct timeval time;
     struct event   event;
-#endif
+
     wasp_task_mt   task_mt;
     wasp_value     context;
 };

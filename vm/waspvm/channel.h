@@ -43,6 +43,7 @@ WASP_END_TYPE( output )
 void wasp_set_monitor( wasp_input channel, wasp_process process );
 void wasp_clear_monitor( wasp_input channel );
 wasp_boolean wasp_wake_monitor( wasp_input channel, wasp_value message );
+int wasp_wake_process( wasp_process process, wasp_value message );
 
 /* Predicate testing whether an input is being monitored by one or more
  * processes. */
