@@ -331,6 +331,7 @@ void wasp_report_net_error( ){
 #endif
 }
 
+/*
 int wasp_parse_dotted_quad( wasp_string quad, wasp_integer* addr ){
     wasp_byte* bytes = (wasp_byte*)addr;
 
@@ -356,9 +357,7 @@ int wasp_parse_dotted_quad( wasp_string quad, wasp_integer* addr ){
     return 1;
 }
 
-wasp_integer wasp_resolve( wasp_string name ){
-    wasp_integer addr;
-
+wasp_integer wasp_resolve_ipv4_addr( wasp_string name ){
     if( ! wasp_parse_dotted_quad( name, &addr ) ){
         struct hostent *entry = gethostbyname( wasp_sf_string( name ) );
         if( !entry ){
@@ -377,25 +376,67 @@ wasp_integer wasp_resolve( wasp_string name ){
     return addr;
 }
 
-wasp_os_connection wasp_tcp_connect( wasp_integer host, wasp_integer port ){
-    //TODO: Should I be nonblocking, here?
-    struct sockaddr_in addr;
-    int fd;
-   
-    //TODO: Move this to use getaddrinfo.
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons( port );
-    addr.sin_addr.s_addr = htonl( host );
+*/
 
-    if( ( fd = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 ){
+char* utoa (char* buf, unsigned int n){
+    int d;
+
+    if( n == 0 ){ buf[0] = '0'; buf[1] = 0; return buf; };
+    
+    buf += 16;
+    *buf = 0;
+
+    while( n ){
+        d = n % 10;
+        n /= 10;
+
+        *( --buf ) = 48 + d;
+    };
+    
+    return buf;
+}
+
+wasp_os_connection wasp_tcp_connect( wasp_string host, wasp_value service ){
+    int result;
+    struct addrinfo hints;
+    struct addrinfo* addr;
+    char* service_str;
+
+    if( wasp_is_string( service ) ){
+        service_str = wasp_sf_string( wasp_string_fv( service ) );
+    }else{ 
+        char buf[ 17 ];
+        service_str = utoa( buf, wasp_req_integer( service ) );
+    }
+    
+    bzero( &hints, sizeof( struct addrinfo ) );
+
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    
+    addr = NULL;
+
+    result = getaddrinfo( wasp_sf_string( host ), service_str, &hints, &addr );
+
+    if( result ){
+        if( addr ) freeaddrinfo( addr );
+        wasp_errf( wasp_es_vm, "sxx", gai_strerror( result ), host, service );
+    }
+
+    result = socket( addr->ai_family, addr->ai_socktype, addr->ai_protocol );
+
+    if( result == -1 ){
+        freeaddrinfo( addr ); //TODO: Use strerror.
         wasp_errf( wasp_es_vm, "s", "could not create file descriptor" );
     }
 
-    if( connect( fd, (struct sockaddr*)&addr, sizeof(addr) ) == -1 ){
-        wasp_errf( wasp_es_vm, "sii", "could not connect", host, port );
+    if( connect( result, addr->ai_addr, (int) addr->ai_addrlen ) ){
+        freeaddrinfo( addr ); //TODO: Use strerror.
+        wasp_errf( wasp_es_vm, "sxx", "could not connect", host, service );
     }
 
-    return wasp_make_os_connection( fd );
+    return wasp_make_os_connection( result );
 }
 
 #ifndef WASP_USE_SYNC_TERM    
@@ -486,19 +527,12 @@ WASP_GENERIC_COMPARE( os_input )
 
 WASP_C_SUBTYPE2( os_output, "os-output", output );
 
-WASP_BEGIN_PRIM( "resolve-ipv4", resolve_ipv4 )
-    REQ_STRING_ARG( name );
-    NO_REST_ARGS( );
-
-    INTEGER_RESULT( wasp_resolve( name ) );
-WASP_END_PRIM( resolve_ipv4 )
-
 WASP_BEGIN_PRIM( "tcp-connect", tcp_connect )
-    REQ_INTEGER_ARG( addr );
-    REQ_INTEGER_ARG( portno );
+    REQ_STRING_ARG( host );
+    REQ_ANY_ARG( service );
     NO_REST_ARGS( );
 
-    RESULT( wasp_vf_os_connection( wasp_tcp_connect( addr, portno ) ) );
+    RESULT( wasp_vf_os_connection( wasp_tcp_connect( host, service ) ) );
 WASP_END_PRIM( tcp_connect )
 
 WASP_BEGIN_PRIM( "os-connection-input", os_connection_input )
@@ -572,7 +606,6 @@ void wasp_init_os_subsystem( ){
     WASP_I_SUBTYPE( os_output, output );
     
     WASP_BIND_PRIM( tcp_connect );
-    WASP_BIND_PRIM( resolve_ipv4 );
 
     WASP_BIND_PRIM( os_connection_input );
     WASP_BIND_PRIM( os_connection_output );

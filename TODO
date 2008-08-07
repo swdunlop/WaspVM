@@ -1,3 +1,6 @@
+- BUG: For some reason, install is hanging at the end..  Is there an excess 
+  OS loop running? Putting an exit in seems to fix it..  This is on Linux.
+    
 - Fix serious problems in trace / free inheritance.
   This is seriously not working, and could be disastrous if a later 
   change to a root class isn't accounted for by a derived class.

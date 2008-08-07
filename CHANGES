@@ -1,4 +1,4 @@
-????/??/?? UNIX I/O System Refactor
+2008/08/04 UNIX I/O System Refactor
   - Fixed error in queue free method.
   - Refactored OS loop so libevent and windows loop can be interchanged.
   - Removed raw-input, raw-output and channel types as they are unused.
@@ -9,12 +9,14 @@
   - Removed mention of sys/filesystem and sys/regex from modules.
   - Removed multiple processes waiting on a single channel; confuses os 
     handling.
-  + Moved tcp-connect and resolve-ipv4 to use GAI.
-  ? BUG: For some reason, install is hanging at the end..  Is there an excess 
-         OS loop running? Putting an exit in seems to fix it..  This is on
-         Linux.
-    
-????/??/?? Process System Cleanup and Improvement
+  - Removed resolve-ipv4 primitive.
+  - Modified tcp-connect to require a string for host name and either a string
+    or an integer for the service, treating the following as equivalent:
+      (tcp-connect "localhost" "http")
+      (tcp-connect "127.0.0.1" "80")
+      (tcp-connect "kabuki.merseine.nu" 80)
+  
+2008/08/03 Process System Cleanup and Improvement
   - Added set-current-input! primitive.
   - Added set-current-output! primitive.
   - Added set-process-input! primitive.
