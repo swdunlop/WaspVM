@@ -19,7 +19,7 @@ EXE =
 OBJ = .o
 SO  = .so
 
-CFLAGS += -DWASP_PLATFORM='"generic"' 
+CFLAGS += -DWASP_PLATFORM='"unix"' 
 CFLAGS += -DWASP_SO='".so"'
 LDFLAGS += -levent
 EXEFLAGS += -rdynamic -ldl

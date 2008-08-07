@@ -15,7 +15,8 @@
       (tcp-connect "localhost" "http")
       (tcp-connect "127.0.0.1" "80")
       (tcp-connect "kabuki.merseine.nu" 80)
-  
+  - Backported Console I/O to Windows environment.
+
 2008/08/03 Process System Cleanup and Improvement
   - Added set-current-input! primitive.
   - Added set-current-output! primitive.

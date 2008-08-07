@@ -131,7 +131,6 @@
   (copy "site" mod-dir)
   (copy "waspdoc" mod-dir)
   ;(copy (string-append "sys/*" *plugin-ext*) mod-sys-dir)
-
   ;(copy "stubs/*" stub-dir)
   
   ; Re-link, so we have the new site config..
