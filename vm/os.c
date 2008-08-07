@@ -58,14 +58,13 @@ void wasp_disable_os_loop( ){
 }
 
 void wasp_activate_os_loop( ){ 
+#ifdef WASP_IN_WIN32
     if( wasp_first_enabled == wasp_last_enabled ){
         SleepEx( 100, TRUE );
     }else{
         SleepEx( 0, TRUE );
     }
     event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE );
-
-#ifdef WASP_USE_WIN32
 #else
     if( wasp_first_enabled == wasp_last_enabled ){
         event_loop( EVLOOP_ONCE );
