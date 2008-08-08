@@ -42,17 +42,23 @@
 
 //TODO: Shutdown manifest for all services.
 
+#ifdef WASP_DEBUG_IO
+#define IO_TRACE printf
+#else
+#define IO_TRACE //
+#endif
+
 wasp_process wasp_os_loop_process;
 unsigned int wasp_os_loop_use = 0;
 
 void wasp_enable_os_loop( ){
-    // printf( "OS Loop Enabled, Use Ct: %i\n", wasp_os_loop_use + 1 );
+    IO_TRACE( "OS Loop Enabled, Use Ct: %i\n", wasp_os_loop_use + 1 );
     if( wasp_os_loop_use ++ ) return;
     wasp_enable_process( wasp_os_loop_process );
 }
 
 void wasp_disable_os_loop( ){
-    // printf( "OS Loop Disabled, Use Ct: %i\n", wasp_os_loop_use - 1 );
+    IO_TRACE( "OS Loop Disabled, Use Ct: %i\n", wasp_os_loop_use - 1 );
     if( -- wasp_os_loop_use ) return;
     wasp_disable_process( wasp_os_loop_process );
 }
@@ -80,45 +86,57 @@ void wasp_os_start_writing( wasp_os_connection conn, wasp_string data ){
     char* str = wasp_sf_string( data );
     int   len = wasp_string_length( data );
     
-    if( ! conn->writing ){
-        // printf( "Started writing for connection %x\n", conn );
-        //TODO: Try writing directly, first.. Sometimes it works!
-        conn->writing = 1;
-        wasp_enable_os_loop( );
-        wasp_root_obj( (wasp_object) conn );
-    }
-    
+    bufferevent_enable( conn->event, EV_WRITE );
     bufferevent_write( conn->event, str, len );
+    //TODO: Try writing directly, first.. Sometimes it works!
+    
+    if( conn->writing ) return;
+    IO_TRACE( "Started writing for connection %x\n", conn );
+    conn->writing = 1;
+
+    if( conn->reading )return;
+    wasp_enable_os_loop( );
+    wasp_root_obj( (wasp_object) conn );
 }
 
 void wasp_os_start_reading( wasp_os_connection conn ){
     if( conn->reading ) return;
-    // printf( "Started reading for connection %x\n", conn );
+    IO_TRACE( "Started reading for connection %x\n", conn );
     
     conn->reading = 1;
-    wasp_enable_os_loop( );
     bufferevent_enable( conn->event, EV_READ );
+
+    if( conn->writing )return;
+    wasp_enable_os_loop( );
+    wasp_root_obj( (wasp_object) conn );
 }
 
 void wasp_os_stop_writing( wasp_os_connection conn ){
     if( ! conn->writing ) return;
-    // printf( "Stopped writing for connection %x\n", conn );
+    IO_TRACE( "Stopped writing for connection %x\n", conn );
     conn->writing = 0;
+    bufferevent_disable( conn->event, EV_WRITE );
+
+    if( conn->reading )return;
     wasp_disable_os_loop( );
     wasp_unroot_obj( (wasp_object) conn );
 }
 
 void wasp_os_stop_reading( wasp_os_connection conn ){
     if( ! conn->reading ) return;
-    // printf( "Stopped reading for connection %x\n", conn );
+    IO_TRACE( "Stopped reading for connection %x\n", conn );
     conn->reading = 0;
+    bufferevent_disable( conn->event, EV_READ );
+
+    if( conn->writing ) return;
     wasp_disable_os_loop( );
+    wasp_unroot_obj( (wasp_object) conn );
 }
 
 
 void wasp_os_closed( wasp_os_connection conn ){    
     if( conn->state < WASP_CLOSED ){
-        // printf( "OS Closed for connection %x\n", conn );
+        IO_TRACE( "OS Closed for connection %x\n", conn );
         
         close( conn->handle );
         conn->state = WASP_CLOSED;
@@ -138,7 +156,7 @@ int wasp_os_xmit_complete( wasp_os_connection conn ){
 
 void wasp_os_close( wasp_os_connection conn ){
     if( conn->state < WASP_CLOSING ){
-        // printf( "OS Closing for connection %x\n", conn );
+        IO_TRACE( "OS Closing for connection %x\n", conn );
         if( wasp_os_xmit_complete( conn ) ){
             wasp_os_closed( conn );
         }else{
@@ -206,15 +224,15 @@ void wasp_os_read_cb(
     wasp_string str = wasp_read_bufferevent( ev );  
     if( ! str ) return;
     wasp_os_stop_reading( conn );
-    bufferevent_disable( conn->event, EV_READ );
     wasp_wake_monitor( (wasp_input)input, wasp_vf_string( str ) );
 }
 
 void wasp_os_xmit_cb( 
     struct bufferevent* ev, wasp_os_connection conn 
 ){
-    // printf( "Detected write completion for %x\n", conn );
+    IO_TRACE( "Detected write completion for %x\n", conn );
     if( conn->state == WASP_CLOSING ) wasp_os_closed( conn );
+    wasp_os_stop_writing( conn );
     //TODO: Write completion notification.
 }
 
@@ -222,7 +240,7 @@ void wasp_os_error_cb(
     struct bufferevent* ev, short what, wasp_os_connection conn 
 ){
     wasp_os_closed( conn );
-    // printf( "OS Error on %i: %i\n", conn->handle, what );
+    IO_TRACE( "OS Error on %i: %i\n", conn->handle, what );
     //TODO: Probably need to store a symbol describing the real error..
 }
 
@@ -402,7 +420,7 @@ int wasp_console_recv_mt( wasp_input inp, wasp_value* data ){
     //TODO:WIN32 console should handle this..
     wasp_root_obj( (wasp_object) wasp_stdin_mon ); 
     
-    //printf( "Signaling STDIN to Resume..\n" );
+    IO_TRACE( "Signaling STDIN to Resume..\n" );
     SetEvent( wasp_stdin_more );
     wasp_enable_os_loop( );
     return 0;
@@ -412,27 +430,27 @@ CALLBACK void wasp_stdin_apc( DWORD ignored ){
     //TODO: Note that this method can easily lose data, if the process has changed
     //      what it is monitoring.  (Not that it is possible from userland, mind you.)
  
-    //printf( "Beginning STDIN Update..\n" );
+    IO_TRACE( "Beginning STDIN Update..\n" );
     if( ! wasp_stdin_mon ) 
         wasp_errf( wasp_es_vm, "s", "STDIN APC arrived without consumer." );
 
-    //printf( "Waking Montoring Process..\n" );
+    IO_TRACE( "Waking Montoring Process..\n" );
     wasp_wake_process( 
         wasp_stdin_mon, 
         wasp_vf_string( wasp_string_fm( wasp_stdin_buf, wasp_stdin_len ) )
     );
 
-    //printf( "Disabling OS Loop..\n" );
+    IO_TRACE( "Disabling OS Loop..\n" );
     wasp_disable_os_loop( );
 }
 
 CALLBACK int wasp_stdin_loop( void* param ){
     for(;;){
-        //printf( "STDIN Waiting for Signal..\n");
+        IO_TRACE( "STDIN Waiting for Signal..\n");
         WaitForSingleObject( wasp_stdin_more, INFINITE );
-        //printf( "STDIN Reading from User..\n" );
+        IO_TRACE( "STDIN Reading from User..\n" );
         ReadFile( wasp_stdin_fd, wasp_stdin_buf, 1024, &wasp_stdin_len, NULL );
-        //printf( "STDIN Queueing Update..\n" );
+        IO_TRACE( "STDIN Queueing Update..\n" );
         QueueUserAPC( wasp_stdin_apc, wasp_vm_thread, 0 );
     };
 }
