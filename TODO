@@ -9,10 +9,8 @@
 
 - Add special os-connection-timeout primitive to avoid redundancies in scheduling timeouts.
 
-- Factor out event handling into poll.c
-
-- Implement poll.c using pure win32 api's.
-  Supporting console as well as sockets.  Also supporting timeouts.
+- Implement os.c using pure win32 api's.
+  Get libevent out, or patch libevent.
 
 - Add "dump-object" which dumps a lib/object object field by field.
 
@@ -20,16 +18,6 @@
   UNIX and WIN32 named pipes, serial ports.
 
 - BUG: parsing a single dot outside parenthesis should not be an incomplete error.
-
-- Answer This Riddle:
-  $ ./waspvm -g | grep primitive | wc
-      218     654    4962
-  $ grep WASP_BIND_PRIM vm/*.c | wc
-      194     788    8733
-  $ grep WASP_I_TYPE vm/*.c | wc
-       26     104    1008
-
-- WaspDoc Use dir-files in find-source-files
 
 - WaspDoc Document Macros
 
@@ -42,16 +30,6 @@
   Scripts using gcov and vim to identify untested portions of primitives.
 
 - Does list append need to resemble set-append and string-append ?
-
-- WaspDoc documents exported macros.
-- WaspDoc documents subsystems.
-- WaspDoc documents core primitives.
-
-- WaspDoc managed reference documentation.
-
-- WaspDoc renders markup to ASCII
-- WaspDoc renders markup to HTML
-- WaspDoc renders markup to PDF
 
 - Move string mutation back into buffer subsystem.
   Too complicated to explain to users why they shouldn't mutate borrowed strings.
@@ -67,18 +45,13 @@
 
   ? Should non-destructive string operations work on buffers?
 
-- Determine the minimum VM that will compile WaspVM
-  - Keep file.c
-  - Keep process.c
-  - Keep channel.c
-  - Keep connection.c
-  - Lose I/O scheduler. Reimplement using a select primitive.
-  - Lose multimethods. Reimplement using compiler.
-  - Lose timeouts. Reimplement using time primitives.
+- WaspDoc renders markup to ASCII
+- WaspDoc renders markup to HTML
+- WaspDoc renders markup to PDF
+
+- WaspDoc documents subsystems.
 
 - Inhibit subsystem warning in standalone compiler in install mode..
-
-- Move file management primitives to os.c
 
 - Polishing Words
   Neal Stephenson in his "In the Beginning.. There Was the Command Line" essay, asserts that the

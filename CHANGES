@@ -1,3 +1,28 @@
+????/??/?? Improved Code Analysis by WaspDoc 
+  - Modified waspdoc check source to use dir-files to identify source files.
+  - Modified waspdoc check source to add "UNDOCUMENTED" to undocumented source files.
+  + Backported lib/editor from MOSVM.
+  + Modified waspdoc check source to consume a root directory argument.
+  + Added glob-files primitive.
+  + Modified waspdoc/ms-file to document macros.
+  + Modified waspdoc/c-file to document primitive functions.
+  + Modified waspdoc/c-file to document primitive types.
+
+????/??/?? Buffer Restoration
+  + Forked string and buffer types again.
+  + Strings are now immutable at a primitive level.
+  + All string-*! primitives are now buffer-* primitives.
+  + Added buffer->string primitive.
+  + Buffers are compared by address, strings by content.
+
+2008/08/07 I/O System Bugfixes 
+  - Fixed bug that would cause non-interactive applications to not exit unless
+    (exit) was called.
+  - Removed (exit) calls from bin/install and bin/waspc applications that were 
+    concealing this problem.
+  - Clarified all logic in vm/os.c related to when connections would start and stop
+    I/O, when their associated event buffers should be disabled, etc.
+
 2008/08/04 UNIX I/O System Refactor
   - Fixed error in queue free method.
   - Refactored OS loop so libevent and windows loop can be interchanged.

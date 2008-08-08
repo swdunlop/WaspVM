@@ -25,8 +25,11 @@ $(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE)
 install: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 	cd mod && $(WASP_EXE) bin/install.ms
 
-package: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
-	cd mod && $(WASP_EXE) bin/package.ms
+zip-package: 
+	bzr export ../waspvm-$(VERSION).zip 
+
+win-package: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
+	./package.sh waspvm-$(VERSION)-$(PLATFORM)
 
 debug: $(WASP_EXE)
 	if which rlwrap; then cd mod && rlwrap gdb $(WASP_EXE); else cd mod && gdb $(WASP_EXE); fi

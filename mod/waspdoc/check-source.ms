@@ -5,17 +5,24 @@
 (define *wasp-src-dirs* '("waspdoc"))
 
 (define (find-source-files)
-  ;TODO: Improve.
-  (list "waspdoc/dump.ms"
-        "waspdoc/dump-source.ms"
-        "waspdoc/ms-file.ms"
-        "waspdoc/check-source.ms"
-        "waspdoc/source.ms"))
+  (define source-files (make-tc))
+   
+  (define (scan-source-dir dir)
+    (set! dir (string-replace dir "/" *path-sep*))
+
+    (define (save-path file)
+      (tc-add! source-files (string-append dir "/" file)))
+
+    (map save-path (filter waspdoc-ms-path? (dir-files dir)))
+    (tc->list source-files))
+    
+  (for-each scan-source-dir *wasp-src-dirs*))
 
 (define (create-func-doc-file doc-id defn)
   (write-data-file 
     doc-id 
     (string-append 
+      ";;; UNDOCUMENTED\n"
       ";;; FUNC: " (format-defn defn) "\n"
       ";;; FROM: " (waspdoc-source-name (waspdoc-defn-source defn)) "\n")))
 
@@ -24,6 +31,8 @@
   (write-data-file 
     doc-id 
     (string-append 
+      ";;; UNDOCUMENTED\n"
+      ";;; FUNC: " (format-defn defn) "\n"
       ";;; TYPE: <" (format-defn defn) ">\n"
       ";;; FROM: " (waspdoc-source-name (waspdoc-defn-source defn)) "\n")))
 
@@ -37,6 +46,8 @@
   (write-data-file
     doc-id
     (string-append
+      ";;; UNDOCUMENTED\n"
+      ";;; FUNC: " (format-defn defn) "\n"
       ";;; OTHER: " (format-defn defn) "\n"
       ";;; FROM: " (waspdoc-source-name (waspdoc-defn-source defn)) "\n")))
 
@@ -45,10 +56,8 @@
   ;TODO: List all imports. 
   (write-data-file
     doc-id (string-append 
-             ";;; MODULE: " (waspdoc-source-name source) "\n"
-             "\n"
-             "Undocumented.\n"
-             "\n")))
+             ";;; UNDOCUMENTED\n"
+             ";;; MODULE: " (waspdoc-source-name source) "\n")))
 
 (define (defn-doc-id defn)
   (define source (waspdoc-defn-source defn))

@@ -27,8 +27,7 @@
             "Given a list of Wasp Lisp source files to compile, produces "
             "a compiled version of each file.  If the optional -exe option "
             "is supplied, creates an executable file with the necessary lisp "
-            "files linked in.\n\n"))
-    (exit 1))
+            "files linked in.\n\n")))
   (define exe-target #f)
   (define stub-src #f)
   (define mods (make-tc))

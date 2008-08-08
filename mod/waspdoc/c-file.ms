@@ -2,7 +2,7 @@
 (import "waspdoc/source")
 
 (define (waspdoc-scan-c path)
-  (define name (substring path 0 (- (string-length path) 2))))
+  (define name (substring path 0 (- (string-length path) 2)))
   (define id (path->id name)) ;;TODO: Where do we get path->id ?
 
   (define func-defns (make-tc)) 
@@ -18,6 +18,6 @@
 
   (for-each scan-c-line lines)
 
-  
-source)
+  source)
 
+(export waspdoc-scan-c)
