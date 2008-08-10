@@ -632,6 +632,14 @@ void wasp_init_os_subsystem( ){
     WSADATA wsa_data;
     WSAStartup( 0x0202, &wsa_data );
 #endif
+
+#ifdef WASP_IN_DARWIN 
+    //NOTE: On Darwin, these two methods fail to properly read STDIO; we 
+    //      disable them, forcing LibEvent to use plain old select(2).
+
+    setenv( "EVENT_NOKQUEUE", "yes", 1 );
+    setenv( "EVENT_NOPOLL", "yes", 1 );
+#endif
     event_init( );
 
     wasp_process p = wasp_make_process( wasp_activate_os_loop, 

@@ -2,7 +2,7 @@ OS=$(shell uname -s | sed 's:_.*::')
 ROOT=$(shell pwd)
 SYS=mod/sys
 
-VERSION=0.3.1
+VERSION=0.3.2
 
 CFLAGS += -DWASP_VERSION='"$(VERSION)"'
 
@@ -19,14 +19,29 @@ PLATFORM = winnt
 
 else # Assuming we're in UNIX..
 
+ifeq ($(OS),Darwin)
+
 EXE = 
 OBJ = .o
 SO  = .so
 
-CFLAGS += -DWASP_SO='".so"'
-LDFLAGS += -levent
-EXEFLAGS += -rdynamic -ldl
+# Mac OS X cripples its GCC in infuriating ways..
+CFLAGS += -DWASP_SO='".so"' -fnested-functions
+EXEFLAGS += -levent -rdynamic -ldl
+PLATFORM = macosx
+
+
+else
+
+EXE = 
+OBJ = .o
+SO  = .so
+
+CFLAGS += -DWASP_SO='".so"' 
+EXEFLAGS += -levent -rdynamic -ldl
 PLATFORM = unix
+
+endif
 
 endif
 

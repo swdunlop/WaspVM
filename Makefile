@@ -28,7 +28,7 @@ install: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 zip-package: 
 	bzr export ../waspvm-$(VERSION).zip 
 
-win-package: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
+exe-package: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 	./package.sh waspvm-$(VERSION)-$(PLATFORM)
 
 debug: $(WASP_EXE)
