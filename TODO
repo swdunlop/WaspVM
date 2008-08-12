@@ -1,3 +1,17 @@
+????/??/?? Buffer Restoration
+  + Forked string and buffer types again.
+  + Strings are now immutable at a primitive level.
+  + All string-*! primitives are now buffer-* primitives.
+  + Added buffer->string primitive.
+  + Buffers are compared by address, strings by content.
+
+????/??/?? Improvements to WaspDoc
+  + Modified waspdoc check source to consume a root directory argument.
+  + Added glob-files primitive.
+  + Modified waspdoc/ms-file to document macros.
+  + Modified waspdoc/c-file to document primitive functions.
+  + Modified waspdoc/c-file to document primitive types.
+
 - Make sure that an input NEVER wakes up a process that has stopped monitoring.
 
 - BUG: For some reason, install is hanging at the end..  Is there an excess 

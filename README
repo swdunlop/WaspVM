@@ -29,22 +29,17 @@ This Wasp Lisp source code package consists of the source code for four key comp
 
 The particular version of Wasp Lisp containing this file is called "Wasp Rewind".
 
-WHAT IS WASP REWIND?
-----------------------
-
-Wasp Rewind is a step backwards in the development of Wasp Lisp to resolve some key issues discovered in the separation of Wasp Lisp from its parent Mosquito Lisp:  
-
-  - Brittleness in how I/O interacts with the process scheduler.
-  - Cruft in the Wasp Lisp compiler.
-  - Insufficient unit testing.
-  - Insufficient documentation.
-
-To solve these problems, the Wasp Lisp team is taking a step back with the Rewind tree, removing a lot of functionality and leaving a core that is capable of compiling and executing Wasp Lisp programs.  What will be left in Wasp Lisp should, in many ways, mirror the functionality of the Scheme and Lua languages.
-
-After Wasp Lisp can self-compile again and execute a small but crucial set of demonstration programs, the effort will move to bringing the code quality and documentation of this subset up to the standard set by the Python community.  (The finest feature of Python is its community..)
-
 WHO IS THE WASP TEAM?
 ---------------------
 
-Until the first point release of Wasp Rewind, the Wasp Team consists solely of the original designer of WaspVM and MOSVM, Scott W. Dunlop <swdunlop@gmail.com>.  After the ball gets rolling, the Wasp Team will expand to include members of the Wasp community who have shown the interest and insight to shepherd the evolution of Wasp Lisp.
+Until the 1.0 release of Wasp Lisp, the Wasp Team consists solely of the original designer of WaspVM and MOSVM, Scott W. Dunlop <swdunlop@gmail.com>.  After the ball gets rolling, the Wasp Team will expand to include members of the Wasp community who have shown the interest and insight to shepherd the evolution of Wasp Lisp.
+
+THANKS
+------
+
+Thank you, foremost, to Wes Brown for his funding of the Mosquito project.  I would never have had the time for all this without it.   Also, my eternal appreciation to the GNU project, as their toolchain has so thoroughly spoiled me that I refuse to deal with any other.
+
+MOSREF relies on the cryptographic work of a lot of researchers beyond myself; without their efforts, I would have wasted a tremendous amount of time reinventing the wheel:  D. J. Bernstein for his analysis of the 25519 Elliptic, and Matthijs van Duin, for translating D. J. Bernstein's work into ANSI C for use by mere mortals like myself.
+
+Also, any public notice of Wasp Lisp is largely due to Bill Clementson, whose continued interest and occasional notice has kept the project in the public eye for years, now.
 

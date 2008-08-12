@@ -1,19 +1,20 @@
-????/??/?? Improved Code Analysis by WaspDoc 
+????/??/?? Added AES-256 Encrypt Primitive
+  + Added (aes256-encrypt key plaintext) -> ciphertext primitive; plaintext
+    must be 16 bytes in length, ciphertext will also be 16 bytes in length.
+    Key must be 32 bytes in length.
+  + Added test/aes256 test case.
+
+2008/08/12 Added Elliptic Curve 25519 Primitives
+  - Added (curve25519-public private) -> public primitive; private key must be 
+    a 32 byte random string.
+  - Added (curve25519-secret public private) -> secret; using a pair of remote 
+    public key and local private key, determines a 32 byte shared secret.  This
+    secret should be hashed before use.
+  - Added test/curve25519 test case.
+
+2008/08/08 Tweaks to WaspDoc Check Source
   - Modified waspdoc check source to use dir-files to identify source files.
   - Modified waspdoc check source to add "UNDOCUMENTED" to undocumented source files.
-  + Backported lib/editor from MOSVM.
-  + Modified waspdoc check source to consume a root directory argument.
-  + Added glob-files primitive.
-  + Modified waspdoc/ms-file to document macros.
-  + Modified waspdoc/c-file to document primitive functions.
-  + Modified waspdoc/c-file to document primitive types.
-
-????/??/?? Buffer Restoration
-  + Forked string and buffer types again.
-  + Strings are now immutable at a primitive level.
-  + All string-*! primitives are now buffer-* primitives.
-  + Added buffer->string primitive.
-  + Buffers are compared by address, strings by content.
 
 2008/08/07 I/O System Bugfixes 
   - Fixed bug that would cause non-interactive applications to not exit unless
