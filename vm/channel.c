@@ -75,7 +75,8 @@ void wasp_channel_xmit( wasp_output channel, wasp_value data ){
 }
 
 void wasp_trace_input( wasp_input input ){
-    if( wasp_input_monitored ) wasp_grey_obj( (wasp_object) input->monitor );
+    if( wasp_input_monitored( input ) ) 
+        wasp_grey_obj( (wasp_object) input->monitor );
 }
 
 WASP_GENERIC_FREE( input );

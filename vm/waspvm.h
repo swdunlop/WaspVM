@@ -33,6 +33,10 @@
 #define WASP_IN_WIN32 WELCOME_TO_SCHIZOPHRENIA_LAND
 #endif
 
+#ifdef __APPLE__
+#define WASP_IN_DARWIN SMELLS_LIKE_BSD_UNTIL_YOU_TASTE_THE_BITROT
+#endif
+
 #include "waspvm/memory.h"
 #include "waspvm/number.h"
 #include "waspvm/boolean.h"
