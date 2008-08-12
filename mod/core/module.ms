@@ -41,9 +41,10 @@
   (when ms-path
     (return (read-lisp-file ms-path)))
 
-  (define so-path (find-module-file (string-append path *plugin-ext*)))
-  (when so-path
-    (return '()))
+;TODO: Disabled until after 1.0.
+;  (define so-path (find-module-file (string-append path *plugin-ext*)))
+;  (when so-path
+;    (return '()))
   
   (error 'module "module source cannot be found" path))
 
@@ -76,18 +77,19 @@
     (load-mo mo-path)
     (return))
 
-  (define so-path (find-module-file (string-append path *plugin-ext*)))
-  (when so-path
-    (define so-init 
-      (string-append "wasp_init_" 
-                     (string-replace (last-item (string-split* key "/"))
-                                     "-" "_")
-                     "_subsystem"))
+;TODO: Disabled until after 1.0.
+; (define so-path (find-module-file (string-append path *plugin-ext*)))
+; (when so-path
+;   (define so-init 
+;     (string-append "wasp_init_" 
+;                    (string-replace (last-item (string-split* key "/"))
+;                                    "-" "_")
+;                    "_subsystem"))
 
-    (load-subsystem so-path so-init)
-    (dict-set! *imports* key #t)
-
-    (return))
+;   (load-subsystem so-path so-init)
+;   (dict-set! *imports* key #t)
+;
+;    (return))
     
   (error 'import "Could not find the requested module or subsystem." key))
 

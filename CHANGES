@@ -1,8 +1,14 @@
-????/??/?? Added AES-256 Encrypt Primitive
-  + Added (aes256-encrypt key plaintext) -> ciphertext primitive; plaintext
-    must be 16 bytes in length, ciphertext will also be 16 bytes in length.
-    Key must be 32 bytes in length.
-  + Added test/aes256 test case.
+????/??/?? Restore Platform, Architecture and OS Semantics
+  + Added arch to makefile.cf.
+  + Moved old platform logic to os in Makefile.cf
+  + Made platform a combination of os and arch, like MOSVM.
+  + Made waspvm stub name a combination of waspvm, os and arch, like MOSVM.
+  + Added support for -platform <platform> to waspc, can be used instead of 
+    -stub.
+
+????/??/?? Port ISAAC to WaspVM
+  + Add (make-isaac data) -> isaac
+  + Add (isaac-read ct) -> ct
 
 2008/08/12 Added Elliptic Curve 25519 Primitives
   - Added (curve25519-public private) -> public primitive; private key must be 

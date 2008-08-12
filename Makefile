@@ -10,9 +10,11 @@ CFLAGS += -Ivm -I.
 
 SOFLAGS += -shared
 
+SALSA_OBJS += vm/salsa20.c vm/salsa.c
 CURVE_OBJS += vm/curve$(OBJ) vm/curve25519_i64$(OBJ)
 
-WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$(OBJ) vm/core$(OBJ) vm/error$(OBJ) vm/file$(OBJ) vm/format$(OBJ) vm/init$(OBJ) vm/list$(OBJ) vm/memory$(OBJ) vm/mq$(OBJ) vm/number$(OBJ) vm/package$(OBJ) vm/parse$(OBJ) vm/primitive$(OBJ) vm/print$(OBJ) vm/procedure$(OBJ) vm/process$(OBJ) vm/queue$(OBJ) vm/string$(OBJ) vm/tag$(OBJ) vm/tree$(OBJ) vm/vector$(OBJ) vm/vm$(OBJ) vm/multimethod$(OBJ) vm/plugin$(OBJ) vm/shell$(OBJ) vm/os$(OBJ) vm/time$(OBJ) vm/regex$(OBJ) vm/filesystem$(OBJ) $(CURVE_OBJS)
+WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$(OBJ) vm/core$(OBJ) vm/error$(OBJ) vm/file$(OBJ) vm/format$(OBJ) vm/init$(OBJ) vm/list$(OBJ) vm/memory$(OBJ) vm/mq$(OBJ) vm/number$(OBJ) vm/package$(OBJ) vm/parse$(OBJ) vm/primitive$(OBJ) vm/print$(OBJ) vm/procedure$(OBJ) vm/process$(OBJ) vm/queue$(OBJ) vm/string$(OBJ) vm/tag$(OBJ) vm/tree$(OBJ) vm/vector$(OBJ) vm/vm$(OBJ) vm/multimethod$(OBJ) vm/shell$(OBJ) vm/os$(OBJ) vm/time$(OBJ) vm/regex$(OBJ) vm/filesystem$(OBJ) $(CURVE_OBJS) $(SALSA_OBJS)
+# vm/plugin$(OBJ)  -- Disabled until after 1.0
 
 LIBWASPVM ?= libwaspvm$(SO)
 

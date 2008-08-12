@@ -25,7 +25,7 @@ SO  = .so
 
 CFLAGS += -DWASP_SO='".so"'
 LDFLAGS += -levent
-EXEFLAGS += -rdynamic -ldl
+# EXEFLAGS += -rdynamic -ldl
 PLATFORM = unix
 
 endif

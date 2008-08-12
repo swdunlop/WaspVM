@@ -58,8 +58,9 @@
                     (find-module-file (string-append module ".mo"))))
   (define ms-exists (and ms-path (file-path? ms-path)))
   (define mo-exists (and mo-path (file-path? mo-path)))
-  (define so-path (find-module-file (string-append module *plugin-ext*)))
-  (define so-exists (and so-path (file-path? so-path)))
+  ;TODO: Disabled until after 1.0.
+  ;(define so-path (find-module-file (string-append module *plugin-ext*)))
+  ;(define so-exists (and so-path (file-path? so-path)))
   
   (cond
     ((and mo-exists ms-exists)
@@ -68,7 +69,8 @@
     (mo-exists #t) ;No source -- we'll assume the module is built.
     (ms-exists
       (compile-module ms-path mo-path))
-    (so-exists (return #f)) ;Subsystem -- we'll assume it has been compiled.
+  ;TODO: Disabled until after 1.0.
+  ;  (so-exists (return #f)) ;Subsystem -- we'll assume it has been compiled.
     (else
       (error 'build "cannot find a source or object file")))
  

@@ -48,7 +48,7 @@ void wasp_init_core_subsystems( ){
     wasp_init_parse_subsystem( );
     wasp_init_tag_subsystem( );
     wasp_init_multimethod_subsystem( );
-    wasp_init_plugin_subsystem( );
+    // wasp_init_plugin_subsystem( ); Disabled until after 1.0.
     wasp_init_file_subsystem( );
     wasp_init_channel_subsystem( );
     wasp_init_connection_subsystem( );
@@ -61,6 +61,7 @@ void wasp_init_core_subsystems( ){
     wasp_init_filesystem_subsystem( );
 
     wasp_init_curve25519_subsystem( );
+    wasp_init_salsa20_subsystem( );
 
     wasp_ss_main = wasp_symbol_fs( "main" );
 
