@@ -7,11 +7,18 @@ if test z$1 = z; then
 fi
 
 PKGDIR=$1
+OS=`uname -s | sed -e 's:[_-].*$::'`
+
+if test z$OS = zMINGW; then
+EXE=.exe
+else
+EXE=
+fi
 
 rm -rf $PKGDIR
 mkdir -pm 0755 $PKGDIR
 cp -rf mod/* $PKGDIR
-cp wasp* $PKGDIR
+cp waspvm$EXE $PKGDIR
 cd $PKGDIR
 
 cat >site/config.ms <<EOF
@@ -21,7 +28,11 @@ cat >site/config.ms <<EOF
 (set-site-config! 'mod-path '("."))
 EOF
 
-../waspc -exe waspc.exe   -stub waspvm.exe bin/waspc
-../waspc -exe wasp.exe    -stub waspvm.exe bin/wasp
-../waspc -exe waspdoc.exe -stub waspvm.exe bin/waspdoc
+../waspc$EXE -exe waspc$EXE   -stub waspvm$EXE bin/waspc
+../waspc$EXE -exe wasp$EXE    -stub waspvm$EXE bin/wasp
+
+## TODO: This is bogus..
+if test z$EXE = z.exe; then
+    ../waspc -exe waspdoc$EXE -stub waspvm$EXE bin/waspdoc
+fi
 
