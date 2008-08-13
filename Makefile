@@ -10,7 +10,7 @@ CFLAGS += -Ivm -I.
 
 SOFLAGS += -shared
 
-SALSA_OBJS += vm/salsa20.c vm/salsa.c
+SALSA_OBJS += vm/salsa20$(OBJ) vm/salsa$(OBJ)
 CURVE_OBJS += vm/curve$(OBJ) vm/curve25519_i64$(OBJ)
 
 WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$(OBJ) vm/core$(OBJ) vm/error$(OBJ) vm/file$(OBJ) vm/format$(OBJ) vm/init$(OBJ) vm/list$(OBJ) vm/memory$(OBJ) vm/mq$(OBJ) vm/number$(OBJ) vm/package$(OBJ) vm/parse$(OBJ) vm/primitive$(OBJ) vm/print$(OBJ) vm/procedure$(OBJ) vm/process$(OBJ) vm/queue$(OBJ) vm/string$(OBJ) vm/tag$(OBJ) vm/tree$(OBJ) vm/vector$(OBJ) vm/vm$(OBJ) vm/multimethod$(OBJ) vm/shell$(OBJ) vm/os$(OBJ) vm/time$(OBJ) vm/regex$(OBJ) vm/filesystem$(OBJ) $(CURVE_OBJS) $(SALSA_OBJS)
@@ -67,6 +67,10 @@ bootstrap:
 clean:
 	rm -f vm/*$(OBJ) $(WASPDOC_EXE) $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE)
 	rm -rf package
+
+test: test-waspvm test-mosref
+test-waspvm: test-url test-http-url test-spawn-connection
+test-mosref: test-bridge test-curve25519 test-salsa 
 
 test-%: test/%.ms $(WASP_EXE) 
 	cd mod && $(WASP_EXE) ../$<

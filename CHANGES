@@ -1,3 +1,8 @@
+2008/08/13 Port lib/bridge Back to WaspVM
+  - Ported lib/bridge from MOSREF 2.0 to WaspVM.
+  - Fixed a bug in the queue-input GC trace that was not passing trace on to
+    the generic input GC trace method.
+
 2008/08/13 Restore Platform, Architecture and OS Semantics
   - Added arch to makefile.cf.
   - Moved old platform logic to os in Makefile.cf
