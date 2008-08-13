@@ -111,6 +111,6 @@
 
   (for-each check-source-exports (map cdr (waspdoc-source-exports source))))
 
-(define (check-source)
+(define (check-source) 
   (for-each check-source-file (find-source-files)))
 
