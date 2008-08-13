@@ -308,6 +308,14 @@ wasp_os_connection wasp_make_os_connection( int handle ){
     return oscon;
 }
 
+void wasp_report_host_error( ){
+#if defined(_WIN32)||defined(__CYGWIN__)
+    wasp_errf( wasp_es_vm, "s", strerror( WSAGetLastError() ) );
+#else
+    wasp_errf( wasp_es_vm, "s", hstrerror( h_errno ) );
+#endif
+}
+
 void wasp_report_net_error( ){
 #ifdef WASP_IN_WIN32
     wasp_errf( wasp_es_vm, "s", strerror( WSAGetLastError() ) );
@@ -335,11 +343,21 @@ char* utoa (char* buf, unsigned int n){
     return buf;
 }
 
-wasp_os_connection wasp_tcp_connect( wasp_string host, wasp_value service ){
+wasp_os_connection wasp_tcp_connect( wasp_value host, wasp_value service ){
     int result;
     struct addrinfo hints;
     struct addrinfo* addr;
     char* service_str;
+    wasp_string host_str;
+
+    if( wasp_is_integer( host ) ){
+        wasp_quad addr = wasp_integer_fv( host );
+        host_str = wasp_formatf( "isisisi",
+                                 addr >> 24, ".",
+                                 (addr >> 16) & 255, ".",
+                                 (addr >> 8) & 255, ".",
+                                 addr & 255 );
+    }else host_str = wasp_req_string( host ) ;
 
     if( wasp_is_string( service ) ){
         service_str = wasp_sf_string( wasp_string_fv( service ) );
@@ -356,7 +374,9 @@ wasp_os_connection wasp_tcp_connect( wasp_string host, wasp_value service ){
     
     addr = NULL;
 
-    result = getaddrinfo( wasp_sf_string( host ), service_str, &hints, &addr );
+    result = getaddrinfo( 
+        wasp_sf_string( host_str ), service_str, &hints, &addr 
+    );
 
     if( result ){
         if( addr ) freeaddrinfo( addr );
@@ -377,6 +397,25 @@ wasp_os_connection wasp_tcp_connect( wasp_string host, wasp_value service ){
 
     return wasp_make_os_connection( result );
 }
+
+wasp_integer wasp_resolve_ipv4( wasp_string name ){
+    struct hostent *entry = gethostbyname( wasp_sf_string( name ) );
+
+    if( !entry ){
+        wasp_report_host_error( );
+    }else if( entry->h_length != 4 ){
+        wasp_errf( wasp_es_vm, "sx", "expected an ipv4 address", name );
+    }else{
+        //TODO: A better version of resolve would return a list of
+        //      addresses..
+        return ntohl( *(wasp_integer*)(entry->h_addr) );
+    }
+}
+
+WASP_BEGIN_PRIM( "resolve-ipv4", resolve_ipv4 )
+    REQ_STRING_ARG( address )
+    INTEGER_RESULT( wasp_resolve_ipv4( address ) );
+WASP_END_PRIM( resolve_ipv4 )
 
 wasp_input wasp_stdin;
 wasp_output wasp_stdout;
@@ -567,7 +606,7 @@ WASP_GENERIC_COMPARE( os_input )
 WASP_C_SUBTYPE2( os_output, "os-output", output );
 
 WASP_BEGIN_PRIM( "tcp-connect", tcp_connect )
-    REQ_STRING_ARG( host );
+    REQ_ANY_ARG( host );
     REQ_ANY_ARG( service );
     NO_REST_ARGS( );
 
@@ -673,6 +712,7 @@ void wasp_init_os_subsystem( ){
     WASP_BIND_PRIM( os_connection_output );
 
     WASP_BIND_PRIM( serve_tcp );
+    WASP_BIND_PRIM( resolve_ipv4 );
 
     wasp_set_global( wasp_symbol_fs( "*console*" ), 
                      wasp_vf_connection( wasp_make_stdio( ) ) );
