@@ -1,8 +1,12 @@
 ????/??/?? Restore Platform, Architecture and OS Semantics
-  + Added arch to makefile.cf.
-  + Moved old platform logic to os in Makefile.cf
-  + Made platform a combination of os and arch, like MOSVM.
-  + Made waspvm stub name a combination of waspvm, os and arch, like MOSVM.
+  - Added arch to makefile.cf.
+  - Moved old platform logic to os in Makefile.cf
+  - Made platform a combination of os and arch, like MOSVM.
+  - Made waspvm stub name a combination of waspvm, os and arch, like MOSVM.
+  - Updated make exe-package to account for platform changes.
+  + Restored stubs directory.
+  + Restored stubs directory to bin/install installer.
+  + Restored stubs directory to make install.
   + Added support for -platform <platform> to waspc, can be used instead of 
     -stub.
 

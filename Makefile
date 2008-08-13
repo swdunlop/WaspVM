@@ -1,6 +1,6 @@
 include Makefile.cf
 
-WASPVM_EXE ?= $(ROOT)/waspvm$(EXE)
+WASPVM_EXE ?= $(ROOT)/waspvm-$(PLATFORM)$(EXE)
 WASPC_EXE ?= $(ROOT)/waspc$(EXE)
 WASP_EXE ?= $(ROOT)/wasp$(EXE)
 WASPDOC_EXE ?= $(ROOT)/waspdoc$(EXE)
@@ -18,6 +18,9 @@ WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$
 
 LIBWASPVM ?= libwaspvm$(SO)
 
+$(WASPVM_EXE): vm/waspvm$(OBJ) $(WASPVM_OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(WASPVM_OBJS) $< $(EXEFLAGS) -o $@
+	
 $(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE)
 	cd mod && $(WASPC_EXE) -exe $(WASPDOC_EXE) -stub $(WASPVM_EXE) bin/waspdoc
 	chmod +rx $(WASPDOC_EXE)
@@ -33,7 +36,7 @@ zip-package:
 	bzr export ../waspvm-$(VERSION).zip 
 
 exe-package: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
-	./package.sh waspvm-$(VERSION)-$(PLATFORM)
+	./package.sh $(PLATFORM) waspvm-$(VERSION)-$(PLATFORM)
 
 debug: $(WASP_EXE)
 	if which rlwrap; then cd mod && rlwrap gdb $(WASP_EXE); else cd mod && gdb $(WASP_EXE); fi

@@ -1,12 +1,26 @@
 OS=$(shell uname -s | sed 's:_.*::')
+ARCH=$(shell uname -m)
 ROOT=$(shell pwd)
 SYS=mod/sys
 
-VERSION=0.3.1
+VERSION=0.4.0
 
 CFLAGS += -DWASP_VERSION='"$(VERSION)"'
 
+ifeq ($(ARCH),i686)
+
+ARCH = x86
+
+endif
+
+
 ifeq ($(OS),MINGW32)
+
+OS = win
+
+endif
+
+ifeq ($(OS),win)
 
 EXE = .exe
 OBJ = .o
@@ -15,7 +29,6 @@ CFLAGS += -mno-cygwin
 CFLAGS += -DWASP_SO='".dll"'
 CFLAGS += -I/usr/local/include -L/usr/local/lib
 EXEFLAGS += -L/usr/local/lib -levent -lws2_32 -lregex 
-PLATFORM = winnt
 
 else # Assuming we're in UNIX..
 
@@ -50,5 +63,6 @@ CFLAGS += -O
 endif
 endif
 
+PLATFORM = $(OS)-$(ARCH)
 CFLAGS += -DWASP_PLATFORM='"$(PLATFORM)"' 
 
