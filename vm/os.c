@@ -623,6 +623,20 @@ WASP_BEGIN_PRIM( "serve-tcp", serve_tcp )
     OS_SERVICE_RESULT( wasp_make_os_service( server_fd ) );
 WASP_END_PRIM( serve_tcp )
 
+#ifdef WASP_IN_WIN32
+void wasp_raise_winerror( wasp_symbol es ){
+    char buffer[255];
+    int err = GetLastError( );
+
+    FormatMessage( 
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, err, 0, buffer, 255, NULL
+    );
+    
+    wasp_errf( es, "si", buffer, err );
+}
+#endif
+
 //TODO: UDP Server
 //TODO: UDP Connect
 //TODO: EvDNS Wrapper

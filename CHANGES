@@ -6,12 +6,16 @@
   + Added support for -platform <platform> to waspc, can be used instead of 
     -stub.
 
-????/??/?? Port SALSA20 to WaspVM
+2008/08/12 Port SALSA20 to WaspVM
+  - Disabled plugins until after 1.0 due to Win32 issues.
   - Added (make-salsa20-key seed) -> salsa20-key.
   - Added (salsa20-encrypt key plaintext ?iv) -> ciphertext
   - Added (salsa20-encrypt key plaintext ?iv) -> plaintext
-  + Wrote test/salsa20 test case.
-  + Disabled plugins until after 1.0 due to Win32 issues.
+  - Added (read-entropy amount) -> entropy primitive for UNIX.
+  - Added (read-prng amount) -> data primitive; uses an internal Salsa/20 
+    state keyed from OS entropy.
+  - Wrote test/salsa20 test case.
+  - Added (read-entropy amount) -> entropy primitive for WIN32.
 
 2008/08/12 Added Elliptic Curve 25519 Primitives
   - Added (curve25519-public private) -> public primitive; private key must be 

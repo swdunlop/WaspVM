@@ -92,11 +92,125 @@ WASP_BEGIN_PRIM( "salsa20-decrypt", salsa20_decrypt )
     RESULT( wasp_vf_string( wasp_crypt_salsa20( key, ciphertext ) ) );
 WASP_END_PRIM( salsa20_decrypt )
 
+#ifdef WASP_IN_WIN32
+#include <wincrypt.h>
+
+HCRYPTPROV wasp_random_context = 0;
+
+int wasp_get_random_context( ){
+    if( wasp_random_context ) return wasp_random_context;
+    
+    if( CryptAcquireContext( 
+        & wasp_random_context, NULL, NULL, PROV_RSA_FULL, 
+        CRYPT_VERIFYCONTEXT | CRYPT_SILENT
+    ) ){
+        return wasp_random_context;
+    }
+    
+    wasp_raise_winerror( wasp_es_vm );
+    // wasp_errf( wasp_es_vm, "s", "could not acquire CryptApi context" );
+    return 0;
+}
+
+wasp_string wasp_read_entropy( int req ){
+    wasp_string entropy = wasp_make_string( req );
+    char* ptr = wasp_sf_string( entropy );
+    
+    if( CryptGenRandom( wasp_get_random_context( ), req, ptr ) ){
+        wasp_string_wrote( entropy, req );
+        return entropy;
+    }else{
+        wasp_raise_winerror( wasp_es_vm );
+        //wasp_errf( wasp_es_vm, "s", "could not access entropy from CryptApi" );
+        return NULL;
+    }
+}
+
+#else
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+int wasp_random_handle = 0;
+
+int wasp_get_random_handle( ){
+    if( wasp_random_handle ) return wasp_random_handle;
+
+    wasp_random_handle = open( "/dev/random", O_RDONLY );
+    if( wasp_random_handle > 0 ) return;
+
+    wasp_random_handle = open( "/dev/urandom", O_RDONLY );
+    if( wasp_random_handle > 0 ) return;
+    
+    wasp_random_handle = 0;
+    wasp_errf( wasp_es_vm, "s", "could not open OS entropy source" );
+    return 0;
+}
+
+wasp_string wasp_read_entropy( int req ){
+    wasp_string entropy = wasp_make_string( req );
+    char* ptr = wasp_sf_string( entropy );
+    
+    while( req ){
+        int amt = wasp_os_error( read( wasp_get_random_handle( ), ptr, req ) );
+        req -= amt;
+        ptr += amt;
+        wasp_string_wrote( entropy, amt );
+    };
+
+    return entropy;
+}
+
+#endif
+
+WASP_BEGIN_PRIM( "read-entropy", read_entropy )
+    REQ_INTEGER_ARG( amount );
+    NO_REST_ARGS( );
+    
+    STRING_RESULT( wasp_read_entropy( amount ) );
+WASP_END_PRIM( read_entropy )
+
+wasp_salsa20_key wasp_prng = NULL;
+
+wasp_salsa20_key wasp_get_prng( ){
+    if( wasp_prng ) return wasp_prng;
+    wasp_string seed = wasp_read_entropy( 32 );
+    wasp_string iv = wasp_read_entropy( 8 );
+
+    wasp_prng = wasp_make_salsa20_key( seed );
+    wasp_set_salsa20_iv( wasp_prng, iv );
+
+    return wasp_prng;
+}
+
+wasp_string wasp_read_prng( int req ){
+    wasp_string data = wasp_make_string( req );
+    salsa20_crypt( 
+        & wasp_get_prng( )->context, 
+        wasp_sf_string( data ), 
+        wasp_sf_string( data ), 
+       req  
+    );
+    
+    wasp_string_wrote( data, req );
+    return data;
+}
+
+WASP_BEGIN_PRIM( "read-prng", read_prng )
+    REQ_INTEGER_ARG( amount );
+    NO_REST_ARGS( );
+    
+    STRING_RESULT( wasp_read_prng( amount ) );
+WASP_END_PRIM( read_prng );
+
 void wasp_init_salsa20_subsystem( ){
     WASP_I_TYPE( salsa20_key );
 
     WASP_BIND_PRIM( make_salsa20_key )
     WASP_BIND_PRIM( salsa20_encrypt )
     WASP_BIND_PRIM( salsa20_decrypt )
+    WASP_BIND_PRIM( read_entropy )
+    WASP_BIND_PRIM( read_prng )
 }
 

@@ -64,4 +64,8 @@ wasp_os_connection wasp_make_os_connection( int handle );
 
 void wasp_init_os_subsystem( );
 
+#ifdef WASP_IN_WIN32
+void wasp_raise_winerror( wasp_symbol es );
+#endif
+
 #endif

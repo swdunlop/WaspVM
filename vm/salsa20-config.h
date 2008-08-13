@@ -257,7 +257,7 @@
 
 #ifdef _UI64_MAX
 
-#if (_UI64_MAX / 0xFFFFFFFFui64 > 0xFFFFFFFFui64)
+#if (_UI64_MAX / 0xFFFFFFFFll > 0xFFFFFFFFull)
 #ifndef I64T
 #define I64T __int64
 #define U64C(v) (v##ui64)

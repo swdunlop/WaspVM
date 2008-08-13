@@ -298,7 +298,6 @@ WASP_BEGIN_PRIM( "read-file", read_file )
     NO_REST_ARGS( );
 
     if( ! has_quantity )quantity = WASP_MAX_IMM; 
-    // wasp_printf( "sisxn", "READ-FILE, quantity: ", quantity, " file: ", file );
     wasp_string data = wasp_read_file( file, quantity );
     wasp_value result;
 
