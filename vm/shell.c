@@ -55,10 +55,10 @@ char** wasp_make_argv( wasp_list arglist, int ct ){
 
     return argv;
 }
-#ifdef TODO_MUST_RESTORE
+#ifndef WASP_IN_WIN32
 #include <sys/socket.h>
 // spawn_cmd not defined for win32, yet.
-wasp_stream wasp_spawn_cmd( wasp_string path, wasp_list arg, wasp_list var ){
+wasp_connection wasp_spawn_cmd( wasp_string path, wasp_list arg, wasp_list var ){
     int argc = wasp_scan_argv( arg );
     int varc = wasp_scan_argv( var );
 
@@ -71,6 +71,8 @@ wasp_stream wasp_spawn_cmd( wasp_string path, wasp_list arg, wasp_list var ){
     char** argv = wasp_make_argv( arg, argc );
     char** varv = varc ? wasp_make_argv( var, varc ) : environ;
 
+    wasp_connection conn = (wasp_connection)wasp_make_os_connection( fds[0] );
+
     int pid = fork(); 
 
     if( pid ){
@@ -78,7 +80,7 @@ wasp_stream wasp_spawn_cmd( wasp_string path, wasp_list arg, wasp_list var ){
         if( varc )free( varv );
         wasp_os_error( pid );
         close( fds[1] );
-        return wasp_make_stream( fds[0] );
+        return conn;
     }else{
         close( fds[0] );
         // Awww yeah.. Duping and forking like it's 1986..
@@ -98,7 +100,7 @@ WASP_BEGIN_PRIM( "spawn-command", spawn_command );
     OPT_LIST_ARG( env );
     NO_REST_ARGS( );
     
-    STREAM_RESULT( wasp_spawn_cmd( path, args, env ) );
+    CONNECTION_RESULT( wasp_spawn_cmd( path, args, env ) );
 WASP_END_PRIM( spawn_command );
 #endif
 
@@ -110,7 +112,7 @@ WASP_BEGIN_PRIM( "run-command", run_command );
 WASP_END_PRIM( spawn_command );
 
 void wasp_init_shell_subsystem( ){
-#ifdef TODO_MUST_RESTORE
+#ifndef WASP_IN_WIN32
 // spawn_cmd not defined for win32, yet.
     WASP_BIND_PRIM( spawn_command );
 #endif

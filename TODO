@@ -12,11 +12,8 @@
   + Modified waspdoc/c-file to document primitive functions.
   + Modified waspdoc/c-file to document primitive types.
 
-- Make sure that an input NEVER wakes up a process that has stopped monitoring.
+- Implement cancel-timeout
 
-- BUG: For some reason, install is hanging at the end..  Is there an excess 
-  OS loop running? Putting an exit in seems to fix it..  This is on Linux.
-    
 - Fix serious problems in trace / free inheritance.
   This is seriously not working, and could be disastrous if a later 
   change to a root class isn't accounted for by a derived class.
@@ -24,7 +21,8 @@
 - Add special os-connection-timeout primitive to avoid redundancies in scheduling timeouts.
 
 - Implement os.c using pure win32 api's.
-  Get libevent out, or patch libevent.
+
+- Implement os.c using pure macosx api's.
 
 - Add "dump-object" which dumps a lib/object object field by field.
 

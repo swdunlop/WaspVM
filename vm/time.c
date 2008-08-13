@@ -96,7 +96,7 @@ WASP_BEGIN_PRIM( "timeout", timeout )
     TASK_RESULT( task ); 
 WASP_END_PRIM( timeout )
 
-WASP_BEGIN_PRIM( "cancel-task", cancel_task )
+WASP_BEGIN_PRIM( "cancel-timeout", cancel_timeout )
     REQ_TASK_ARG( task )
     NO_REST_ARGS( );
     
@@ -142,7 +142,7 @@ void wasp_init_time_subsystem( ){
     wasp_ss_timeout = wasp_symbol_fs( "timeout" );
 
     WASP_BIND_PRIM( timeout );
-    WASP_BIND_PRIM( cancel_task );
+    WASP_BIND_PRIM( cancel_timeout );
     WASP_BIND_PRIM( pause );
 }
 

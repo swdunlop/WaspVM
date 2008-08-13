@@ -112,9 +112,8 @@ int wasp_get_random_context( ){
     return 0;
 }
 
-wasp_string wasp_read_entropy( int req ){
+void wasp_read_entropy( void* ptr, int req ){
     wasp_string entropy = wasp_make_string( req );
-    char* ptr = wasp_sf_string( entropy );
     
     if( CryptGenRandom( wasp_get_random_context( ), req, ptr ) ){
         wasp_string_wrote( entropy, req );
@@ -148,35 +147,67 @@ int wasp_get_random_handle( ){
     return 0;
 }
 
-wasp_string wasp_read_entropy( int req ){
-    wasp_string entropy = wasp_make_string( req );
-    char* ptr = wasp_sf_string( entropy );
-    
+void wasp_read_entropy( void* ptr, int req ){
     while( req ){
         int amt = wasp_os_error( read( wasp_get_random_handle( ), ptr, req ) );
         req -= amt;
         ptr += amt;
-        wasp_string_wrote( entropy, amt );
     };
-
-    return entropy;
 }
 
 #endif
+
+wasp_string wasp_read_entropy_str( int req ){
+    wasp_string entropy = wasp_make_string( req );
+    wasp_read_entropy( wasp_sf_string( entropy ), req );
+    wasp_string_wrote( entropy, req );
+}
+
+wasp_quad wasp_random_quad( ){
+    wasp_quad q;
+    wasp_read_entropy( &q, sizeof( q ) );
+    return q;
+}
+
+wasp_integer wasp_random_integer( wasp_integer min, wasp_integer max ){
+    if( min > max ){ int temp = max; max = min; min = temp; };
+    wasp_quad base = max - min;
+    if( base == 0 ) return min;
+    if( base == 0xFFFFFFFF ) return (wasp_integer) wasp_random_quad( );
+    base ++;
+    wasp_quad maxrnd = 
+        (wasp_quad)( ( 0x100000000ull ) / base * base - 1 );
+
+    wasp_quad rnd;
+
+    for(;;){ 
+        rnd = wasp_random_quad( random ); 
+        if( rnd <= maxrnd ) break; 
+    }
+
+    return min + rnd % base;
+}
+
+WASP_BEGIN_PRIM( "random-integer", random_integer )
+    REQ_INTEGER_ARG( min );
+    REQ_INTEGER_ARG( max );
+    
+    INTEGER_RESULT( wasp_random_integer( min, max ) );
+WASP_END_PRIM( random_integer )
 
 WASP_BEGIN_PRIM( "read-entropy", read_entropy )
     REQ_INTEGER_ARG( amount );
     NO_REST_ARGS( );
     
-    STRING_RESULT( wasp_read_entropy( amount ) );
+    STRING_RESULT( wasp_read_entropy_str( amount ) );
 WASP_END_PRIM( read_entropy )
 
 wasp_salsa20_key wasp_prng = NULL;
 
 wasp_salsa20_key wasp_get_prng( ){
     if( wasp_prng ) return wasp_prng;
-    wasp_string seed = wasp_read_entropy( 32 );
-    wasp_string iv = wasp_read_entropy( 8 );
+    wasp_string seed = wasp_read_entropy_str( 32 );
+    wasp_string iv = wasp_read_entropy_str( 8 );
 
     wasp_prng = wasp_make_salsa20_key( seed );
     wasp_set_salsa20_iv( wasp_prng, iv );
@@ -212,5 +243,6 @@ void wasp_init_salsa20_subsystem( ){
     WASP_BIND_PRIM( salsa20_decrypt )
     WASP_BIND_PRIM( read_entropy )
     WASP_BIND_PRIM( read_prng )
+    WASP_BIND_PRIM( random_integer )
 }
 
