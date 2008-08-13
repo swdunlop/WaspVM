@@ -20,7 +20,8 @@ LIBWASPVM ?= libwaspvm$(SO)
 
 $(WASPVM_EXE): vm/waspvm$(OBJ) $(WASPVM_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(WASPVM_OBJS) $< $(EXEFLAGS) -o $@
-	
+	test z$(DEBUG) = z && strip $(WASPVM_EXE) || true
+
 $(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE)
 	cd mod && $(WASPC_EXE) -exe $(WASPDOC_EXE) -stub $(WASPVM_EXE) bin/waspdoc
 	chmod +rx $(WASPDOC_EXE)
@@ -53,6 +54,7 @@ $(WASPC_EXE): $(WASPVM_EXE) $(WASPLD_EXE)
 
 %$(EXE): vm/%$(OBJ) $(WASPVM_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(WASPVM_OBJS) $< $(EXEFLAGS) -o $@
+	test z$(DEBUG) = z && strip $(WASPVM_EXE) || true
 
 vm/%$(OBJ): vm/%.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
