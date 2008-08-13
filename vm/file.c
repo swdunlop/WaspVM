@@ -298,16 +298,8 @@ WASP_BEGIN_PRIM( "read-file", read_file )
     NO_REST_ARGS( );
 
     if( ! has_quantity )quantity = WASP_MAX_IMM; 
-    wasp_string data = wasp_read_file( file, quantity );
-    wasp_value result;
 
-    if( quantity && (! wasp_string_length( data ) ) ){
-        result = wasp_vf_false( );
-    }else{
-        result = wasp_vf_string( data );
-    }
-    
-    RESULT( result );
+    STRING_RESULT( wasp_read_file( file, quantity ) )
 WASP_END_PRIM( read_file )
 
 WASP_BEGIN_PRIM( "close-file", close_file )

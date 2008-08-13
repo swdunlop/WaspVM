@@ -24,11 +24,9 @@
         read-platform-stub)
 
 (define (read-platform-stub platform)
-;TODO: Disabled because cross-platform builds are disabled at the moment.
-;  (define path (path-join (or (site-config 'stub-path) "./stubs") 
-;                          (string-append "waspvm-stub-" platform)))
-  (define path (path-join (or (site-config 'bin-path) "./bin")
-                          "waspvm"))
+  (define path (path-join (site-config 'stub-path)
+                          (string-append "waspvm-" platform)))
+
   (when (string-begins-with? platform "winnt")
     (set! path (string-append path ".exe")))
 
@@ -153,9 +151,5 @@
 ;;TODO: Note, this only works when platform is equivalent to the current
 ;;      platform!
 (define (build-exe platform main)
-  (unless (string=? platform *platform*)
-    (error 'build "Cannot build cross-platform binaries at this time." 
-           platform))
-    
   (build-exe-with-stub (read-platform-stub platform) main))
 

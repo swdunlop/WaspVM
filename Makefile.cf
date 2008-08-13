@@ -15,9 +15,11 @@ endif
 
 
 ifeq ($(OS),MINGW32)
-
 OS = win
-
+else
+ifeq ($(OS),Linux)
+OS = linux
+endif
 endif
 
 ifeq ($(OS),win)

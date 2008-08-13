@@ -1,14 +1,17 @@
-????/??/?? Restore Platform, Architecture and OS Semantics
+2008/08/13 Restore Platform, Architecture and OS Semantics
   - Added arch to makefile.cf.
   - Moved old platform logic to os in Makefile.cf
   - Made platform a combination of os and arch, like MOSVM.
   - Made waspvm stub name a combination of waspvm, os and arch, like MOSVM.
   - Updated make exe-package to account for platform changes.
-  + Restored stubs directory.
-  + Restored stubs directory to bin/install installer.
-  + Restored stubs directory to make install.
-  + Added support for -platform <platform> to waspc, can be used instead of 
-    -stub.
+  - Restored stubs directory.
+  - read-file now returns "" when reading past end of the file, instead of #f.
+  - Restored use of stub-path to lib/build
+  - Modified build process for local waspc and wasp to overlay site/config.ms
+    and site/config.mo with mod/local-config.m*
+  - Added support for -platform <platform> to waspc, can be used instead of 
+    -stub
+  - Restored stubs directory to bin/install installer.
 
 2008/08/12 Port SALSA20 to WaspVM
   - Disabled plugins until after 1.0 due to Win32 issues.

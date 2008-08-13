@@ -1,4 +1,5 @@
 ; Copyright (C) 2006, Ephemeral Security, LLC 
+; Modifications (C) 2008, Scott W. Dunlop <swdunlop@gmail.com>
 ;  
 ; This library is free software; you can redistribute it and/or modify it  
 ; under the terms of the GNU Lesser General Public License, version 2.1
@@ -12,11 +13,10 @@
 ; You should have received a copy of the GNU Lesser General Public License  
 ; along with this library; if not, write to the Free Software Foundation,  
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA  
-;  
 
 (define (read-data-file path)
   (define file (open-file path "r"))
-  (define data (read-file file *max-int*))
+  (define data (read-file file))
   (close-file file)
   data)
 

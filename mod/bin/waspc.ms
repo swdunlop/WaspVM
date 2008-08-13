@@ -17,18 +17,31 @@
 ; Given a source file, or the input port, and a target file, or the output
 ; port, compiles and outputs a frozen file.
 
+(define usage
+
+"waspc [OPTION] ... [SOURCE-FILE] ...
+Compiles Wasp Lisp programs.
+
+OPTIONS:
+  -exe <dest-path>       A copy of the virtual machine will be linked to the
+                         compiled source files, creating a standalone program.
+  -platform <platform>   When used with the -exe flag, specifies which OS
+                         and architecture to compile for. 
+  -stub <stub-path>      Like -platform, but specifies the exact virtual
+                         machine file to use instead of looking up a generic
+                         virtual machine in the stubs directory.
+")
+
+        
 (import "lib/build")
 
 (define (main . args)
   (when (null? args)
-    (send (string-append 
-            "USAGE: waspc [-exe <path> [-stub <stub-path>] <source-file> "
-            "...\n\n"
-            "Given a list of Wasp Lisp source files to compile, produces "
-            "a compiled version of each file.  If the optional -exe option "
-            "is supplied, creates an executable file with the necessary lisp "
-            "files linked in.\n\n")))
+    (print usage)
+    (return #f))
+  
   (define exe-target #f)
+  (define platform *platform*)
   (define stub-src #f)
   (define mods (make-tc))
   
@@ -51,6 +64,10 @@
        (set! stub-src (car args))
        (unless (path-exists? stub-src)
          (parse-fail "Stub file does not exist."))
+       (set! args (cdr args)))
+      ((string=? arg "-platform")
+       (when (null? args) (parse-fail "Expected platform ID after -platform."))
+       (set! platform (car args))
        (set! args (cdr args)))
       ((string-begins-with? arg "-")
        (parse-fail (string-append "Unrecognized option: " arg)))
@@ -77,5 +94,5 @@
     (write-data-file exe-target 
       (if stub-src 
         (build-exe-with-stub (read-data-file stub-src) imports)
-        (build-exe *platform* imports)))))
+        (build-exe platform imports)))))
   
