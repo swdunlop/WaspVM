@@ -23,8 +23,8 @@
   (forever
     (define evt (wait in))
     (when (string? evt)
-      (string-prepend! (quad->string (string-length evt))
-                       evt))
+      (string-prepend! evt 
+                       (quad->string (string-length evt))))
     (send evt out)))
 
 ; This filter will refuse to produce data until its full length has been

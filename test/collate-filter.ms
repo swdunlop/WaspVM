@@ -51,3 +51,22 @@
 (s: (wait 100 recv))
 (r: 'timeout)
 
+(define xmit (make-queue))
+(define recv (input-chain xmit (prepend-collation-filter)))
+
+(send "Alpha" xmit)
+(send "Beta" xmit)
+(send "Charlie" xmit)
+
+(s: (wait 100 recv))
+(r: "\0\0\0\5Alpha")
+
+(s: (wait 100 recv))
+(r: "\0\0\0\4Beta")
+
+(s: (wait 100 recv))
+(r: "\0\0\0\7Charlie")
+
+(s: (wait 100 recv))
+(r: 'timeout)
+
