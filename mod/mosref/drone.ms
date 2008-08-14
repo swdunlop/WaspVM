@@ -16,7 +16,6 @@
 
 (module "mosref/drone")
 
-(import "lib/cfb")
 (import "lib/buffer-channel")
 (import "lib/iterate")
 (import "lib/crypto-filter")
