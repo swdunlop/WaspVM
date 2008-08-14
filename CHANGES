@@ -9,6 +9,7 @@
   - Fixed overuse of OS loop due to cancel-task not decreasing the OS usage
     index.
   - Added (scan-io) primitive when compiled with WASP_DEBUG_IO
+  - Fixed missing return value from wasp_read_entropy_str.
 
 2008/08/13 Port lib/bridge Back to WaspVM
   - Ported lib/bridge from MOSREF 2.0 to WaspVM.

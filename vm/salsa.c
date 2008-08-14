@@ -161,6 +161,7 @@ wasp_string wasp_read_entropy_str( int req ){
     wasp_string entropy = wasp_make_string( req );
     wasp_read_entropy( wasp_sf_string( entropy ), req );
     wasp_string_wrote( entropy, req );
+    return entropy;
 }
 
 wasp_quad wasp_random_quad( ){

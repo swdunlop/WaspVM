@@ -2,9 +2,10 @@
 
 (enable-spot-tests)
 
-(define (print* . items)
-  (for-each print items)
-  (print *line-sep*))
+(define (spam item) #f)
+(define (spam* . items)
+  (for-each spam items)
+  (spam *line-sep*))
 
 (define private-1 
         "a\1\2\3\4\5\6\7\8\9\0\1\2\3\4\5\6\7\8\9\0\1\2\3\4\5\6\7\8\9\0a")
@@ -23,8 +24,8 @@
 (define secret-1 (curve25519-secret private-1 public-2))
 (define secret-2 (curve25519-secret private-2 public-1))
 
-(print* " SECRET 1: "  (format secret-1))
-(print* " SECRET 2: "  (format secret-2))
+(spam* " SECRET 1: "  (format secret-1))
+(spam* " SECRET 2: "  (format secret-2))
 
 (s: secret-1)
 (t: (= (string-length _) 32))
