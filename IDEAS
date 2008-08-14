@@ -1,3 +1,9 @@
+- Protection for MOSREF Against Information Theoretic attacks
+  + Added (salsa20-iv key) and (set-salsa20-iv! key iv) to permit failure
+    triggered rekeying.
+  + Added one or more bytes of prefix noise to plaintext.
+  + Added one or more bytes of suffix noise padding.
+
 - WaspDoc Markup Language
   - Derived from HazeML
   - Lines starting with * are list entries; subsequent indentation is a part of the line.

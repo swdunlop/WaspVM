@@ -67,9 +67,13 @@ wasp_string wasp_crypt_salsa20( wasp_salsa20_key key, wasp_string src ){
 
 WASP_BEGIN_PRIM( "make-salsa20-key", make_salsa20_key )
     REQ_STRING_ARG( seed )
+    OPT_STRING_ARG( iv )
     NO_REST_ARGS( );
+
+    wasp_salsa20_key key = wasp_make_salsa20_key( seed );
+    if( has_iv ) wasp_set_salsa20_iv( key, iv );
     
-    RESULT( wasp_vf_salsa20_key( wasp_make_salsa20_key( seed ) ) );
+    RESULT( wasp_vf_salsa20_key( key ) );
 WASP_END_PRIM( make_salsa20_key );
 
 WASP_BEGIN_PRIM( "salsa20-encrypt", salsa20_encrypt )

@@ -1,5 +1,10 @@
 ????/??/?? Port MOSREF into WaspVM Core
   - Copied MOSREF 2.0-b3 into the Core.
+  - Copied lib/crypto-filter into the Core.
+  - Copied lib/checksum-filter into the Core.
+  - Copied lib/copy-filter into the Core.
+  t Modified mosref/base to use curve25519 and salsa20.
+  t Modified make-salsa20-key to accept an optional IV argument.
 
 2008/08/13 Port lib/socks-client, lib/socks-server Back to WaspVM
   - Added (random-integer minimum maximum) -> integer primitive.
