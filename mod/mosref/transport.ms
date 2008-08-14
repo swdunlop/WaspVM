@@ -72,3 +72,26 @@
                ;(trace-filter "recv-plaintext")
                ))
 
+(define (spawn-endpoint endpoint break xmit recv)
+  ;(set! xmit (output-chain xmit (trace-filter "XMIT")))
+  ;(set! recv (input-chain  recv (trace-filter "RECV")))
+  (define bridge (make-bridge xmit recv))
+  (define lanes (bridge-lanes bridge))
+
+  (define (spawn-endpoint/lane lane)
+    (when (eq? lane 'close)
+      (break bridge)
+      (halt))
+
+    (spawn (lambda ()
+             (with-input (lane-recv lane)
+               (with-output (lane-xmit lane)
+                 (endpoint bridge))))))
+
+  (spawn (lambda ()
+           (forever
+             (spawn-endpoint/lane (wait lanes)))))
+  
+  bridge)
+
+(export spawn-endpoint)
