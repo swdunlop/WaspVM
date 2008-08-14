@@ -1,14 +1,19 @@
 (import "lib/test")
+
+(import "mosref/transport")
 (import "mosref/drone")
 (import "mosref/console")
 (import "lib/fuzz-filter")
 
-(define (wait/doom src) (wait src))
-;(define (wait/doom src)
-;  (define data (wait 10000 src))
-; (when (eq? data 'timeout)
-;   (error 'fail "Failed to complete tests in the allotted time"))
-; (return data))
+; Seed PRNG in case we're scarce on entropy.
+(random-integer 1 100)
+
+;(define (wait/doom src) (wait src))
+(define (wait/doom src)
+  (define data (wait 1000 src))
+ (when (eq? data 'timeout)
+   (error 'fail "Failed to complete tests in the allotted time"))
+ (return data))
 
 (define (expect channel value)
   (equal? value (wait/doom channel)))
@@ -24,13 +29,13 @@
 (define console-xmit (make-queue))
 (define drone-recv (input-chain console-xmit 
                                 ;(trace-filter "drone-recv")
-                                ;(fuzz-filter) 
+                                (fuzz-filter) 
                                 ;(trace-filter "drone-recv/fz")
                                 ))
 
 (define console-recv (input-chain drone-xmit 
                                   ;(trace-filter "console-recv")
-                                  ;(fuzz-filter) 
+                                  (fuzz-filter) 
                                   ;(trace-filter "console-recv/fz")
                                   ))
 

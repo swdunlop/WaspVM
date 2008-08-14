@@ -1,3 +1,14 @@
+????/??/?? Port MOSREF 2.0b4 into WaspVM.
+  Found the final source tree for MOSREF, porting it into the current
+  work on MOSREF..
+  
+  - Ported lib/env into the core.
+  - Ported mosref/shell into the core.
+  - Merged mosref/base and mosref/endpoint into mosref/transport.
+  - Updated implementations of Console and Drone endpoints.
+  + Ported bin/mosref into the core.
+  t Disabled use of lib/terminal in bin/mosref.
+  
 2008/08/14 Port MOSREF Affiliation into WaspVM.
   - Ported lib/buffer-channel into the core.
   - Ported lib/tag-filter into the core.
