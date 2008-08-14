@@ -28,14 +28,22 @@
   (if (input? src)
     (wait-input src)
     (wait (input src))))
-    
+
 (define (wait (<integer> ms) (#t src))
   (define inp (if (input? src) src (input src)))
-  (timeout ms inp)
-  (wait-input inp))
+  (define timer (timeout ms inp))
+  (guard (lambda (err)
+           (cancel-timeout timer)
+           (re-error err))
+    (define evt (wait-input inp))
+    (cancel-timeout timer)
+    evt))
     
+(define (wait (<integer> ms))
+  (wait ms (current-input)))
+
 (define (input)
-  (input (current-process-input)))
+  (input (current-input)))
 
 (define (input (<input> i))
   i)
@@ -53,7 +61,7 @@
   (process-input p))
   
 (define (output)
-  (output (current-process-output)))
+  (output (current-output)))
 
 (define (output (<output> o))
   o)
@@ -73,7 +81,7 @@
 (define timeout-input timeout)
 
 (define (timeout (<integer> ms))
-  (timeout-input ms (current-process-input)))
+  (timeout-input ms (current-input)))
 
 (define (timeout (<integer> ms) (<queue> q))
   (timeout-input ms (queue-input q)))
