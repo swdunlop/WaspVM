@@ -59,6 +59,7 @@ void wasp_init_core_subsystems( ){
 
     wasp_init_regex_subsystem( );
     wasp_init_filesystem_subsystem( );
+    wasp_init_crc32_subsystem( );
 
     wasp_init_curve25519_subsystem( );
     wasp_init_salsa20_subsystem( );
