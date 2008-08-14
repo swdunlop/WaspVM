@@ -12,7 +12,8 @@
   + Modified waspdoc/c-file to document primitive functions.
   + Modified waspdoc/c-file to document primitive types.
 
-- Implement cancel-timeout
+- Explicitly free all objects at shutdown.
+  - Ensures that listeners will close, etc.
 
 - Fix serious problems in trace / free inheritance.
   This is seriously not working, and could be disastrous if a later 

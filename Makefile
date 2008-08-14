@@ -70,7 +70,7 @@ clean:
 
 test: test-waspvm test-mosref
 test-waspvm: test-url test-http-url test-spawn-connection
-test-mosref: test-bridge test-curve25519 test-salsa 
+test-mosref: test-bridge test-curve25519 test-salsa test-socks
 
 test-%: test/%.ms $(WASP_EXE) 
 	cd mod && $(WASP_EXE) ../$<

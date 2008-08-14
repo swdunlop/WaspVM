@@ -18,65 +18,64 @@
 
 (enable-spot-tests)
 
+;(define spam print)
+(define (spam arg) #f)
+
 (import "lib/tcp-server")
 (import "lib/socks-server")
 (import "lib/socks-client")
 
-(define localhost (resolve-addr "127.0.0.1"))
+(define localhost (resolve-ipv4 "127.0.0.1"))
 (define server-portno (random-integer 10000 30000))
 (define server-listener 
   (spawn-tcp-server server-portno (lambda ()
-                                    (print "SERVER: CONNECTED.\n")
+                                    (spam "SERVER: CONNECTED.\n")
                                     (send "HELO")
-                                    (print "SERVER: SENT HELLO\n")
+                                    (spam "SERVER: SENT HELLO\n")
                                     (define evt (wait))
-                                    (print "SERVER: GOT: ")
-                                    (print (format evt))
-                                    (print "\n")
+                                    (spam "SERVER: GOT: ")
+                                    (spam (format evt))
+                                    (spam "\n")
                                     (send evt)
-                                    (print "SERVER: SENT RESPONSE\n")
+                                    (spam "SERVER: SENT RESPONSE\n")
                                     (send 'close)
-                                    (print "SERVER: SENT CLOSE\n"))))
-
+                                    (spam "SERVER: SENT CLOSE\n")
+                                    (define evt (wait))
+                                    (spam "SERVER: GOT: ")
+                                    (spam (format evt))
+                                    (spam "\n"))))
 
 (define (test-conn conn)
-  (define timer (timeout 10000 (output conn) 'timeout))
+  (define timer (timeout 10000 conn))
   (define e (wait conn))
-  (print "CLIENT: GOT ")
-  (print (format e))
-  (print "\n")
-
-  (s: e)
-  (r: 'connect)
-
-  (define e (wait conn))
-  (print "CLIENT: GOT ")
-  (print (format e))
-  (print "\n")
+  (spam "CLIENT: GOT ")
+  (spam (format e))
+  (spam "\n")
 
   (s: e)
   (r: "HELO")
 
   (send "Foo" conn)
-  (print "CLIENT: SENT Foo.")
+  (spam "CLIENT: SENT Foo.\n")
 
   (define e (wait conn))
 
-  (print "CLIENT: GOT ")
-  (print (format e))
-  (print "\n")
+  (spam "CLIENT: GOT ")
+  (spam (format e))
+  (spam "\n")
 
   (s: e)
   (r: "Foo")
 
   (define e (wait conn))
 
-  (print "CLIENT: GOT ")
-  (print (format e))
-  (print "\n")
+  (spam "CLIENT: GOT ")
+  (spam (format e))
+  (spam "\n")
 
   (s: e)
   (r: 'close)
+  (send 'close conn)
   (cancel-timeout timer))
 
 (define (test-proxy proxy-addr proxy-portno server-addr)
@@ -85,14 +84,14 @@
                                    server-addr server-portno))
   (test-conn conn))
   
-(test-conn (tcp-connect "127.0.0.1" server-portno))
+;(test-conn (tcp-connect "127.0.0.1" server-portno))
 
 (define proxy-portno (random-integer 10000 30000))
 (define proxy-listener (spawn-socks4-proxy proxy-portno
                                            (lambda (x)
-                                             (print "Auth is: ")
-                                             (print (format x))
-                                             (print "\n")
+                                             (spam "Auth is: ")
+                                             (spam (format x))
+                                             (spam "\n")
                                              (string=? x "foo"))
                                            tcp-connect))
 
@@ -101,4 +100,3 @@
 
 (close-service server-listener)
 (close-service proxy-listener)
-

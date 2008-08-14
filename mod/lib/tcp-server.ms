@@ -22,11 +22,11 @@
   (spawn (function (tcp-server)
             (forever
               (define conn (wait server))
-              (if (eq? conn 'close)
-                (return)
-                (with-io (os-connection-input conn)
-                         (os-connection-output conn)
-                  (apply spawn fn rest))))))
+              (when (eq? conn 'close) (return))
+
+              (with-io (os-connection-input conn)
+                       (os-connection-output conn)
+                       (apply spawn fn rest)))))
   server)
 
 (export spawn-tcp-server)

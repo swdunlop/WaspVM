@@ -34,6 +34,8 @@ struct wasp_task_data{
 
     wasp_task_mt   task_mt;
     wasp_value     context;
+
+    int pending :1;
 };
 
 WASP_H_TYPE( task )

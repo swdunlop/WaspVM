@@ -31,6 +31,8 @@ void wasp_get_now( wasp_quad* secs, wasp_quad* nsecs ){
 
 void wasp_task_cb( int fd, short evt, void* context ){
     wasp_task task = (wasp_task) context; 
+    
+    if( ! task->pending ) return;
     int ms = task->task_mt( task );
 
     if( ms ){
@@ -38,6 +40,7 @@ void wasp_task_cb( int fd, short evt, void* context ){
         task->time.tv_usec = ((ms % 1000)) * 1000;
         evtimer_add( &( task->event ), &( task->time ) );
     }else{
+        task->pending = 0;
         wasp_disable_os_loop( );
         wasp_unroot_obj( (wasp_object) task );
     };
@@ -48,20 +51,26 @@ wasp_task wasp_make_task( wasp_task_mt mt, wasp_value context ){
     evtimer_set( &( task->event ), wasp_task_cb, task );
     task->task_mt = mt;
     task->context = context;
+    task->pending = 0;
     return task;
 }
 
 wasp_task wasp_schedule_task( wasp_task task, wasp_quad ms ){
-    wasp_root_obj( (wasp_object) task );
-    wasp_enable_os_loop( );    
     task->time.tv_sec = ms / 1000;
     task->time.tv_usec = ((ms % 1000)) * 1000;
     evtimer_add( &( task->event ), &( task->time ) );
+    if( task->pending ) return;
+    task->pending = 1;
+    wasp_root_obj( (wasp_object) task );
+    wasp_enable_os_loop( );    
 }
 
 void wasp_cancel_task( wasp_task task ){
+    if( ! task->pending ) return;
     evtimer_del( &( task->event ) );
+    wasp_disable_os_loop( );    
     wasp_unroot_obj( (wasp_object) task );
+    task->pending = 0;
 }
 
 void wasp_trace_task( wasp_task task ){

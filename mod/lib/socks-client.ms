@@ -89,7 +89,7 @@
 
 (define (tcp-socks4-connect auth socks-addr socks-portno dest-addr dest-portno)
   (define c (tcp-connect socks-addr socks-portno))
-  (define t (timeout 10000 (output c) 'timeout))
+  (define t (timeout 10000 c))
   (define e #f)
 
   (define (next what)
@@ -101,8 +101,6 @@
   (guard (lambda (e)
            (cancel-timeout t)
            (re-error e))
-    (unless (eq? (next "connect") 'connect)
-      (error 'socks "could not connect to proxy" e))
 
     (send (format-socks4-request auth 'tcp dest-addr dest-portno) c)
 
@@ -113,7 +111,6 @@
 
   ; Note, this is full synchronous.  We should make it asynchronous.
   (cancel-timeout t)
-  (send 'connect (output c))
 
   ; Any data past the end, here, is data..
   (unless (empty-string? e)

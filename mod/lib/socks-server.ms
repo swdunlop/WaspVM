@@ -75,11 +75,11 @@
 (export format-socks4-response parse-socks4-request)
 
 (define (spawn-socks4-proxy portno auth-fn conn-fn)
-  (define listener (if (integer? portno) (tcp-listen portno)
+  (define listener (if (integer? portno) (serve-tcp portno)
                                          portno))
 
   (define (socks4-proxy-session conn)
-    (define t (timeout 10000 (output conn) 'timeout))
+    (define t (timeout 10000 conn))
     (define e #f)
     (define (next what)
       (set! e (wait conn))
@@ -97,7 +97,6 @@
              (cancel-timeout t)
              (unless (eq? (error-key err) 'socks)
                (re-error err))
-             (send (string-append "SOCKS: " (car (error-info err) ) "\n"))
              (halt))
 
       (unless (string? (next "socks request"))
@@ -118,41 +117,51 @@
       (when (string? addr)
         (guard (lambda (x)
                  (error 'socks (string-append "cannot resolve address " addr)))
-          (set! addr (resolve-addr addr))))
+          (set! addr (resolve-ipv4 addr))))
 
       (set! f (conn-fn addr portno)))
   
     (cancel-timeout t)
     (send (format-socks4-response #t addr portno) conn)
-    (define c-xmit (input conn))
-    (define c-recv (output conn))
+    (define c-xmit (output conn))
+    (define c-recv (input conn))
 
     (define f-xmit #f)
     (define f-recv #f)
 
     (cond ((pair? f) (set! f-xmit (car f))
                      (set! f-recv (cadr f)))
-          ((stream? f) (set! f-xmit (input f))
-                       (set! f-recv (output f)))
+          ((connection? f) (set! f-xmit (output f))
+                           (set! f-recv (input f)))
           (else (error 'socks "bogus forward connection")))
     
+    (define (shutdown)
+      (send 'close f-xmit)
+      (send 'close f-recv)
+      (halt))
+
     (spawn (lambda ()
              (forever
                (define e (wait f-recv))
-               (unless (eq? e 'connect)
-                 (send e c-xmit)))))
+               (unless (eq? e 'connect) (send e c-xmit))
+               (pause)(pause)
+               (when (eq? e 'close) 
+                 (send 'close f-xmit)
+                 (return)))))
     (forever
-      (send (wait c-recv) f-xmit)))
-
-  (define (spawn-socks4-proxy-session conn)
-    (spawn socks4-proxy-session conn))
+      (define e (wait c-recv))
+      (send e f-xmit)
+      (pause)(pause)
+      (when (eq? e 'close) 
+        (send 'close c-xmit)
+        (return))))
 
   (spawn (lambda ()
            (forever
              (define c (wait listener))
-             (if (eq? c 'close)
-               (return)
-               (spawn-socks4-proxy-session c)))))
+             (when (eq? c 'close)
+               (return))
+             (spawn socks4-proxy-session c))))
 
   listener)
 

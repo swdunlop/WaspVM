@@ -91,22 +91,22 @@ void wasp_os_start_writing( wasp_os_connection conn, wasp_string data ){
     //TODO: Try writing directly, first.. Sometimes it works!
     
     if( conn->writing ) return;
-    IO_TRACE( "Started writing for connection %x\n", conn );
     conn->writing = 1;
 
     if( conn->reading )return;
+    IO_TRACE( "-- %4i -- WRITING -- ENABLE --\n", conn->handle );
     wasp_enable_os_loop( );
     wasp_root_obj( (wasp_object) conn );
 }
 
 void wasp_os_start_reading( wasp_os_connection conn ){
     if( conn->reading ) return;
-    IO_TRACE( "Started reading for connection %x\n", conn );
     
     conn->reading = 1;
     bufferevent_enable( conn->event, EV_READ );
 
     if( conn->writing )return;
+    IO_TRACE( "-- %4i -- READING -- ENABLE --\n", conn->handle );
     wasp_enable_os_loop( );
     wasp_root_obj( (wasp_object) conn );
 }
@@ -118,17 +118,18 @@ void wasp_os_stop_writing( wasp_os_connection conn ){
     bufferevent_disable( conn->event, EV_WRITE );
 
     if( conn->reading )return;
+    IO_TRACE( "-- %4i -- WRITING -- DISABLE --\n", conn->handle );
     wasp_disable_os_loop( );
     wasp_unroot_obj( (wasp_object) conn );
 }
 
 void wasp_os_stop_reading( wasp_os_connection conn ){
     if( ! conn->reading ) return;
-    IO_TRACE( "Stopped reading for connection %x\n", conn );
     conn->reading = 0;
     bufferevent_disable( conn->event, EV_READ );
 
     if( conn->writing ) return;
+    IO_TRACE( "-- %4i -- READING -- DISABLE --\n", conn->handle );
     wasp_disable_os_loop( );
     wasp_unroot_obj( (wasp_object) conn );
 }
@@ -141,12 +142,12 @@ void wasp_os_closed( wasp_os_connection conn ){
         close( conn->handle );
         conn->state = WASP_CLOSED;
         
+        wasp_os_stop_writing( conn );
+        wasp_os_stop_reading( conn );
+
         wasp_wake_monitor( 
             ((wasp_connection)conn)->input, wasp_vf_symbol( wasp_ss_close ) 
         );
-        
-        wasp_os_stop_writing( conn );
-        wasp_os_stop_reading( conn );
     }
 }
 
@@ -160,6 +161,7 @@ void wasp_os_close( wasp_os_connection conn ){
         if( wasp_os_xmit_complete( conn ) ){
             wasp_os_closed( conn );
         }else{
+            IO_TRACE( "Deferring closure, still got %i data on %x\n", EVBUFFER_LENGTH( EVBUFFER_OUTPUT( conn->event ) ), conn );
             conn->state = WASP_CLOSING;
         }
     }
@@ -178,7 +180,7 @@ void wasp_os_xmit_mt( wasp_os_output outp, wasp_value data ){
         );
     }else if( wasp_is_string( data ) ){
         wasp_os_start_writing( conn, wasp_string_fv( data ) );
-	}else{
+    }else{
         wasp_errf( 
             wasp_es_vm, "sxx", "OS outputs can only send strings", 
             outp, data 
@@ -231,8 +233,8 @@ void wasp_os_xmit_cb(
     struct bufferevent* ev, wasp_os_connection conn 
 ){
     IO_TRACE( "Detected write completion for %x\n", conn );
-    if( conn->state == WASP_CLOSING ) wasp_os_closed( conn );
     wasp_os_stop_writing( conn );
+    if( conn->state == WASP_CLOSING ) wasp_os_closed( conn );
     //TODO: Write completion notification.
 }
 
@@ -249,6 +251,8 @@ int wasp_svc_recv_mt( wasp_os_service svc, wasp_value* data ){
         *data = wasp_vf_symbol( wasp_ss_close );
         return 1;
     }else{
+        wasp_root_obj( (wasp_object) svc );
+        IO_TRACE( "-- %4i -- LISTENER -- ENABLE --\n", svc->handle );
         wasp_enable_os_loop( );
         event_add( &( svc->event ), svc->timeout ? &( svc->timeval ) : NULL );
         return 0;
@@ -257,26 +261,47 @@ int wasp_svc_recv_mt( wasp_os_service svc, wasp_value* data ){
 
 void wasp_svc_read_cb( int handle, short event, void* service ){
     struct sockaddr addr;
+ 
     int sz = sizeof( addr );
     int fd = accept( handle, &addr, &sz);
     if( fd == -1 ) return; //TODO: Close? Fail?
         //TODO: Close down the connection, and unroot it.
+    
+    wasp_unroot_obj( (wasp_object) service );
+    IO_TRACE( "-- %4i -- LISTENER -- DISABLE --\n",((wasp_os_service) service)->handle );
+    wasp_disable_os_loop( );
+    
     wasp_os_connection conn = wasp_make_os_connection( fd );
     
-    wasp_disable_os_loop( );
     wasp_wake_monitor( (wasp_input)service, wasp_vf_os_connection( conn ) );
 }
 
 wasp_os_service wasp_make_os_service( int handle ){
     wasp_os_service svc = WASP_OBJALLOC( os_service );
     ((wasp_input)svc)->recv = (wasp_input_mt)wasp_svc_recv_mt;
-    
+    svc->handle = handle; 
     svc->timeout = svc->closed = 0;
     svc->timeval.tv_sec = svc->timeval.tv_usec = 0;
     event_set( &( svc->event ), handle, EV_READ, wasp_svc_read_cb, (void*)svc );
-    wasp_root_obj( (wasp_object) svc ); //TODO: Need unroot on close.
 
     return svc;
+}
+
+void wasp_os_close_service( wasp_os_service service ){
+    if( service->closed ) return;
+    service->closed = 1;
+    close( service->handle );
+    event_del( &( service->event ) );
+
+    if( wasp_input_monitored( (wasp_input) service ) ){
+        IO_TRACE( "Alerting service monitor for %x.\n", service );
+        wasp_unroot_obj( (wasp_object) service );
+        IO_TRACE( "-- %4i -- L-SHUTDOWN -- DISABLE --\n", service->handle );
+        wasp_disable_os_loop( ); 
+        wasp_wake_monitor( 
+            (wasp_input)service, wasp_vf_symbol( wasp_ss_close ) 
+        );
+    };
 }
 
 wasp_os_connection wasp_make_os_connection( int handle ){
@@ -394,8 +419,11 @@ wasp_os_connection wasp_tcp_connect( wasp_value host, wasp_value service ){
         freeaddrinfo( addr ); 
         wasp_report_net_error( );
     }
+    
+    wasp_os_connection conn = wasp_make_os_connection( result );
+    IO_TRACE( "Connected to remote host on %x\n", conn );
 
-    return wasp_make_os_connection( result );
+    return conn;
 }
 
 wasp_integer wasp_resolve_ipv4( wasp_string name ){
@@ -536,7 +564,7 @@ wasp_connection wasp_make_stdio( ){
     
     wasp_os_connection oc = wasp_make_os_connection( STDOUT_FILENO );
     wasp_os_connection ic = wasp_make_os_connection( STDIN_FILENO );
-
+    
     wasp_connection conn = wasp_make_connection( NULL, NULL );
 
     wasp_stdin = ((wasp_connection)ic)->input;
@@ -547,6 +575,10 @@ wasp_connection wasp_make_stdio( ){
 
     conn->input = wasp_stdin;
     conn->output = wasp_stdout;
+
+    IO_TRACE( "STDOUT is %x\n", oc );
+    IO_TRACE( "STDIN is %x\n", ic );
+    IO_TRACE( "STDIO is %x\n", conn );
 
     return conn;
 }
@@ -662,6 +694,14 @@ WASP_BEGIN_PRIM( "serve-tcp", serve_tcp )
     OS_SERVICE_RESULT( wasp_make_os_service( server_fd ) );
 WASP_END_PRIM( serve_tcp )
 
+WASP_BEGIN_PRIM( "close-service", close_service )
+    REQ_OS_SERVICE_ARG( service );
+    NO_REST_ARGS( );
+    
+    wasp_os_close_service( service );
+
+    NO_RESULT( );
+WASP_END_PRIM( close_service );
 #ifdef WASP_IN_WIN32
 void wasp_raise_winerror( wasp_symbol es ){
     char buffer[255];
@@ -679,6 +719,36 @@ void wasp_raise_winerror( wasp_symbol es ){
 //TODO: UDP Server
 //TODO: UDP Connect
 //TODO: EvDNS Wrapper
+
+#ifdef WASP_DEBUG_IO
+void wasp_scan_pool_for_io( char* pool_name, wasp_pool pool ){
+    wasp_object obj = pool->head;
+    while( obj ){
+        if( obj->type == wasp_os_connection_type ){
+            wasp_os_connection conn = (wasp_os_connection) obj;
+            printf( "    Connection " );
+            if( conn->reading ) printf( "Reading, " );
+            if( conn->writing ) printf( "Writing, " );
+            printf( "Handle: %i\n", conn->handle );
+        }else if( obj->type == wasp_os_service_type ){
+            wasp_os_service svc = (wasp_os_service) obj;
+            printf( "    Service " );
+            printf( "Handle: %i\n", svc->handle );
+        }
+        obj = obj->next;
+    }
+}
+
+WASP_BEGIN_PRIM( "scan-io", scan_io )
+    printf( "---- SCANNING I/O ACTIVITY [%i] ----\n", wasp_os_loop_use );
+    wasp_scan_pool_for_io( "root", wasp_roots );
+    wasp_scan_pool_for_io( "grey", wasp_greys );
+    wasp_scan_pool_for_io( "black", wasp_blacks );
+    wasp_scan_pool_for_io( "white", wasp_whites );
+    printf( "-------- DONE SCANNING I/O --------\n" );
+WASP_END_PRIM( scan_io )
+
+#endif
 
 void wasp_init_os_subsystem( ){
 #ifdef WASP_IN_WIN32
@@ -713,7 +783,11 @@ void wasp_init_os_subsystem( ){
 
     WASP_BIND_PRIM( serve_tcp );
     WASP_BIND_PRIM( resolve_ipv4 );
-
+    
+    WASP_BIND_PRIM( close_service );
+#ifdef WASP_DEBUG_IO
+    WASP_BIND_PRIM( scan_io );
+#endif
     wasp_set_global( wasp_symbol_fs( "*console*" ), 
                      wasp_vf_connection( wasp_make_stdio( ) ) );
 }

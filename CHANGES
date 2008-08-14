@@ -1,11 +1,14 @@
-????/??/?? Port lib/socks-client, lib/socks-server Back to WaspVM
+2008/08/13 Port lib/socks-client, lib/socks-server Back to WaspVM
   - Added (random-integer minimum maximum) -> integer primitive.
   - Added (resolve-ipv4 hostname) -> integer primitive.
   - Modified tcp-connect to accept integer addresses.
-  t Rename cancel-task to cancel-timeout.
-  t Added (close-service os-service) primitive.
-  t Ported lib/socks-client and lib/socks-server from MOSREF 2.0 to WaspVM.
-  t Added a unit test for lib/socks-client and lib/socks-server.
+  - Rename cancel-task to cancel-timeout.
+  - Added (close-service os-service) primitive.
+  - Ported lib/socks-client and lib/socks-server from MOSREF 2.0 to WaspVM.
+  - Added a unit test for lib/socks-client and lib/socks-server.
+  - Fixed overuse of OS loop due to cancel-task not decreasing the OS usage
+    index.
+  - Added (scan-io) primitive when compiled with WASP_DEBUG_IO
 
 2008/08/13 Port lib/bridge Back to WaspVM
   - Ported lib/bridge from MOSREF 2.0 to WaspVM.
