@@ -4,13 +4,16 @@
   + All string-*! primitives are now buffer-* primitives.
   + Added buffer->string primitive.
   + Buffers are compared by address, strings by content.
-
+  
 ????/??/?? Improvements to WaspDoc
   + Modified waspdoc check source to consume a root directory argument.
   + Added glob-files primitive.
   + Modified waspdoc/ms-file to document macros.
   + Modified waspdoc/c-file to document primitive functions.
   + Modified waspdoc/c-file to document primitive types.
+
+- Add the (ensure cleanup stmt ...) macro.
+  Emulates the common (guard (lambda (err) cleanup (re-error err)) ...) idiom.
 
 - Explicitly free all objects at shutdown.
   - Ensures that listeners will close, etc.

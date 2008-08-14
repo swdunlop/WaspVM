@@ -16,6 +16,7 @@
 
 (module "mosref/base")
 
+(import "lib/crypto-filter")
 (import "lib/checksum-filter")
 (import "lib/copy-filter")
 (import "lib/trace")
@@ -33,7 +34,7 @@
 ;;; But the node key? Let's aim higher..  Oh Mr. OS...
 (define (make-private-key) (read-entropy 32))
 
-(define find-public-key private-key curve25519-public)
+(define find-public-key curve25519-public)
 (define find-shared-secret curve25519-secret)
 
 (export make-mosref-recv make-mosref-xmit)
@@ -43,11 +44,13 @@
   (define (xmit-encrypt message) (salsa20-encrypt xmit-key message))
 
   (output-chain xmit
-                (trace-filter "xmit-ciphertext")
+                ;(trace-filter "xmit-ciphertext")
                 (encrypt-filter xmit-encrypt)
-                (trace-filter "xmit-plaintext w/cs")
+                ;(trace-filter "xmit-plaintext w/len+cs")
+                (prepend-collation-filter)
+                ;(trace-filter "xmit-plaintext w/cs")
                 (prepend-checksum-filter crc32)
-                (trace-filter "xmit-plaintext")
+                ;(trace-filter "xmit-plaintext")
                 (copy-filter)))
 
 (define (make-mosref-recv recv recv-key recv-iv)
@@ -55,9 +58,12 @@
   (define (recv-decrypt message) (salsa20-decrypt recv-key message))
 
   (input-chain recv
-               (trace-filter "recv-ciphertext")
+               ;(trace-filter "recv-ciphertext")
                (decrypt-filter recv-decrypt)
-               (trace-filter "recv-plaintext w/cs")
+               ;(trace-filter "recv-plaintext w/len+cs")
+               (check-collation-filter)
+               ;(trace-filter "recv-plaintext w/cs")
                (check-checksum-filter crc32)
-               (trace-filter "recv-plaintext")))
+               ;(trace-filter "recv-plaintext")
+               ))
 

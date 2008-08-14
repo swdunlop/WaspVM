@@ -3,8 +3,21 @@
   - Copied lib/crypto-filter into the Core.
   - Copied lib/checksum-filter into the Core.
   - Copied lib/copy-filter into the Core.
-  t Modified mosref/base to use curve25519 and salsa20.
-  t Modified make-salsa20-key to accept an optional IV argument.
+  - Restored crc32 primitive to static build.
+  - Modified mosref/base to use curve25519 and salsa20.
+  - Modified make-salsa20-key to accept an optional IV argument.
+  - Modified (wait timeout input) in core/io to cancel the timeout after a
+    message arrives.
+  - Fixed core/io to use current-input, not current-process-input.
+  - Fixed core/io to use current-output, not current-process-output.
+  - Added (wait timeout) method to core/io.
+  - Added test/mosref-base to test MOSREF's fundamental xmit and recv 
+    operations.
+  - Added string->byte to core.c
+  - Added string->word to core.c
+  - Added string->quad to core.c
+  - Added lib/collate-filter, which prepends a length field as needed.
+  - Ensured messages are intact by including a length header.
 
 2008/08/13 Port lib/socks-client, lib/socks-server Back to WaspVM
   - Added (random-integer minimum maximum) -> integer primitive.

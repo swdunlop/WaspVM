@@ -1,4 +1,8 @@
 - Protection for MOSREF Against Information Theoretic attacks
+  + Add a maximum and minimum value to check-collation.
+  + Protect check-checksum-filter against messages shorter than by specifying
+    a check-collation minimum of 4.
+  + Protect against unholy large messages with a check-collation maximum.
   + Added (salsa20-iv key) and (set-salsa20-iv! key iv) to permit failure
     triggered rekeying.
   + Added one or more bytes of prefix noise to plaintext.

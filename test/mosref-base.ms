@@ -3,6 +3,8 @@
 
 (enable-spot-tests)
 
+(print "Gathering entropy..\n")
+
 (define private-1  (make-private-key))
 (define private-2  (make-private-key))
 
@@ -17,6 +19,8 @@
 
 (define iv-1  (make-iv))
 (define iv-2  iv-1)
+
+(print "..Entropy gathered, proceeding to test.\n")
 
 (define transport (make-queue))
 
@@ -34,4 +38,14 @@
                "I understand equations, both the simple and quadratical,"
                "About binomial theorem I'm teeming with a lot o' news,"
                "With many cheerful facts about the square of the hypotenuse."))
+
+(s: (send "Hello" xmit)
+    (wait 1000 recv))
+
+(r: "Hello")
+
+(s: (send verse xmit)
+    (wait 1000 recv))
+
+(r: verse)
 
