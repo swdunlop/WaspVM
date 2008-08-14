@@ -1,10 +1,14 @@
 ????/??/?? Port mosref/drone and mosref/console into WaspVM.
-  - Ported lib/buffer-channel into the Core.
-  - Ported lib/tag-filter into the Core.
-  - Ported lib/package-filter into the Core.
-  + Replaced all uses of ecdh and aes with generic ciphers from base in 
+  - Ported lib/buffer-channel into the core.
+  - Ported lib/tag-filter into the core.
+  - Ported lib/package-filter into the core.
+  - Ported lib/fuzz-filter into the core.
+  + Ported test/affiliation into the core.
+  t Replaced use of base64-encode with format.
+  t Replaced use of base64-decode with common sense.
+  t Replaced all uses of ecdh and aes with generic ciphers from base in 
     mosref/drone.
-  + Replaced all uses of ecdh and aes with generic ciphers from base in 
+  t Replaced all uses of ecdh and aes with generic ciphers from base in 
     mosref/console.
 
 2008/08/14 Port mosref/base into WaspVM. 
