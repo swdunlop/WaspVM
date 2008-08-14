@@ -126,6 +126,33 @@ void wasp_untree_cb( wasp_value value, wasp_tc tc ){
     wasp_tc_add( tc, value );
 }
 
+char* wasp_req_strfield( wasp_string str, int sz ){
+    if( wasp_string_length( str ) < sz )
+        wasp_errf( wasp_es_vm, "six", "string too small", sz, str );
+    return wasp_sf_string( str );
+}
+
+WASP_BEGIN_PRIM( "string->byte", string_to_byte )
+    REQ_STRING_ARG( string )
+    NO_REST_ARGS( )
+    
+    INTEGER_RESULT( *(wasp_byte*)wasp_req_strfield( string, 1 ) ); 
+WASP_END_PRIM( string_to_byte )
+
+WASP_BEGIN_PRIM( "string->word", string_to_word )
+    REQ_STRING_ARG( string )
+    NO_REST_ARGS( )
+    
+    INTEGER_RESULT( htons( *(wasp_word*)wasp_req_strfield( string, 2 ) ) ); 
+WASP_END_PRIM( string_to_word )
+
+WASP_BEGIN_PRIM( "string->quad", string_to_quad )
+    REQ_STRING_ARG( string )
+    NO_REST_ARGS( )
+    
+    INTEGER_RESULT( htonl( *(wasp_quad*)wasp_req_strfield( string, 1 ) ) ); 
+WASP_END_PRIM( string_to_quad )
+
 WASP_BEGIN_PRIM( "string->integer", string_to_integer )
     REQ_STRING_ARG( string )
     NO_REST_ARGS( )
@@ -1972,9 +1999,9 @@ void wasp_bind_core_prims( ){
     WASP_BIND_PRIM( word_to_string );
     WASP_BIND_PRIM( quad_to_string );
 
-    // WASP_BIND_PRIM( string_to_byte );
-    // WASP_BIND_PRIM( string_to_word );
-    // WASP_BIND_PRIM( string_to_quad );
+    WASP_BIND_PRIM( string_to_byte );
+    WASP_BIND_PRIM( string_to_word );
+    WASP_BIND_PRIM( string_to_quad );
 
     WASP_BIND_PRIM( append );
     WASP_BIND_PRIM( appendd );
