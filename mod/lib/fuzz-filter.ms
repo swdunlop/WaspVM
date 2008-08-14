@@ -62,7 +62,7 @@
              (if (eq? (error-key err) 'timeout)
                (send first out)
                (re-error err)))
-        (define second (pass-up/duration in out 100))
+        (define second (pass-up/duration in out 10))
         (send (string-append first second) out)))
 
   (define (pass-rule)
