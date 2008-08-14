@@ -18,6 +18,7 @@
 
 (import "lib/crypto-filter")
 (import "lib/checksum-filter")
+(import "lib/collate-filter")
 (import "lib/copy-filter")
 (import "lib/trace")
 
