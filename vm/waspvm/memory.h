@@ -128,6 +128,8 @@ typedef int wasp_boolean;
         wasp_errf( wasp_es_vm, "sxx", "type mismatch", wasp_##tn##_type, val ); \
     } 
 
+struct wasp_boolean_data { int x; };
+struct wasp_null_data { int x; };
 #define WASP_I_TYPE__( tn ) \
     wasp_##tn##_type->format = (wasp_format_mt)wasp_format_##tn; \
     wasp_##tn##_type->trace = (wasp_gc_mt)wasp_trace_##tn; \

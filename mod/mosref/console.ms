@@ -19,7 +19,6 @@
 (import "mosref/base")
 (import "mosref/endpoint")
 
-(import "lib/cfb")
 (import "lib/crypto-filter")
 (import "lib/buffer-channel")
 (import "lib/build")
@@ -29,7 +28,7 @@
 (import "lib/s-filter")
 (import "lib/package-filter")
 
-(export console-affiliation console-repl make-drone-exe make-console-ecdh)
+(export console-affiliation console-repl make-drone-exe)
 
 (import "lib/iterate")
 
@@ -40,9 +39,7 @@
                         "..." 
                         *line-sep*)))
 
-(define (make-console-ecdh) (make-ecdh-key *ecdh-keysize*))
-
-(define (console-affiliation session-ecdh xmit recv)
+(define (console-affiliation session-private xmit recv)
   ;;;TODO: Configure timeout.
   (define read (buffer-channel recv))
 
@@ -50,20 +47,19 @@
 
   (step "Reading Drone Public Key")
   ;;; Drone --> Console, via plaintext, Dp
-  (define drone-ecdh (import-ecdh (read 59)))
-  (define aes-key (make-aes-key 256 
-                                (ecdh-shared-secret session-ecdh drone-ecdh)))
+  (define drone-public (read 32))
+  (define traffic-key  (find-shared-secret session-private drone-public))
 
   (step "Reading Drone IV")
   ;;; Drone --> Console, via KK, DD
-  (define drone-iv (aes-decrypt aes-key (read 16)))
+  (define drone-iv (decrypt traffic-key (read 8)))
 
   (step "Transmitting Console IV")
   ;;; Console --> Drone, via KK, CC
-  (send (aes-encrypt aes-key console-iv) xmit)
+  (send (encrypt traffic-key console-iv) xmit)
   
-  (define report (make-mosref-recv recv aes-key drone-iv))
-  (define command (make-mosref-xmit xmit aes-key console-iv))
+  (define report (make-mosref-recv recv traffic-key drone-iv))
+  (define command (make-mosref-xmit xmit traffic-key console-iv))
 
   (step "Waiting for Drone to confirm Console IV")
   ;;; Drone --> Console, via RK, CC
@@ -78,7 +74,7 @@
   (step "Affiliation complete.")
   (list command report))
 
-(define (make-drone-exe console-addr console-portno console-ecdh platform)
+(define (make-drone-exe console-addr console-portno console-public platform)
   (build-exe platform
              `((import "mosref/drone")
                (import "mosref/endpoint")
@@ -87,12 +83,9 @@
                (define conn (tcp-connect ,console-addr ,console-portno))
                (apply spawn-endpoint 
                       drone-endpoint
-                      (drone-affiliation 
-                        (import-ecdh
-                          (base64-decode ,(base64-encode (export-public-ecdh 
-                                                           console-ecdh))))
+                      (drone-affiliation ,(format console-public))
                         (input conn)
-                        (output conn))))))
+                        (output conn)))))
 
 ;;TODO: import handler.
 (define (console-endpoint) (send 'close))
@@ -180,8 +173,8 @@
     (send prog repl-xmit))
 
   (define cmds 
-    (dict (cons 'quit
-                quit-repl)))
+    (make-dict (cons 'quit
+                     quit-repl)))
 
   (define default-cmd eval-expr)
 

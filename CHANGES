@@ -1,16 +1,17 @@
-????/??/?? Port mosref/drone and mosref/console into WaspVM.
+2008/08/14 Port MOSREF Affiliation into WaspVM.
   - Ported lib/buffer-channel into the core.
   - Ported lib/tag-filter into the core.
   - Ported lib/package-filter into the core.
   - Ported lib/fuzz-filter into the core.
   - Ported lib/line-filter into the core.
-  t Ported test/affiliation into the core.
-  t Replaced use of base64-encode with format.
-  t Replaced use of base64-decode with common sense.
-  t Replaced all uses of ecdh and aes with generic ciphers from base in 
+  - Replaced use of base64-encode with format.
+  - Replaced use of base64-decode with common sense.
+  - Replaced all uses of ecdh and aes with generic ciphers from base in 
     mosref/drone.
-  t Replaced all uses of ecdh and aes with generic ciphers from base in 
+  - Replaced all uses of ecdh and aes with generic ciphers from base in 
     mosref/console.
+  - Ported test/affiliation into the core.
+  - Fix -- Found wasp_prng state was not being properly rooted.
 
 2008/08/14 Port mosref/base into WaspVM. 
   - Copied MOSREF 2.0-b3 into the Core.

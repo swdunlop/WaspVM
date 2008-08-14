@@ -87,6 +87,7 @@ wasp_symbol wasp_symbol_fs( const char* s ){
 wasp_string wasp_make_string( wasp_integer capacity ){
     wasp_string string = WASP_OBJALLOC( string );
     string->pool = malloc( capacity + 1 );
+    bzero( string->pool, capacity + 1 );
     string->capacity = capacity;
     AUDIT_STRING( string );
     return string;
@@ -230,8 +231,9 @@ void wasp_string_expand( wasp_string string, wasp_integer newlen ){
     while( newcap < newlen ) newcap <<= 1;
 
     string->pool = realloc( string->pool, newcap + 1 );
+    bzero( string->pool + string->capacity, newcap - string->capacity );
     string->capacity = newcap;
-    
+
     AUDIT_STRING( string );
 }
 void wasp_string_flush( wasp_string string ){

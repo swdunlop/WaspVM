@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-WASP_BEGIN_TYPE( salsa20_key );
+WASP_BEGIN_TYPE( salsa20_key )
     salsa20_ctx context;
 WASP_END_TYPE( salsa20_key )
 
@@ -27,7 +27,7 @@ WASP_END_TYPE( salsa20_key )
 #define SALSA20_KEY_RESULT( vn ) TYPED_RESULT( vn, salsa20_key )
 #define OPT_SALSA20_KEY_ARG( vn ) OPT_TYPED_ARG( vn, salsa20_key )
 
-WASP_GENERIC_MT( salsa20_key );
+ WASP_GENERIC_MT( salsa20_key );
 WASP_C_TYPE2( salsa20_key, "salsa20-key" );
 
 wasp_salsa20_key wasp_make_salsa20_key( wasp_string seed ){
@@ -168,10 +168,47 @@ wasp_string wasp_read_entropy_str( int req ){
     return entropy;
 }
 
+WASP_BEGIN_PRIM( "read-entropy", read_entropy )
+    REQ_INTEGER_ARG( amount );
+    NO_REST_ARGS( );
+    
+    STRING_RESULT( wasp_read_entropy_str( amount ) );
+WASP_END_PRIM( read_entropy )
+
+wasp_salsa20_key wasp_prng = NULL;
+
+wasp_salsa20_key wasp_get_prng( ){
+    if( wasp_prng ) return wasp_prng;
+    wasp_string seed = wasp_read_entropy_str( 32 );
+    wasp_string iv = wasp_read_entropy_str( 8 );
+
+    wasp_prng = wasp_make_salsa20_key( seed );
+    wasp_root_obj( wasp_prng );
+    wasp_set_salsa20_iv( wasp_prng, iv );
+
+    return wasp_prng;
+}
+
+wasp_string wasp_read_prng( int req ){
+    wasp_string data = wasp_make_string( req );
+    salsa20_crypt( 
+        & wasp_get_prng( )->context, 
+        wasp_sf_string( data ), 
+        wasp_sf_string( data ), 
+       req  
+    );
+    
+    wasp_string_wrote( data, req );
+    return data;
+}
+
 wasp_quad wasp_random_quad( ){
-    wasp_quad q;
-    wasp_read_entropy( &q, sizeof( q ) );
-    return q;
+    char q[16];
+    salsa20_crypt( 
+        & wasp_get_prng( )->context, 
+        q, q, 4 
+    );
+    return *(wasp_quad*)q; 
 }
 
 wasp_integer wasp_random_integer( wasp_integer min, wasp_integer max ){
@@ -199,39 +236,6 @@ WASP_BEGIN_PRIM( "random-integer", random_integer )
     
     INTEGER_RESULT( wasp_random_integer( min, max ) );
 WASP_END_PRIM( random_integer )
-
-WASP_BEGIN_PRIM( "read-entropy", read_entropy )
-    REQ_INTEGER_ARG( amount );
-    NO_REST_ARGS( );
-    
-    STRING_RESULT( wasp_read_entropy_str( amount ) );
-WASP_END_PRIM( read_entropy )
-
-wasp_salsa20_key wasp_prng = NULL;
-
-wasp_salsa20_key wasp_get_prng( ){
-    if( wasp_prng ) return wasp_prng;
-    wasp_string seed = wasp_read_entropy_str( 32 );
-    wasp_string iv = wasp_read_entropy_str( 8 );
-
-    wasp_prng = wasp_make_salsa20_key( seed );
-    wasp_set_salsa20_iv( wasp_prng, iv );
-
-    return wasp_prng;
-}
-
-wasp_string wasp_read_prng( int req ){
-    wasp_string data = wasp_make_string( req );
-    salsa20_crypt( 
-        & wasp_get_prng( )->context, 
-        wasp_sf_string( data ), 
-        wasp_sf_string( data ), 
-       req  
-    );
-    
-    wasp_string_wrote( data, req );
-    return data;
-}
 
 WASP_BEGIN_PRIM( "read-prng", read_prng )
     REQ_INTEGER_ARG( amount );

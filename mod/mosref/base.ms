@@ -22,18 +22,22 @@
 (import "lib/copy-filter")
 (import "lib/trace")
 
-(export *ecdh-keysize* *sig-length* 
-        make-iv make-private-key
+(export make-iv make-private-key decrypt encrypt
         find-public-key find-shared-secret)
 
-(define *ecdh-keysize* 32)
-(define *sig-length* 16)
+(define (encrypt keystr plaintext)
+  (salsa20-encrypt (make-salsa20-key keystr) plaintext))
+
+(define (decrypt keystr plaintext)
+  (salsa20-decrypt (make-salsa20-key keystr) plaintext))
 
 ;;; We trust the PRNG for our IV's..
 (define (make-iv) (read-prng 8))
 
 ;;; But the node key? Let's aim higher..  Oh Mr. OS...
-(define (make-private-key) (read-entropy 32))
+;(define (make-private-key) (read-entropy 32))
+(print "TODO: Use Entropy for Node Keys again..\n")
+(define (make-private-key) (read-prng 32))
 
 (define find-public-key curve25519-public)
 (define find-shared-secret curve25519-secret)
@@ -46,7 +50,7 @@
 
   (output-chain xmit
                 ;(trace-filter "xmit-ciphertext")
-                (encrypt-filter xmit-encrypt)
+                ;TODO: DEBUG (encrypt-filter xmit-encrypt)
                 ;(trace-filter "xmit-plaintext w/len+cs")
                 (prepend-collation-filter)
                 ;(trace-filter "xmit-plaintext w/cs")
@@ -60,7 +64,7 @@
 
   (input-chain recv
                ;(trace-filter "recv-ciphertext")
-               (decrypt-filter recv-decrypt)
+               ;TODO: DEBUG (decrypt-filter recv-decrypt)
                ;(trace-filter "recv-plaintext w/len+cs")
                (check-collation-filter)
                ;(trace-filter "recv-plaintext w/cs")

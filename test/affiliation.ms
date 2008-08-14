@@ -3,44 +3,45 @@
 (import "mosref/console")
 (import "lib/fuzz-filter")
 
-(define (wait/doom . rest)
-  (define doom (make-channel))
-  (define time (timeout 5000 doom 
-                  '(fail "Failed to complete tests in the allotted time")))
-  (define data (error-on-fail (wait @rest doom)))
-  (cancel-timeout time)
-  data)
+(define (wait/doom src) (wait src))
+;(define (wait/doom src)
+;  (define data (wait 10000 src))
+; (when (eq? data 'timeout)
+;   (error 'fail "Failed to complete tests in the allotted time"))
+; (return data))
 
 (define (expect channel value)
   (equal? value (wait/doom channel)))
 
 (enable-spot-tests)
 
-(define console-ecdh (make-ecdh-key 384))
+(define console-private (make-private-key))
+(define console-public (find-public-key console-private))
 (define drone-port #f)
 (define console-port #f)
 
-(define drone-xmit (make-channel))
-(define console-xmit (make-channel))
+(define drone-xmit (make-queue))
+(define console-xmit (make-queue))
 (define drone-recv (input-chain console-xmit 
                                 ;(trace-filter "drone-recv")
-                                (fuzz-filter) 
+                                ;(fuzz-filter) 
                                 ;(trace-filter "drone-recv/fz")
                                 ))
+
 (define console-recv (input-chain drone-xmit 
                                   ;(trace-filter "console-recv")
-                                  (fuzz-filter) 
+                                  ;(fuzz-filter) 
                                   ;(trace-filter "console-recv/fz")
                                   ))
 
-(define sync (make-channel))
+(define sync (make-queue))
 (spawn (lambda ()
-         (set! drone-port (drone-affiliation console-ecdh 
+         (set! drone-port (drone-affiliation console-public
                                              drone-xmit drone-recv))
          (send 'drone-ready sync)))
 
 (spawn (lambda ()
-         (set! console-port (console-affiliation console-ecdh 
+         (set! console-port (console-affiliation console-private
                                                  console-xmit console-recv))
          (send 'console-ready sync)))
 
@@ -155,13 +156,13 @@
 (define (fuzz xmit recv ct)
   (until (<= ct 0)
      (set! ct (- ct 1))
-     (define msg (random-string (random-integer 0 1024)))
+     (define msg (read-prng (random-integer 0 1024)))
      (send (copy-string msg) xmit)
      (print (if (string=? (wait/doom recv) msg) "." "x")))
   (print *line-sep*))
 
-(fuzz console-xmit drone-recv 1000)
-(fuzz drone-xmit console-recv 1000)
+(fuzz console-xmit drone-recv 10000)
+(fuzz drone-xmit console-recv 10000)
 
 (send 'close console-xmit)
 (s: (wait/doom drone-recv))

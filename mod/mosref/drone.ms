@@ -33,30 +33,30 @@
                         "..."
                         *line-sep*)))
 
-(define (drone-affiliation console-ecdh xmit recv)
+(define (drone-affiliation console-public xmit recv)
   ;;;TODO: Configure timeout.
   (define read (buffer-channel recv))
 
   (step "Preparing keys")
   (define drone-iv (make-iv))
-  (define drone-ecdh (make-ecdh-key 384)) 
-  (define aes-key (make-aes-key 256 
-                                (ecdh-shared-secret drone-ecdh console-ecdh)))
+  (define drone-private (make-private-key)) 
+  (define drone-public  (find-public-key drone-private)) 
+  (define traffic-key (find-shared-secret drone-private console-public))
 
   (step "Sending Drone Public Key")
   ;;; Drone --> Console, via plaintext, Dp
-  (send (export-public-ecdh drone-ecdh) xmit)
+  (send drone-public xmit)
 
   (step "Sending Drone IV")
   ;;; Drone --> Console, via KK, DD
-  (send (aes-encrypt aes-key drone-iv) xmit)
+  (send (encrypt traffic-key drone-iv) xmit)
 
   (step "Reading Console IV")
   ;;; Console --> Drone, via KK, CC
-  (define console-iv (aes-decrypt aes-key (read 16)))
+  (define console-iv (decrypt traffic-key (read 8)))
  
-  (define report (make-mosref-xmit xmit aes-key drone-iv))
-  (define command (make-mosref-recv recv aes-key console-iv))
+  (define report (make-mosref-xmit xmit traffic-key drone-iv))
+  (define command (make-mosref-recv recv traffic-key console-iv))
 
   (step "Confirming Console IV")
   ;;; Drone --> Console, via RK, CC

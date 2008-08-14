@@ -22,7 +22,9 @@ WASP_BEGIN_PRIM( "curve25519-public", curve25519_public )
     NO_REST_ARGS( )
    
     if( wasp_string_length( private ) != 32 )
-        wasp_errf( wasp_es_vm, "si", "private must be 32 bytes long", wasp_string_length( private ) );
+        wasp_errf( 
+            wasp_es_vm, "si", "private must be 32 bytes long", 
+                              wasp_string_length( private ) );
 
     wasp_string public = wasp_make_string( 32 );
 

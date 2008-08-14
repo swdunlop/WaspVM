@@ -107,7 +107,7 @@ wasp_object wasp_objalloc( wasp_type type, wasp_quad size ){
     obj->type = type;
 
     wasp_pool_obj( obj, wasp_blacks );
-    // assert( ! ( ((wasp_quad)obj) & 1 ) );
+    assert( ! ( ((wasp_quad)obj) & 1 ) );
     return obj;
 }
 void wasp_objfree( void* obj ){
@@ -163,6 +163,7 @@ void wasp_collect_window( ){
     if( wasp_new_objects > wasp_new_tolerance )wasp_collect_garbage( );
 }
 void wasp_collect_garbage( ){
+    // return; // DEBUG: HERE WE GO AGAIN
     //printf( "Beginning GC at %i; old %i v. new %i..\n", wasp_since, wasp_old_objects, wasp_new_objects );
     wasp_object obj;
 

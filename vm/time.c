@@ -56,10 +56,10 @@ wasp_task wasp_make_task( wasp_task_mt mt, wasp_value context ){
 }
 
 wasp_task wasp_schedule_task( wasp_task task, wasp_quad ms ){
+    if( task->pending ) return;
     task->time.tv_sec = ms / 1000;
     task->time.tv_usec = ((ms % 1000)) * 1000;
     evtimer_add( &( task->event ), &( task->time ) );
-    if( task->pending ) return;
     task->pending = 1;
     wasp_root_obj( (wasp_object) task );
     wasp_enable_os_loop( );    

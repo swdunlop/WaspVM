@@ -4,6 +4,7 @@ WASPVM_EXE ?= $(ROOT)/stubs/waspvm-$(PLATFORM)$(EXE)
 WASPC_EXE ?= $(ROOT)/waspc$(EXE)
 WASP_EXE ?= $(ROOT)/wasp$(EXE)
 WASPDOC_EXE ?= $(ROOT)/waspdoc$(EXE)
+MOSREF_EXE ?= $(ROOT)/mosref$(EXE)
 WASPLD_EXE ?= $(ROOT)/waspld$(EXE)
 
 CFLAGS += -Ivm -I.
@@ -33,6 +34,10 @@ $(WASPDOC_EXE): $(WASPC_EXE) $(WASPVM_EXE)
 	cd mod && $(WASPC_EXE) -exe $(WASPDOC_EXE) -stub $(WASPVM_EXE) bin/waspdoc
 	chmod +rx $(WASPDOC_EXE)
 
+$(MOSREF_EXE): $(WASPC_EXE) $(WASPVM_EXE)
+	cd mod && $(WASPC_EXE) -exe $(MOSREF_EXE) -stub $(WASPVM_EXE) bin/mosref
+	chmod +rx $(MOSREF_EXE)
+
 $(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE) 
 	cd mod && $(WASPC_EXE) -exe $(WASP_EXE) -stub $(WASPVM_EXE) bin/wasp
 	chmod +rx $(WASP_EXE)
@@ -48,6 +53,9 @@ exe-package: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 
 debug: $(WASP_EXE)
 	if which rlwrap; then cd mod && rlwrap gdb $(WASP_EXE); else cd mod && gdb $(WASP_EXE); fi
+	
+valgrind: $(WASP_EXE)
+	if which rlwrap; then cd mod && rlwrap valgrind --leak-check=full $(WASP_EXE); else cd mod && valgrind --leak-check=full $(WASP_EXE); fi
 	
 repl: $(WASP_EXE)
 	if which rlwrap; then cd mod && rlwrap $(WASP_EXE); else cd mod && $(WASP_EXE); fi
@@ -68,10 +76,12 @@ clean:
 	rm -f vm/*$(OBJ) $(WASPDOC_EXE) $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE)
 	rm -rf package
 
-test: test-waspvm test-mosref
+test: test-waspvm test-mosref test-affiliation
 test-waspvm: test-url test-http-url test-spawn-connection
 test-mosref: test-bridge test-curve25519 test-salsa test-socks test-mosref-base
 
 test-%: test/%.ms $(WASP_EXE) 
 	cd mod && $(WASP_EXE) ../$<
+
+mosref: $(MOSREF_EXE)
 
