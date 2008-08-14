@@ -3,7 +3,8 @@
   - Ported lib/tag-filter into the core.
   - Ported lib/package-filter into the core.
   - Ported lib/fuzz-filter into the core.
-  + Ported test/affiliation into the core.
+  - Ported lib/line-filter into the core.
+  t Ported test/affiliation into the core.
   t Replaced use of base64-encode with format.
   t Replaced use of base64-decode with common sense.
   t Replaced all uses of ecdh and aes with generic ciphers from base in 
