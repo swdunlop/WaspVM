@@ -1,3 +1,6 @@
+????/??/?? Port MOSREF into WaspVM Core
+  - Copied MOSREF 2.0-b3 into the Core.
+
 2008/08/13 Port lib/socks-client, lib/socks-server Back to WaspVM
   - Added (random-integer minimum maximum) -> integer primitive.
   - Added (resolve-ipv4 hostname) -> integer primitive.
