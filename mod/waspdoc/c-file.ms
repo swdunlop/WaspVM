@@ -9,7 +9,7 @@
   (define type-defns (make-tc))
   (define exported (make-dict))
 
-  (define source (make-waspdoc-source id name (set) exported))
+  (define source (make-waspdoc-source id name (make-set) exported))
 
   (define lines (split-lines (read-data-file path)))
   
