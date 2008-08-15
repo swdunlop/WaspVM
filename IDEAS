@@ -1,4 +1,6 @@
 - Protection for MOSREF Against Information Theoretic attacks
+  + Use a unified console private key.
+  + Drones are assigned drone-iv at compilation, all drones use same console-public.
   + Add a maximum and minimum value to check-collation.
   + Protect check-checksum-filter against messages shorter than by specifying
     a check-collation minimum of 4.
@@ -7,6 +9,7 @@
     triggered rekeying.
   + Added one or more bytes of prefix noise to plaintext.
   + Added one or more bytes of suffix noise padding.
+  + Make shell command work on Win32.
 
 - WaspDoc Markup Language
   - Derived from HazeML

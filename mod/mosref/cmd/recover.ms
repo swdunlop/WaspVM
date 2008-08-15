@@ -44,7 +44,7 @@
   (unless (node-online node)
     (send-err "Intermediate node " (format (node-id node)) " is not online."))
   
-  (define ecdh (make-console-ecdh))
+  ;TODO: (define ecdh (make-console-ecdh)) Unnecessary?
 
   (spawn-drone-listener node next))
 

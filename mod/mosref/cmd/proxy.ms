@@ -45,7 +45,7 @@
           (define portno (wait))
           (define lapse (wait))
           (define conn (tcp-connect addr portno))
-          (define timer (timeout lapse (output conn) 'timeout))
+          (define timer (timeout lapse (output conn)))
           (define evt (wait conn))
           (cond 
             ((eq? evt 'timeout) (send '(fail "timed out"))

@@ -75,7 +75,7 @@
   (step "Affiliation complete.")
   (list command report))
 
-(define (make-drone-exe console-addr sin console-portno console-ecdh platform)
+(define (make-drone-exe console-addr sin console-portno console-public platform)
   (build-exe platform
              `((import "mosref/drone")
                (import "mosref/transport")
@@ -121,25 +121,6 @@
   (define id (node-id drone))
   (alert "Drone " (format id) " has lost connection.")
   (set-node-online! (find-drone-by-bridge bridge) #f))
-
-;; transmits the supplied program to be executed on the remote endpoint of
-;; the supplied transport.
-
-(define (make-drone-exe console-addr console-portno console-public platform)
-  (build-exe platform
-             `((import "mosref/drone")
-               (import "mosref/endpoint")
-               (import "lib/cons-filter") ;TODO: Should be forwarded..
-               (import "lib/format-filter") ;TODO: Should be forwarded..
-               (define conn (tcp-connect ,console-addr ,console-portno))
-               (apply spawn-endpoint 
-                      drone-endpoint
-                      (drone-affiliation ,(format console-public))
-                        (input conn)
-                        (output conn)))))
-
-;;TODO: import handler.
-(define (console-endpoint) (send 'close))
 
 ;; transmits the supplied program to be executed on the remote endpoint of
 ;; the supplied transport.

@@ -14,21 +14,23 @@
 ; along with this library; if not, write to the Free Software Foundation, 
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 
-(module "mosref/cmds")
-(import "mosref/cmd/clear")
-(import "mosref/cmd/cp")
-(import "mosref/cmd/do")
-(import "mosref/cmd/drone")
-(import "mosref/cmd/exit")
-;(import "mosref/cmd/fork") ;TODO:TERMINAL
-(import "mosref/cmd/help")
-(import "mosref/cmd/load")
-(import "mosref/cmd/nodes")
-(import "mosref/cmd/on")
-;(import "mosref/cmd/proxy") ;TODO:CONNECT
-(import "mosref/cmd/recover")
-;(import "mosref/cmd/scan")
-(import "mosref/cmd/set")
-(import "mosref/cmd/sh")
-(import "mosref/cmd/with")
+(module "mosref/patch")
+(import "lib/bridge")
 
+; Given a pair of channels, xmit and recv, spawns a process that relays all
+; data received by xmit to recv.
+
+(define (patch in out)
+  (spawn (lambda ()
+           (define recv (if (lane? in) (lane-recv in) (output in)))
+           (define xmit (if (lane? out) (lane-xmit out) (input out)))
+           (forever
+             (define evt (wait recv))
+             (send evt xmit)
+             (when (eq? evt 'close) (return))))))
+
+(define (patch2 left right)
+  (patch left right)
+  (patch right left))
+
+(export patch patch2)

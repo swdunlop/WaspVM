@@ -6,8 +6,26 @@
   - Ported mosref/shell into the core.
   - Merged mosref/base and mosref/endpoint into mosref/transport.
   - Updated implementations of Console and Drone endpoints.
+  t Ported lib/args-fu into the core.
+  t Ported lib/catch into the core.
+  t Ported mosref/node into the core.
+  t Ported mosref/parse into the core.
+  t Ported mosref/format into the core.
+  t Ported mosref/cmds into the core.
+  t Ported mosref/listener into the core.
+  t Ported mosref/props into the core.
+  t Ported mosref/patch into the core.
+  + Ported mosref/prop/* into the core.
+  + Ported mosref/cmd/* into the core.
   + Ported bin/mosref into the core.
   t Disabled use of lib/terminal in bin/mosref.
+  - Disabled exploit command.
+  - Disabled fork command.
+  - Disabled proxy command.
+    + NOTE: proxy command and anything that relies on tcp-forward will fail until the 'connect
+      message is put into vm/os.c.
+  - Disabled scan command.
+
   
 2008/08/14 Port MOSREF Affiliation into WaspVM.
   - Ported lib/buffer-channel into the core.
