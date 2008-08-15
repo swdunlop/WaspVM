@@ -144,7 +144,6 @@
       (dict-remove! (bridge-recv-tags bridge) tag)))
   lane)
 
-
 (define (lane-monitor bridge lane)
   (define b-xmit (bridge-xmit bridge))
   (define l-xmit (lane-xmit lane))
@@ -185,4 +184,13 @@
         lane-xmit lane-recv lane-tag lane? <lane>)
 
 (export make-bridge bridge-lanes bridge? <bridge>)
+
+; Extends Core/IO for Lanes
+
+(define (input (<lane> lane)) (input (lane-recv lane)))
+(define (output (<lane> lane)) (output (lane-xmit lane)))
+(define (timeout (<integer> ms) (<lane> l))
+  (timeout-input ms (input (lane-recv lane))))
+
+(export input output)
 

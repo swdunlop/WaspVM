@@ -83,5 +83,6 @@ test-mosref: test-bridge test-curve25519 test-salsa test-socks test-mosref-base
 test-%: test/%.ms $(WASP_EXE) 
 	cd mod && $(WASP_EXE) ../$<
 
-mosref: $(MOSREF_EXE)
+sref: $(MOSREF_EXE)
+	if which rlwrap; then cd mod && rlwrap $(MOSREF_EXE); else cd mod && $(MOSREF_EXE); fi
 

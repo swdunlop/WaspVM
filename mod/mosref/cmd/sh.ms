@@ -83,7 +83,7 @@
                  (when (eq? e 'done)
                    (return))
                  (when (eq? e 'close)
-                   (send 'done tr)
+                   (send 'done tx)
                    (return))
                  (send e tx))))
       (forever
@@ -92,8 +92,8 @@
           (return))
         (send e lx)
         (when (eq? e 'close)
-          (send 'done lr)
-          (send e (output tr)))))
+          (send 'done lx)
+          (send e (output tx)))))
     (send-err "Could not resolve initial lane.")
     (return))
   (when (eq? (car event) 'error)
@@ -112,27 +112,26 @@
 
   (define stream (spawn-command prog args))
 
-  (define sx (input stream))
-  (define sr (output stream))
   (define tx (output))
   (define tr (input))
+  (define sr (input stream))
+  (define sx (output stream))
+  (define cmd-done #f)
 
-  (spawn (lambda ()
-           (forever
+  (spawn (function (relay-command-output)
+           (until cmd-done
              (define e (wait sr))
              (when (eq? e 'done)
                (return))
              (when (eq? e 'close)
-               (send 'done tr)
+               (set! cmd-done #t)
+               ;(send 'done tx);XX
                (return))
              (send e tx))))
+    
+  (define (poll-console-input)
+    (define event (wait 10 tr))
+    (when (eq? event 'timeout) (return))
+    (send event sx))
 
-  (forever
-    (define e (wait tr))
-    (send e sx)
-    (when (eq? e 'done)
-      (return))
-    (when (eq? e 'close)
-      (send 'done sr)
-      (send e (output tr))
-      (return))))
+  (until cmd-done (poll-console-input)))

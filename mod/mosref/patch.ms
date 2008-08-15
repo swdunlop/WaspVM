@@ -21,12 +21,12 @@
 ; data received by xmit to recv.
 
 (define (patch in out)
-  (spawn (lambda ()
-           (define recv (if (lane? in) (lane-recv in) (output in)))
-           (define xmit (if (lane? out) (lane-xmit out) (input out)))
+  (set! in (input in))
+  (set! out (output out))
+  (spawn (function (patch-process)
            (forever
-             (define evt (wait recv))
-             (send evt xmit)
+             (define evt (wait in))
+             (send evt out)
              (when (eq? evt 'close) (return))))))
 
 (define (patch2 left right)
