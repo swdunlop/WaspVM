@@ -20,7 +20,7 @@
 (import "mosref/cmd/do")
 (import "mosref/cmd/drone")
 (import "mosref/cmd/exit")
-(import "mosref/cmd/fork")
+;(import "mosref/cmd/fork") ;TODO:TERMINAL
 (import "mosref/cmd/help")
 (import "mosref/cmd/load")
 (import "mosref/cmd/nodes")
