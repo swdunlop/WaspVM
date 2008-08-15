@@ -19,7 +19,7 @@
 (import "mosref/transport")
 
 (import "lib/crypto-filter")
-(import "lib/buffer-channel")
+(import "lib/buffer-input")
 (import "lib/build")
 
 (import "lib/with-io")
@@ -41,8 +41,8 @@
                         *line-sep*)))
 
 (define (console-affiliation session-private xmit recv)
-  ;;;TODO: Configure timeout.
-  (define read (buffer-channel recv))
+  ;;;TODO: Ensure we handle 'close to read.
+  (define read (buffer-input/eoc recv))
 
   (define console-iv (make-iv))
 
@@ -85,9 +85,9 @@
                  (apply spawn-endpoint 
                         drone-endpoint
                         drone-broken
-                        (drone-affiliation ,(format console-public))
-                          (input conn)
-                          (output conn)))
+                        (drone-affiliation ,console-public
+                                           (output conn)
+                                           (input conn))))
 
                ;TODO: Send the next two statements when the drone affiliates..
                (define (import key)

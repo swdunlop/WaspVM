@@ -26,20 +26,24 @@
 #endif
 
 #ifdef AUDIT_STRINGS
-#define AUDIT_STRING( x ) wasp_audit_string( x );
-void wasp_audit_string( wasp_string string ){
-    assert( string );
-    assert( string->pool );
-    assert( string->length <= string->capacity );
-    assert( string->origin <= string->capacity );
-    assert(( string->origin + string->length ) <= string->capacity );
-    assert( string->origin < 32767 );
-    assert( string->length < 32767 );
-    assert( string->capacity < 32767 );
-    assert( string->origin < 32767 );
-    assert( string->length < 32767 );
-    assert( string->capacity < 32767 );
-}
+#define AUDIT_STRING( x ) wasp_audit_string( x, __func__ );
+
+#define audit( f, test ) \
+    if( ! (test) ){ printf( "Failed test %s, in %s.\n", #test, f ); exit(1);  }
+
+#define wasp_audit_string( string, fn ) \
+    audit( __func__, string );\
+    audit( __func__, string->pool );\
+    audit( __func__, string->length <= string->capacity );\
+    audit( __func__, string->origin <= string->capacity );\
+    audit( __func__, ( string->origin + string->length ) <= string->capacity );\
+    audit( __func__, string->origin < 32767 );\
+    audit( __func__, string->length < 32767 );\
+    audit( __func__, string->capacity < 32767 );\
+    audit( __func__, string->origin < 32767 );\
+    audit( __func__, string->length < 32767 );\
+    audit( __func__, string->capacity < 32767 );\
+
 #else
 #define AUDIT_STRING( x ) ;
 #endif
@@ -125,6 +129,18 @@ wasp_value wasp_get_global( wasp_symbol name ){
     return wasp_has_global( name ) ? name->value : wasp_vf_null();
 }
 
+void wasp_string_append_code( wasp_string str, unsigned char ch ){
+    char buf[4];
+    memset( buf, '0', 3 ); 
+    buf[3] = 0;
+    int i = 3;
+
+    do{
+        buf[ --i ] = '0' + ch % 10;
+    }while( ch /= 10 );
+   
+    wasp_string_append( str, buf, 3 );
+};
 void wasp_format_string( wasp_string buf, wasp_string str ){
     //TODO: Improve with ellision, scored length.
     AUDIT_STRING( str );
@@ -151,7 +167,7 @@ void wasp_format_string( wasp_string buf, wasp_string str ){
                 wasp_string_append_byte( buf, ch );
             }else{
                 wasp_string_append_byte( buf, '\\' );
-                wasp_string_append_unsigned( buf, ch );
+                wasp_string_append_code( buf, ch );
             }
         }
     };
@@ -409,6 +425,7 @@ void wasp_string_append_hexquad( wasp_string buf, wasp_quad word ){
 void wasp_string_append_indent( wasp_string buf, wasp_integer depth ){
     while( ( depth-- ) > 0 ) wasp_string_append_byte( buf, ' ' );
 }
+
 void wasp_string_append_unsigned( wasp_string str, wasp_quad number ){
     static char buf[256];
     buf[255] = 0;

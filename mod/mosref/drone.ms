@@ -16,7 +16,7 @@
 
 (module "mosref/drone")
 
-(import "lib/buffer-channel")
+(import "lib/buffer-input")
 (import "lib/iterate")
 (import "lib/crypto-filter")
 (import "lib/package-filter")
@@ -35,7 +35,7 @@
 
 (define (drone-affiliation console-public xmit recv)
   ;;;TODO: Configure timeout.
-  (define read (buffer-channel recv))
+  (define read (buffer-input/eoc recv))
 
   (step "Preparing keys")
   (define drone-iv (make-iv))
@@ -53,7 +53,12 @@
 
   (step "Reading Console IV")
   ;;; Console --> Drone, via KK, CC
-  (define console-iv (decrypt traffic-key (read 8)))
+  (define console-iv-ct (read 8))
+  (step "CONSOLE IV CT is " console-iv-ct)
+  (define console-iv (decrypt traffic-key console-iv-ct))
+  (step "CONSOLE IV PT is " console-iv)
+
+  ;(define console-iv (decrypt traffic-key (read 8)))
  
   (define report (make-mosref-xmit xmit traffic-key drone-iv))
   (define command (make-mosref-recv recv traffic-key console-iv))

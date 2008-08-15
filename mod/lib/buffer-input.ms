@@ -15,14 +15,16 @@
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 
 (module "lib/input-channel")
+(import "lib/catch")
 
 (define (buffer-input input)
-  (buffer-input input #f #f)))
+  (buffer-input input #f #f))
 
 (define (buffer-input (#t source) (<integer> timeout))
   (buffer-input source #f (make-queue)))
 
 (define (buffer-input (#t source) (#t timeout) (#t debris))
+  (define buffer (make-string 64))
   (set! source (input source))
 
   (define reject (cond 
@@ -32,6 +34,7 @@
                    (else (function (ignore-debris event)))))
 
   (define (process evt)
+    (print (string-append "Processing event: " (format evt) "\n"))
     (cond ((string? evt) (string-append! buffer evt))
           ((eq? evt 'close) (reject 'close)
                             (error 'close))
@@ -41,9 +44,9 @@
                  (timeout (function (more/timed)
                             (define event (wait timeout source))
                             (unless 
-                              (eq? event 'timeout) (process evt))))
+                              (eq? event 'timeout) (process event))))
                  (else (function (more/patient)
-                          (process event (wait source))))))
+                          (process (wait source))))))
 
   (function (read-input-buffer amt)
     (when (eq? amt 'rest)
@@ -54,7 +57,13 @@
       (while (< (string-length buffer) amt)
         (more)))
 
-    (string-read! buffer amt)))
+    (print "Returning first ") (print (format amt)) (print " of ") (print (format buffer)) 
+    (print "\n")
+    ;(define result (string-read! buffer amt))
+    (define result (substring buffer 0 amt))
+    (print "Which is: ") (print (format result)) (print "\n")
+    result))
+    ;(string-read! buffer amt)))
 
 (define (error-on-close fn)
   (function (close-monitor . args)

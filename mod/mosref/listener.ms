@@ -28,43 +28,43 @@
 (define (monitor-mosref-listener state)
   (define sessions (mosref-listener-sessions state))
   (define portno (mosref-listener-portno state))
-  (define listener (tcp-listen portno))
+  (define listener (serve-tcp portno))
+  
+  (define (mosref-sin-checker conn)
+    (define read (buffer-input conn 5000))
+    (define preamble (read *preamble-len*))
+    (print "PREAMBLE: ")(print (format preamble))(print "\n")
 
-  (define (spawn-checker conn)
-    (define timer (timeout 5000 (output conn) 'timeout))
-    (spawn (lambda ()
-             (forever
-               (define buf (make-string))
-               (define evt (wait conn))
-               (unless (string? evt)
-                 (send 'close conn)
-                 (cancel-timeout timer)
-                 (return))
-               (string-append! buf evt)
-               (when (>= (string-length buf) *preamble-len*)
-                 (define preamble (string-read! buf *preamble-len*))
-                 (define channel (dict-ref sessions preamble))
+    (unless (string? preamble)
+      ; You have 5 seconds to send a preamble.. Otherwise, it's the plank!
+      (print "Rejecting preamble, took too long or closed.\n")
+      (send 'close conn)
+      (return))
 
-                 (unless channel
-                   (send 'close conn)
-                   (cancel-timeout timer)
-                   (return))
+    (define channel (dict-ref sessions preamble))
 
-                 (unless (empty-string? buf)
-                   (channel-prepend! (output conn) buf))
+    (unless channel
+      ; Perhaps I should have specified a VALID preamble?
+      (print "Rejecting preamble, was invalid.\n")
+      (send 'close conn)
+      (return))
 
-                 (dict-remove! sessions preamble)
+    (dict-remove! sessions preamble)
 
-                 (send conn channel)
-                 (cancel-timeout timer)
-                 (return))))))
+    ;TODO: Figure out how to put data "back" into the channel.
+    ;      That will permit us to not have to do this:
+    (define queue (make-queue))
+    (send (read 'rest) queue)
+    (patch queue conn)
+
+    (send queue channel))
   
   (spawn (function (monitor-mosref-listener)
             (forever 
               (define evt (wait listener))
               (when (eq? evt 'close) 
                 (return))
-              (spawn-checker evt)))))
+              (spawn mosref-sin-checker evt)))))
 
 (define (register-mosref-listener portno)
   (define state (make-mosref-listener-state portno (make-dict)))

@@ -10,20 +10,23 @@
   - Ported mosref/shell into the core.
   - Merged mosref/base and mosref/endpoint into mosref/transport.
   - Updated implementations of Console and Drone endpoints.
-  t Ported lib/args-fu into the core.
-  t Ported lib/catch into the core.
+  - Ported lib/args-fu into the core.
+  - Ported lib/catch into the core.
   t Ported mosref/node into the core.
-  t Ported mosref/parse into the core.
-  t Ported mosref/format into the core.
-  t Ported mosref/cmds into the core.
+  - Ported mosref/parse into the core.
+  - Ported mosref/format into the core.
+  - Ported mosref/cmds into the core.
   t Ported mosref/listener into the core.
-  t Ported mosref/props into the core.
-  t Ported mosref/patch into the core.
-  t Ported mosref/prop/* into the core.
-  t Ported mosref/cmd/* into the core.
-  t Ported lib/cons-filter into the core.
-  + Ported bin/mosref into the core.
-  t Disabled use of lib/terminal in bin/mosref.
+  - Ported mosref/props into the core.
+  - Ported mosref/patch into the core.
+  - Added input, timeout and output methods for lanes to lib/bridge
+  - Modified mosref/patch to use the input and output multimethods defined in
+    core/io.  (And, in turn, lib/bridge)
+  - Ported mosref/prop/* into the core.
+  - Ported mosref/cmd/* into the core.
+  - Ported lib/cons-filter into the core.
+  - Ported bin/mosref into the core.
+  - Disabled use of lib/terminal in bin/mosref.
   - Disabled exploit command.
   - Disabled fork command.
   - Disabled proxy command.
@@ -34,17 +37,20 @@
   - CMD HELP: HELP OK, WORKS
     ? How does one get help on properties?
   - CMD EXIT: HELP OK, WORKS
-  + CMD CLEAR: HELP OK
-  + CMD DRONE: HELP OK
-  + CMD ON: HELP OK
-  + CMD RECOVER: HELP OK
+  - CMD CLEAR: HELP OK, WORKS
+  + CMD DRONE: HELP OK, ???
+    + addr=localhost drone foo foo linux-x86 
+      Fails on tcp-listen.
+  + CMD ON: HELP OK, ???
+  + CMD RECOVER: HELP OK, ??? 
+  + CMD SH: HELP OK, WORKS LOCAL, ??? REMOTE
+
+      + Make lib/bridge override input, output, send, wait for lanes.
+  + CMD CP: HELP OK, ??? LOCAL, ??? TO-DRONE, ??? FROM-DRONE, ??? TO-FROM-DRONE
   + CMD NODES: HELP OK, WORKS LOCAL, ??? CONNECTED
   + CMD SET: HELP OK, LISTING OK, SETTING OK
     + Does not like x = y syntax; wants x=y.
     + Parse errors overformatting key name.
-  + CMD SET: HELP OK, FAILS LOCAL, ??? REMOTE
-    + Local causes a crash, waiting on an output.
-  + CMD CP: HELP OK, ??? LOCAL, ??? TO-DRONE, ??? FROM-DRONE, ??? TO-FROM-DRONE
   + CMD WITH: HELP OK, WORKS LOCAL
     + Does not like x = y syntax; wants x=y.
         
