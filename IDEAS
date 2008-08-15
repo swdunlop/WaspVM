@@ -10,6 +10,7 @@
   + Added one or more bytes of prefix noise to plaintext.
   + Added one or more bytes of suffix noise padding.
   + Make shell command work on Win32.
+  + Make exit command work as expected with on <drone> exit
 
 - WaspDoc Markup Language
   - Derived from HazeML

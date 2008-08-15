@@ -6,6 +6,7 @@
   - Ported lib/clue-db into the core.
   - Ported lib/cons-filter into the core.
   - Ported lib/shuffle into the core.
+  - Ported lib/format-filter into the core.
   - Ported mosref/shell into the core.
   - Merged mosref/base and mosref/endpoint into mosref/transport.
   - Updated implementations of Console and Drone endpoints.
@@ -30,7 +31,23 @@
       message is put into vm/os.c.
   - Disabled scan command.
   + Figure out how to remove channel-prepend! usage in spawn-checker.
-  
+  - CMD HELP: HELP OK, WORKS
+    ? How does one get help on properties?
+  - CMD EXIT: HELP OK, WORKS
+  + CMD CLEAR: HELP OK
+  + CMD DRONE: HELP OK
+  + CMD ON: HELP OK
+  + CMD RECOVER: HELP OK
+  + CMD NODES: HELP OK, WORKS LOCAL, ??? CONNECTED
+  + CMD SET: HELP OK, LISTING OK, SETTING OK
+    + Does not like x = y syntax; wants x=y.
+    + Parse errors overformatting key name.
+  + CMD SET: HELP OK, FAILS LOCAL, ??? REMOTE
+    + Local causes a crash, waiting on an output.
+  + CMD CP: HELP OK, ??? LOCAL, ??? TO-DRONE, ??? FROM-DRONE, ??? TO-FROM-DRONE
+  + CMD WITH: HELP OK, WORKS LOCAL
+    + Does not like x = y syntax; wants x=y.
+        
 2008/08/14 Port MOSREF Affiliation into WaspVM.
   - Ported lib/buffer-channel into the core.
   - Ported lib/tag-filter into the core.
