@@ -79,8 +79,8 @@
 (export drone-node-link set-node-bridge! drone-node-sin drone-node-ecdh)
 
 (define (spawn-node-program (<console-node> node) program)
-  (define xmit (make-channel))
-  (define recv (make-channel))
+  (define xmit (make-queue))
+  (define recv (make-queue))
   (with-input xmit (with-output recv (spawn program)))
   (list xmit recv))
 

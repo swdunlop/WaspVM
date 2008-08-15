@@ -3,6 +3,9 @@
   work on MOSREF..
   
   - Ported lib/env into the core.
+  - Ported lib/clue-db into the core.
+  - Ported lib/cons-filter into the core.
+  - Ported lib/shuffle into the core.
   - Ported mosref/shell into the core.
   - Merged mosref/base and mosref/endpoint into mosref/transport.
   - Updated implementations of Console and Drone endpoints.
@@ -15,8 +18,9 @@
   t Ported mosref/listener into the core.
   t Ported mosref/props into the core.
   t Ported mosref/patch into the core.
-  + Ported mosref/prop/* into the core.
-  + Ported mosref/cmd/* into the core.
+  t Ported mosref/prop/* into the core.
+  t Ported mosref/cmd/* into the core.
+  t Ported lib/cons-filter into the core.
   + Ported bin/mosref into the core.
   t Disabled use of lib/terminal in bin/mosref.
   - Disabled exploit command.
@@ -25,7 +29,7 @@
     + NOTE: proxy command and anything that relies on tcp-forward will fail until the 'connect
       message is put into vm/os.c.
   - Disabled scan command.
-
+  + Figure out how to remove channel-prepend! usage in spawn-checker.
   
 2008/08/14 Port MOSREF Affiliation into WaspVM.
   - Ported lib/buffer-channel into the core.

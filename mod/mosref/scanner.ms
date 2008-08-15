@@ -70,8 +70,8 @@
 ; a done.
 
 (define (spawn-scanners hosts ports conns lapse)
-  (define work (make-channel))
-  (define yield (make-channel))
+  (define work (make-queue))
+  (define yield (make-queue))
   (define terminate (terminator conns 'done yield))
    
   (pairs hosts ports work)
@@ -128,7 +128,7 @@
   (define tc (make-tc))
 
   (until (>= first last)
-    (tc-append! tc first)
+    (tc-add! tc first)
     (set! first (+ first 1)))
 
   (tc->list tc))

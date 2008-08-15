@@ -115,7 +115,7 @@
   (define conn (spawn-node-program node *node-sin-listen-prog*))
   (define xmit (car conn))
   (define recv (cadr conn))
-  (define lanes (make-channel))
+  (define lanes (make-queue))
   (define bridge (drone-node-bridge node))
 
   (send (list portno sin) xmit)

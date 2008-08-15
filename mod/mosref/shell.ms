@@ -1,4 +1,4 @@
-; Copyright (C) 2006, Ephemeral Security, LLC
+; cOPYRIGht (C) 2006, Ephemeral Security, LLC
 ; Modifications (C) 2008, Scott W. Dunlop <swdunlop@gmail.com>
 ; 
 ; This library is free software; you can redistribute it and/or modify it 
@@ -25,7 +25,7 @@
 
 (define *cmd-term* (make-regex "[^ \r\n\t]+"))
 (define *display-count* 0)
-(define *displays* (set))
+(define *displays* (make-set))
 
 (define (add-shell-display! out)
   (set! *display-count* (+ *display-count* 1))
@@ -67,7 +67,7 @@
 (export <mosref-cmd> mosref-cmd?
         mosref-cmd-verb mosref-cmd-usage mosref-cmd-info mosref-cmd-impl)
 
-(define *cmds-by-verb* (dict))
+(define *cmds-by-verb* (make-dict))
 
 (define (mosref-cmds) (dict-values *cmds-by-verb*))
 

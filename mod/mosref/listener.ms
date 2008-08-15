@@ -16,7 +16,7 @@
 
 (module "mosref/listener")
 
-(define *listeners-by-portno* (dict))
+(define *listeners-by-portno* (make-dict))
 (define *preamble-len* 16)
 
 (define-record-type mosref-listener
@@ -67,7 +67,7 @@
               (spawn-checker evt)))))
 
 (define (register-mosref-listener portno)
-  (define state (make-mosref-listener-state portno (dict)))
+  (define state (make-mosref-listener-state portno (make-dict)))
   (monitor-mosref-listener state)
   (dict-set! *listeners-by-portno* portno state)
   state)
@@ -90,7 +90,7 @@
       (return preamble))))
 
 (define (mosref-sin-listen portno sin)
-  (define channel (make-channel))
+  (define channel (make-queue))
   (define listener (spawn-mosref-listener portno))
   (define sessions (mosref-listener-sessions listener))
   (dict-set! sessions sin channel)
