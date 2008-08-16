@@ -52,7 +52,7 @@
 
   (output-chain xmit
                 (trace-filter "xmit-ciphertext")
-                ;TODO: DEBUG (encrypt-filter xmit-encrypt)
+                ;(encrypt-filter xmit-encrypt)
                 (trace-filter "xmit-plaintext w/len+cs")
                 (prepend-collation-filter)
                 (trace-filter "xmit-plaintext w/cs")
@@ -70,7 +70,7 @@
   (println* "RECV for RECV is: " (format recv))
   (input-chain recv
                (trace-filter "recv-ciphertext")
-               ;TODO: DEBUG (decrypt-filter recv-decrypt)
+               ;(decrypt-filter recv-decrypt)
                (trace-filter "recv-plaintext w/len+cs")
                (check-collation-filter)
                (trace-filter "recv-plaintext w/cs")

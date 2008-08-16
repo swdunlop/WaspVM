@@ -56,16 +56,10 @@
       (return (string-read! buffer (string-length buffer))))
     
     (catch-case (((close) (return 'close))
-                 (else (re-error err)))
+                  (else (re-error err)))
       (while (< (string-length buffer) amt)
-        (more)))
-
-    ;(print "Returning first ") (print (format amt)) (print " of ") (print (format buffer)) 
-    ;(print "\n")
-    ;(define result (string-read! buffer amt))
-    ;(print "Which is: ") (print (format result)) (print (format (string-length result))) (print "\n")
-    ;result))
-    (string-read! buffer amt)))
+        (more))
+      (string-read! buffer amt))))
 
 (define (error-on-close fn)
   (function (close-monitor . args)
