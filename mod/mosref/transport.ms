@@ -51,13 +51,13 @@
   (define (xmit-encrypt message) (salsa20-encrypt xmit-key message))
 
   (output-chain xmit
-                (trace-filter "xmit-ciphertext")
-                ;(encrypt-filter xmit-encrypt)
+                ;(trace-filter "xmit-ciphertext")
+                (encrypt-filter xmit-encrypt)
                 (trace-filter "xmit-plaintext w/len+cs")
                 (prepend-collation-filter)
-                (trace-filter "xmit-plaintext w/cs")
+                ;(trace-filter "xmit-plaintext w/cs")
                 (prepend-checksum-filter crc32)
-                (trace-filter "xmit-plaintext")
+                ;(trace-filter "xmit-plaintext")
                 (copy-filter)))
 
 (define (make-mosref-recv extra recv recv-key recv-iv)
@@ -67,13 +67,12 @@
   (when extra
     (set! recv (preface-input extra recv)))
 
-  (println* "RECV for RECV is: " (format recv))
   (input-chain recv
-               (trace-filter "recv-ciphertext")
-               ;(decrypt-filter recv-decrypt)
+               ;(trace-filter "recv-ciphertext")
+               (decrypt-filter recv-decrypt)
                (trace-filter "recv-plaintext w/len+cs")
                (check-collation-filter)
-               (trace-filter "recv-plaintext w/cs")
+               ;(trace-filter "recv-plaintext w/cs")
                (check-checksum-filter crc32)
                (trace-filter "recv-plaintext")
                ))

@@ -37,12 +37,9 @@
 (define (step label . items)
   (println* "  CONSOLE: " label (string-join " " @(map format items))))
 
-(define actual-send send)
 (define (console-affiliation session-private xmit recv)
   ;;;TODO: Ensure we handle 'close to read.
   (define read (buffer-input/eoc recv))
-  (define (send . rest) (println* "SENDING: " (string-join " " @(map format rest)))
-    (actual-send @rest))
   (define console-iv (make-iv))
 
   (step "Reading Drone Public Key")

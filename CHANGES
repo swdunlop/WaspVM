@@ -12,11 +12,11 @@
   - Updated implementations of Console and Drone endpoints.
   - Ported lib/args-fu into the core.
   - Ported lib/catch into the core.
-  t Ported mosref/node into the core.
+  - Ported mosref/node into the core.
   - Ported mosref/parse into the core.
   - Ported mosref/format into the core.
   - Ported mosref/cmds into the core.
-  t Ported mosref/listener into the core.
+  - Ported mosref/listener into the core.
   - Ported mosref/props into the core.
   - Ported mosref/patch into the core.
   - Added input, timeout and output methods for lanes to lib/bridge
@@ -38,20 +38,21 @@
     ? How does one get help on properties?
   + CMD SH: HELP OK, WORKS LOCAL, ??? REMOTE
       + Remote works, but tries to send done on console output.
-  - NOTE: Messages restricted to 64k or smaller.  Some applications need to chunk it up, like 
+      + Should not use drone-local lib/env to determine spawn-command availability.
+      + May want to consider providing run-command on WIN32.
+  + NOTE: Messages restricted to 64k or smaller.  Some applications need to chunk it up, like 
     cp et al.
-      + Make lib/bridge override input, output, send, wait for lanes.
   + CMD CP: HELP OK, ??? LOCAL, ??? TO-DRONE, ??? FROM-DRONE, ??? TO-FROM-DRONE
   + CMD NODES: HELP OK, WORKS LOCAL, WORKSCONNECTED
       + Works peer-addr support to make it really work.
   + CMD SET: HELP OK, LISTING OK, SETTING OK
-    + Does not like x = y syntax; wants x=y.
     + Parse errors overformatting key name.
   + CMD WITH: HELP OK, WORKS LOCAL
-    + Does not like x = y syntax; wants x=y.
   + NOTE: closes from remote end during a process tends to crash the console.
   + Need to write mosquito or expect-driven test cases to automate mosref testing.
-
+  + Need to re-enable ciphers and examine why they aren't syncing.
+  + Add an exit-on-close filter to start of drone receive chain.
+  + Need to generalize traceback and self-protection on console side.
 2008/08/14 Port MOSREF Affiliation into WaspVM.
   - Ported lib/buffer-channel into the core.
   - Ported lib/tag-filter into the core.

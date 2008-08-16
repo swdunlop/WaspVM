@@ -32,7 +32,8 @@
   (define id (req-term terms " drone identifier"))
   (define platform (req-term terms " drone platform"))
   (define node (mosref-shell-node shell))
-  (define console-private (make-private-key))
+  (define session-private (make-private-key))
+  (define session-public (find-public-key session-private))
   (define addr (node-addr node))
   (unless addr
     (send-err " node address unknown, use set addr to assign one"))
@@ -40,14 +41,14 @@
   (define sin (node-make-sin node portno))
   (define data (guard (lambda (e)
                         (send-err "Could not compile drone."))
-                 (make-drone-exe addr sin portno console-private platform)))
+                 (make-drone-exe addr sin portno session-public platform)))
   (guard (lambda (e)
            (send-err "Could not write file " (format (cadr file)) "."))
     (put-node-file @file data))
 
   (send-line "Drone executable created.")
 
-  (define next (make-drone-node id node sin (find-public-key console-private)))
+  (define next (make-drone-node id node sin session-private))
   (set-node-prop! next 'platform platform)
   
   (spawn-drone-listener node next))
