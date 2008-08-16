@@ -15,6 +15,8 @@
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 
 (module "mosref/listener")
+(import "mosref/patch")
+(import "lib/record")
 
 (define *listeners-by-portno* (make-dict))
 (define *preamble-len* 16)
@@ -53,11 +55,7 @@
 
     ;TODO: Figure out how to put data "back" into the channel.
     ;      That will permit us to not have to do this:
-    (define queue (make-queue))
-    (send (read 'rest) queue)
-    (patch queue conn)
-
-    (send queue channel))
+    (send (preface-connection (read 'rest) conn) channel))
   
   (spawn (function (monitor-mosref-listener)
             (forever 

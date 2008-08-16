@@ -24,32 +24,20 @@
     (define evt (wait in))
     (when (string? evt)
       (string-prepend! evt 
-                       (quad->string (string-length evt))))
+                       (word->string (string-length evt))))
     (send evt out)))
 
 ; This filter will refuse to produce data until its full length has been
 ; digested.
 (define-filter (check-collation-filter)
-  (define buf (make-string))
+  (define read (buffer-input in #f out))
 
-  (define (wait-for-any)
-    (forever
-      (define evt (wait in))
-      (when (string? evt)
-        (string-append! buf evt)
-        (return))
-      (send evt out)))
-  
-  (define (wait-for-field len)
-    (while (< (string-length buf) len)
-      (wait-for-any))
-    (string-read! buf len))
-  
   (define (wait-for-int)
-    (string->quad (wait-for-field 4)))
+    (string->word (read 2)))
   
   (forever
     (define len (wait-for-int))
-    (define msg (wait-for-field len))
+    (println* "Reading message of length " (format len))
+    (define msg (read len))
     (send msg out)))
 

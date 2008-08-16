@@ -1,3 +1,9 @@
+- Add Wait Multiple
+  + recv_mt's take a ct argument.
+  + wait primitive can send a count through.
+  + byte-channels use that for a string length.
+  + data-channels use that for returning lists of values per read.
+
 - Protection for MOSREF Against Information Theoretic attacks
   + Use a unified console private key.
   + Drones are assigned drone-iv at compilation, all drones use same console-public.

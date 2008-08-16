@@ -21,6 +21,7 @@
 (import "lib/collate-filter")
 (import "lib/copy-filter")
 (import "lib/trace")
+(import "mosref/patch")
 
 (export make-iv make-private-key decrypt encrypt
         find-public-key find-shared-secret)
@@ -49,27 +50,31 @@
   (define (xmit-encrypt message) (salsa20-encrypt xmit-key message))
 
   (output-chain xmit
-                ;(trace-filter "xmit-ciphertext")
+                (trace-filter "xmit-ciphertext")
                 ;TODO: DEBUG (encrypt-filter xmit-encrypt)
-                ;(trace-filter "xmit-plaintext w/len+cs")
+                (trace-filter "xmit-plaintext w/len+cs")
                 (prepend-collation-filter)
-                ;(trace-filter "xmit-plaintext w/cs")
+                (trace-filter "xmit-plaintext w/cs")
                 (prepend-checksum-filter crc32)
-                ;(trace-filter "xmit-plaintext")
+                (trace-filter "xmit-plaintext")
                 (copy-filter)))
 
-(define (make-mosref-recv recv recv-key recv-iv)
+(define (make-mosref-recv extra recv recv-key recv-iv)
   (define recv-key (make-salsa20-key recv-key recv-iv))
   (define (recv-decrypt message) (salsa20-decrypt recv-key message))
+    
+  (when extra
+    (set! recv (preface-input extra recv)))
 
+  (println* "RECV for RECV is: " (format recv))
   (input-chain recv
-               ;(trace-filter "recv-ciphertext")
+               (trace-filter "recv-ciphertext")
                ;TODO: DEBUG (decrypt-filter recv-decrypt)
-               ;(trace-filter "recv-plaintext w/len+cs")
+               (trace-filter "recv-plaintext w/len+cs")
                (check-collation-filter)
-               ;(trace-filter "recv-plaintext w/cs")
+               (trace-filter "recv-plaintext w/cs")
                (check-checksum-filter crc32)
-               ;(trace-filter "recv-plaintext")
+               (trace-filter "recv-plaintext")
                ))
 
 (define (spawn-endpoint endpoint break xmit recv)

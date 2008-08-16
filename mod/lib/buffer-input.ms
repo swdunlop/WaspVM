@@ -21,7 +21,7 @@
   (buffer-input input #f #f))
 
 (define (buffer-input (#t source) (<integer> timeout))
-  (buffer-input source #f (make-queue)))
+  (buffer-input source timeout #f))
 
 (define (buffer-input (#t source) (#t timeout) (#t debris))
   (define buffer (make-string 64))
@@ -34,7 +34,7 @@
                    (else (function (ignore-debris event)))))
 
   (define (process evt)
-    (print (string-append "Processing event: " (format evt) "\n"))
+    ;(print (string-append "Processing event: " (format evt) "\n"))
     (cond ((string? evt) (string-append! buffer evt))
           ((eq? evt 'close) (reject 'close)
                             (error 'close))
@@ -42,11 +42,14 @@
 
   (define more (cond
                  (timeout (function (more/timed)
+                                 ;(print "Looking for more..\n")
                             (define event (wait timeout source))
                             (unless 
                               (eq? event 'timeout) (process event))))
                  (else (function (more/patient)
-                          (process (wait source))))))
+                                 ;(print "Looking for more..\n")
+                          (define event (wait source))
+                          (process event)))))
 
   (function (read-input-buffer amt)
     (when (eq? amt 'rest)
@@ -57,13 +60,12 @@
       (while (< (string-length buffer) amt)
         (more)))
 
-    (print "Returning first ") (print (format amt)) (print " of ") (print (format buffer)) 
-    (print "\n")
+    ;(print "Returning first ") (print (format amt)) (print " of ") (print (format buffer)) 
+    ;(print "\n")
     ;(define result (string-read! buffer amt))
-    (define result (substring buffer 0 amt))
-    (print "Which is: ") (print (format result)) (print "\n")
-    result))
-    ;(string-read! buffer amt)))
+    ;(print "Which is: ") (print (format result)) (print (format (string-length result))) (print "\n")
+    ;result))
+    (string-read! buffer amt)))
 
 (define (error-on-close fn)
   (function (close-monitor . args)

@@ -61,7 +61,7 @@
   ;(define console-iv (decrypt traffic-key (read 8)))
  
   (define report (make-mosref-xmit xmit traffic-key drone-iv))
-  (define command (make-mosref-recv recv traffic-key console-iv))
+  (define command (make-mosref-recv #f recv traffic-key console-iv))
 
   (step "Confirming Console IV")
   ;;; Drone --> Console, via RK, CC

@@ -15,6 +15,7 @@
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 
 (module "lib/bridge")
+(import "lib/object")
 
 (define-class bridge <object>
               (make-bridge-state xmit-tags recv-tags binds lanes xmit recv)

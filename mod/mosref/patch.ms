@@ -20,9 +20,19 @@
 ; Given a pair of channels, xmit and recv, spawns a process that relays all
 ; data received by xmit to recv.
 
+(define (preface-input data in)
+  (define q (make-queue))
+  (send data q)
+  (patch in q)
+  (input q))
+
+(define (preface-connection data conn)
+  (make-connection (preface-input data conn) (output conn)))
+
 (define (patch in out)
   (set! in (input in))
   (set! out (output out))
+  (println* "Patching " (format in) " to " (format out))
   (spawn (function (patch-process)
            (forever
              (define evt (wait in))
@@ -33,4 +43,4 @@
   (patch left right)
   (patch right left))
 
-(export patch patch2)
+(export patch patch2 preface-input preface-connection)

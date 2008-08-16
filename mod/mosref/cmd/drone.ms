@@ -61,7 +61,7 @@
 
   (send-line "Listening for drone on " (format portno) "...")
 
-  (spawn (lambda ()
+  (spawn (function (drone-listener)
            (define session #f)
            (define transport #f)
 
@@ -108,7 +108,9 @@
           (define conn (mosref-sin-listen @what))
           (define lane (make-reserved-lane bridge))
           (patch2 conn lane)
-          (send (list 'connect (peer-addr conn) (lane-tag lane)))
+          (send (list 'connect 
+                      #f ;(peer-addr conn) ;TODO:ADDR
+                      (lane-tag lane)))
           (send 'close)))
 
 (define (node-sin-listen (<drone-node> node) portno sin)
@@ -138,7 +140,8 @@
 (define (node-sin-listen (<console-node> node) portno sin)
   (define portno (node-port node))
   (define conn (mosref-sin-listen portno sin))
-  (list (peer-addr conn) (input conn) (output conn)))
+  (list #f ;(peer-addr conn) ;TODO:ADDR
+    (output conn) (input conn)))
 
 (define *node-make-sin-prog*
   (inline (export nothing)

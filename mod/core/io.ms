@@ -95,3 +95,9 @@
 (define (timeout (<integer> ms) (<process> q))
   (timeout-input ms (process-input q)))
 
+(define (print* . items)
+  (for-each print items))
+
+(define (println* . items)
+  (print* @items *line-sep*))
+

@@ -35,15 +35,14 @@
 
 ;(define-macro (step . rest) '(begin))
 (define (step label . items)
-  (print (string-append "  CONSOLE: "
-                        (apply string-append label (map format items)) 
-                        "..." 
-                        *line-sep*)))
+  (println* "  CONSOLE: " label (string-join " " @(map format items))))
 
+(define actual-send send)
 (define (console-affiliation session-private xmit recv)
   ;;;TODO: Ensure we handle 'close to read.
   (define read (buffer-input/eoc recv))
-
+  (define (send . rest) (println* "SENDING: " (string-join " " @(map format rest)))
+    (actual-send @rest))
   (define console-iv (make-iv))
 
   (step "Reading Drone Public Key")
@@ -59,7 +58,7 @@
   ;;; Console --> Drone, via KK, CC
   (send (encrypt traffic-key console-iv) xmit)
   
-  (define report (make-mosref-recv recv traffic-key drone-iv))
+  (define report (make-mosref-recv (read 'rest) recv traffic-key drone-iv))
   (define command (make-mosref-xmit xmit traffic-key console-iv))
 
   (step "Waiting for Drone to confirm Console IV")
@@ -80,7 +79,7 @@
              `((import "mosref/drone")
                (import "mosref/transport")
                (define conn (tcp-connect ,console-addr ,console-portno))
-               (send ,(format sin) conn)
+               (send ,sin conn)
                (define endpoint 
                  (apply spawn-endpoint 
                         drone-endpoint

@@ -40,11 +40,12 @@
   - CMD CLEAR: HELP OK, WORKS
   + CMD DRONE: HELP OK, ???
     + addr=localhost drone foo foo linux-x86 
-      Fails on tcp-listen.
+      + Need to port peer-addr for cmd/drone
   + CMD ON: HELP OK, ???
   + CMD RECOVER: HELP OK, ??? 
   + CMD SH: HELP OK, WORKS LOCAL, ??? REMOTE
-
+  - NOTE: Messages restricted to 64k or smaller.  Some applications need to chunk it up, like 
+    cp et al.
       + Make lib/bridge override input, output, send, wait for lanes.
   + CMD CP: HELP OK, ??? LOCAL, ??? TO-DRONE, ??? FROM-DRONE, ??? TO-FROM-DRONE
   + CMD NODES: HELP OK, WORKS LOCAL, ??? CONNECTED
