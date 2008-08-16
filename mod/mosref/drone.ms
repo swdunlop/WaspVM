@@ -67,10 +67,10 @@
   ;;; Drone --> Console, via RK, CC
   (send console-iv report)
 
-  (step "Waiting for Console to confirm Drone IV")
+  (step "Waiting for Console to confirm Drone IV [DISABLED]")
   ;;; Console --> Drone, via CK, DD
-  (unless (string=? (wait command) drone-iv)
-    (error 'aff "the console failed to confirm affiliation"))
+  (wait command) ;(unless (string=? (wait command) drone-iv)
+    ;(error 'aff "the console failed to confirm affiliation"))
 
   (step "Affiliation complete.")
   (list report command))

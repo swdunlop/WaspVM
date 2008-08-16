@@ -17,6 +17,8 @@
 (module "mosref/format")
 
 (define (format-ipv4 i)
+  (unless i (return "unknown"))
+
   (define (ub i)
     (if (< i 0) (+ i 256) i))
 

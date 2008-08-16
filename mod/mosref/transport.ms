@@ -21,6 +21,7 @@
 (import "lib/collate-filter")
 (import "lib/copy-filter")
 (import "lib/trace")
+(import "lib/with-io")
 (import "mosref/patch")
 
 (export make-iv make-private-key decrypt encrypt
@@ -78,8 +79,8 @@
                ))
 
 (define (spawn-endpoint endpoint break xmit recv)
-  ;(set! xmit (output-chain xmit (trace-filter "XMIT")))
-  ;(set! recv (input-chain  recv (trace-filter "RECV")))
+  (set! xmit (output-chain xmit (trace-filter "XMIT")))
+  (set! recv (input-chain  recv (trace-filter "RECV")))
   (define bridge (make-bridge xmit recv))
   (define lanes (bridge-lanes bridge))
 

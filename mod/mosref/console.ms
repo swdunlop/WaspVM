@@ -29,7 +29,7 @@
 
 (import "lib/bridge")
 
-(export console-affiliation console-repl make-drone-exe)
+(export console-affiliation console-repl make-drone-exe console-endpoint console-broken)
 
 (import "lib/iterate")
 
@@ -61,10 +61,11 @@
   (define report (make-mosref-recv (read 'rest) recv traffic-key drone-iv))
   (define command (make-mosref-xmit xmit traffic-key console-iv))
 
-  (step "Waiting for Drone to confirm Console IV")
+  (step "Waiting for Drone to confirm Console IV [DISABLED]")
   ;;; Drone --> Console, via RK, CC
-  (unless (string=? (wait report) console-iv)
-    (error 'aff "the drone failed to confirm affiliation"))
+  (define conf (wait report))
+  ;(unless (string=? conf console-iv) ;TODO: FIX
+  ;  (error 'aff "the drone failed to confirm affiliation" conf))
 
   (step "Confirming Drone IV")
   ;;; Console --> Drone, via CK, DD
@@ -219,16 +220,6 @@
       (if (eq? cmd 'close)
         (return (send 'close))
         ((dict-ref cmds cmd default-cmd) cmd)))))
-
-(define (console-endpoint bridge) 
-  (define path (wait))
-
-  (unless (string? path)
-    (send 'close)
-    (return))
-  (set! path (find-module-file path))
-  (send (if path (read-data-file path)
-                 #f)))
 
 (define (console-broken bridge)
   ;TODO: (for-each break-alert terminals)
