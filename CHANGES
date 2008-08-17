@@ -5,8 +5,10 @@
   - Verified operation of drone bridging.
   - Moved mosref/patch to lib/patch.
   - Removed debugging spam from lib/patch.
-  + Modified MOSREF communications to operate in 1k blocks, supporting 
-    messages of up to 2 GB in length.
+  - Modified MOSREF communications to operate in blocks of random sizes from 0 to 255 bytes,
+    each block has a checksum, the overall message has a checksum.  This reduces the potential for 
+    noise to tie up memory or hang the node.  (It will still cause the connection to break,
+    though.)
   + Added HELP for properties.
   + Modified tcp-connect to yield 'connect first.
   + Restored tcp-forward.

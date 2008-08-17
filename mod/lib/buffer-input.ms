@@ -20,6 +20,9 @@
 (define (buffer-input input)
   (buffer-input input #f #f))
 
+(define (buffer-input (#t source) (#t debris))
+  (buffer-input source #f debris))
+
 (define (buffer-input (#t source) (<integer> timeout))
   (buffer-input source timeout #f))
 

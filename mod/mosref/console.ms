@@ -58,11 +58,11 @@
   (define report (make-mosref-recv (read 'rest) recv traffic-key drone-iv))
   (define command (make-mosref-xmit xmit traffic-key console-iv))
 
-  (step "Waiting for Drone to confirm Console IV [DISABLED]")
+  (step "Waiting for Drone to confirm Console IV")
   ;;; Drone --> Console, via RK, CC
   (define conf (wait report))
-  ;(unless (string=? conf console-iv) ;TODO: FIX
-  ;  (error 'aff "the drone failed to confirm affiliation" conf))
+  (unless (string=? conf console-iv)
+    (error 'aff "the drone failed to confirm affiliation" conf))
 
   (step "Confirming Drone IV")
   ;;; Console --> Drone, via CK, DD
@@ -76,6 +76,7 @@
   (build-exe platform
              `((import "mosref/drone")
                (import "mosref/transport")
+               (import "lib/bridge")
                (define conn (tcp-connect ,console-addr ,console-portno))
                (send ,sin conn)
                (define endpoint 

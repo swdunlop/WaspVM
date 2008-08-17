@@ -44,7 +44,8 @@
 
 (define-filter (mosref-decrypt key iv)
   (set! key (make-salsa20-key key iv))             
-  (define read-ciphertext (buffer-input in))
+
+  (define read-ciphertext (buffer-input in #f out))
   (define (read . args)
     (define data (read-ciphertext @args))
     (unless (string? data) 
@@ -52,26 +53,79 @@
       (halt))
     (salsa20-decrypt key data))
 
-  (forever
-    (define len (string->word (read 2)))
-    (define crc (string->quad (read 4)))
-    (define text (read len))
-    (unless (= crc (crc32 text))
+  (define buffer #f)
+  (define req #f)
+
+  (define (read-block)
+    (define len (string->byte (read 1)))
+
+    (when (> len req)
+      (send '(fail len "final block of message too large") out)
+      (halt))
+
+    (define block-crc (string->quad (read 4)))
+    (define block (read len))
+    
+    ;(println* "    RECV-BLOCK[ " (format len) " : " (format block-crc) " ]")
+
+    (unless (= (crc32 block) block-crc)
+      (send `(fail crc "garbled message block received") out)
+      (halt))
+
+    (set! req (- req (string-length block)))
+    (string-append! buffer block))
+
+  (define (read-message)
+    (set! buffer (make-string))
+    (set! req (string->quad (read 4)))
+    (set! message-crc (string->quad (read 4)))
+      
+    ;(println* "RECV-MESG[ " (format req) " : " (format message-crc) " ]")
+    (while (> req 0) (read-block))
+
+    (unless (= message-crc (crc32 buffer))
       (send `(fail crc "garbled message received") out)
       (halt))
-    (send text out)))
+      
+    (send buffer out))
+
+  (forever (read-message)))
 
 (define-filter (mosref-encrypt key iv)
   (set! key (make-salsa20-key key iv))             
+  (define message #f)
+  (define message-ofs #f)
+  (define message-left #f)
+
+  (define (write item)
+    (send (salsa20-encrypt key item) out))
+
+  (define (send-block)
+    (define block-sz (random-integer 16 255))
+    (when (> block-sz message-left)
+      (set! block-sz message-left))
+    (define block (substring message message-ofs block-sz))
+    ;(println* "    XMIT-BLOCK[ " (format block-sz) " : " (format (crc32 block)) " ]")
+    (write (byte->string block-sz))
+    (write (quad->string (crc32 block)))
+    (write block)
+    (set! message-ofs (+ message-ofs block-sz))
+    (set! message-left (- message-left block-sz)))
+ 
+  (define (send-message)
+    (set! message-left (string-length message))
+    (set! message-ofs 0)
+    (write (quad->string message-left))
+    (write (quad->string (crc32 message)))
+    ;(println* "XMIT-MESG[ " (format message-left) " : " (format (crc32 message)) " ]")
+    (while (> message-left 0) (send-block)))
+
   (forever
-    (define event (wait in))
-    (when (string? event) 
-      (define len (string-length event))
-      (define crc (crc32 event))
-      (send (salsa20-encrypt key (word->string len)) out)
-      (send (salsa20-encrypt key (quad->string crc)) out)
-      (set! event (salsa20-encrypt key event)))
-    (send event out)))
+    (set! message (wait in))
+    (unless (string? message)
+      (send message out)
+      (halt))
+    (send-message)))
 
 (define (make-mosref-xmit xmit xmit-key xmit-iv)
   (output-chain xmit (mosref-encrypt xmit-key xmit-iv)))
@@ -102,4 +156,4 @@
   
   bridge)
 
-(export spawn-endpoint)
+(export spawn-endpoint) 

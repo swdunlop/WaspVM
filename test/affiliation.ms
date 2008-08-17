@@ -8,12 +8,12 @@
 ; Seed PRNG in case we're scarce on entropy.
 (random-integer 1 100)
 
-;(define (wait/doom src) (wait src))
-(define (wait/doom src)
-  (define data (wait 1000 src))
- (when (eq? data 'timeout)
-   (error 'fail "Failed to complete tests in the allotted time"))
- (return data))
+(define (wait/doom src) (wait src))
+;(define (wait/doom src)
+;  (define data (wait 1000 src))
+; (when (eq? data 'timeout)
+;   (error 'fail "Failed to complete tests in the allotted time"))
+; (return data))
 
 (define (expect channel value)
   (equal? value (wait/doom channel)))
@@ -157,7 +157,7 @@
 (s: (wait/doom drone-recv))
 (r: m3)
 (r: mm3)
-
+(exit)
 (define (fuzz xmit recv ct)
   (until (<= ct 0)
      (set! ct (- ct 1))
