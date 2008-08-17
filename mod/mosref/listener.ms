@@ -15,7 +15,7 @@
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 
 (module "mosref/listener")
-(import "mosref/patch")
+(import "lib/patch")
 (import "lib/record")
 
 (define *listeners-by-portno* (make-dict))

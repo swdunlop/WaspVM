@@ -1,3 +1,10 @@
+- Recovery System for Console Shutdown
+  + The console will checkpoint its state to disk after each modification of
+    a setting or creation of a drone.
+  + The console may be started with this checkpointed state, permitting the
+    recovery of lost drones.
+  + Added the "recover all" command, recovering all disconnected drones.
+
 - Provide a Feedback System for Errors in MOSREF
   + Break up messages into chunks no larger than 1024 bytes.
   + Ensure that messages larger than 2**32 cause a console error.

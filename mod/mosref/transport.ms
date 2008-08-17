@@ -18,7 +18,7 @@
 
 (import "lib/trace")
 (import "lib/with-io")
-(import "mosref/patch")
+(import "lib/patch")
 
 (export make-iv make-private-key decrypt encrypt
         find-public-key find-shared-secret)

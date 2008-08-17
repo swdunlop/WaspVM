@@ -105,7 +105,7 @@
 (define *node-sin-listen-prog* 
   (inline (export nothing)
           (import "mosref/listener")
-          (import "mosref/patch")
+          (import "lib/patch")
           (define bridge *drone-bridge*)
           (define what (wait))
           (define conn (mosref-sin-listen @what))

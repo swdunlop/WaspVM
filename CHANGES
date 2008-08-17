@@ -2,29 +2,26 @@
   At this point, MOSREF is functional, but could use some improvements; this
   milestone is focussed on making MOSREF a production-worthy tool.
   
-  + Verified operation of drone bridging.
-  + Moved all inline programs in MOSREF commands into their own modules to
-    reduce excessive transmission traffic.
-  + Restored tcp-forward.
-  + Restored the MOSREF "proxy" command.
+  - Verified operation of drone bridging.
+  - Moved mosref/patch to lib/patch.
+  - Removed debugging spam from lib/patch.
   + Modified MOSREF communications to operate in 1k blocks, supporting 
     messages of up to 2 GB in length.
   + Added HELP for properties.
-  + Added test suite for all MOSREF commands using a local drone.
-  + Cross-platform testing using win32.
+  + Modified tcp-connect to yield 'connect first.
+  + Restored tcp-forward.
+  + Restored the MOSREF "proxy" command.
   + Restored the scan command.
+  + Added test suite for all MOSREF commands using a local drone.
+  + Moved all inline programs in MOSREF commands into their own modules to
+    reduce excessive transmission traffic.
   + Ensured the initial mode of any executable created by WaspC is 0700.
-  + Added the os-connection-peer primitive, which can get the remote peer's 
-    address and service of a connection.
   + Ensured that sudden collapse of a drone will not crash the console.
-  + Removed debugging spam from lib/patch.
   + Ensured that all spawned processes on the console will traceback and halt
     intead of crashing the console.
-  + The console will checkpoint its state to disk after each modification of
-    a setting or creation of a drone.
-  + The console may be started with this checkpointed state, permitting the
-    recovery of lost drones.
-  + Added the "recover all" command, recovering all disconnected drones.
+  + Verify standalone operation of drone. 
+  + Verify Cross-platform operation using win32.
+  + Verify Cross-platform operation using darwin.
   + Tagged MOSREF as MOSREF 3.0b1
   + Tagged WASPVM as 0.4 final.
 

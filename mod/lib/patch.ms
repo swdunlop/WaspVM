@@ -14,8 +14,7 @@
 ; along with this library; if not, write to the Free Software Foundation, 
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 
-(module "mosref/patch")
-(import "lib/bridge")
+(module "lib/patch")
 
 ; Given a pair of channels, xmit and recv, spawns a process that relays all
 ; data received by xmit to recv.
@@ -32,7 +31,6 @@
 (define (patch in out)
   (set! in (input in))
   (set! out (output out))
-  (println* "Patching " (format in) " to " (format out))
   (spawn (function (patch-process)
            (forever
              (define evt (wait in))

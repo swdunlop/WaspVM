@@ -31,7 +31,7 @@
   (inline 
     (export nothing)
     (import "lib/env")
-    (import "mosref/patch")
+    (import "lib/patch")
     (when (string-begins-with? *platform* "win")
       (send 
         '(error "MOSREF cannot spawn shell commands on Microsoft Windows"))
