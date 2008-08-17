@@ -53,7 +53,7 @@
   (output-chain xmit
                 ;(trace-filter "xmit-ciphertext")
                 (encrypt-filter xmit-encrypt)
-                (trace-filter "xmit-plaintext w/len+cs")
+                ;(trace-filter "xmit-plaintext w/len+cs")
                 (prepend-collation-filter)
                 ;(trace-filter "xmit-plaintext w/cs")
                 (prepend-checksum-filter crc32)
@@ -68,18 +68,19 @@
     (set! recv (preface-input extra recv)))
 
   (input-chain recv
+               (halt-on-close)
                ;(trace-filter "recv-ciphertext")
                (decrypt-filter recv-decrypt)
-               (trace-filter "recv-plaintext w/len+cs")
+               ;(trace-filter "recv-plaintext w/len+cs")
                (check-collation-filter)
                ;(trace-filter "recv-plaintext w/cs")
                (check-checksum-filter crc32)
-               (trace-filter "recv-plaintext")
+               ;(trace-filter "recv-plaintext")
                ))
 
 (define (spawn-endpoint endpoint break xmit recv)
-  (set! xmit (output-chain xmit (trace-filter "XMIT")))
-  (set! recv (input-chain  recv (trace-filter "RECV")))
+  ;(set! xmit (output-chain xmit (trace-filter "XMIT")))
+  ;(set! recv (input-chain  recv (trace-filter "RECV")))
   (define bridge (make-bridge xmit recv))
   (define lanes (bridge-lanes bridge))
 

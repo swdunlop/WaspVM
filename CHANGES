@@ -33,7 +33,7 @@
     + NOTE: proxy command and anything that relies on tcp-forward will fail until the 'connect
       message is put into vm/os.c.
   - Disabled scan command.
-  + Figure out how to remove channel-prepend! usage in spawn-checker.
+  + Make sure initial mode of drone is 0700
   - CMD HELP: HELP OK, WORKS
     ? How does one get help on properties?
   + CMD SH: HELP OK, WORKS LOCAL, ??? REMOTE
@@ -42,7 +42,15 @@
       + May want to consider providing run-command on WIN32.
   + NOTE: Messages restricted to 64k or smaller.  Some applications need to chunk it up, like 
     cp et al.
-  + CMD CP: HELP OK, ??? LOCAL, ??? TO-DRONE, ??? FROM-DRONE, ??? TO-FROM-DRONE
+  + CMD CP: HELP OK, WORKS LOCAL, ??? TO-DRONE, ??? FROM-DRONE, ??? TO-FROM-DRONE
+    + For Local to Remote:
+      + Data is colleted on remote end, we get done and we.. halt on the     
+        console.
+    + For Remote to Local:
+
+    ? What will ON drone CP file file do?
+    ? What will ON drone CP file console:file do?
+
   + CMD NODES: HELP OK, WORKS LOCAL, WORKSCONNECTED
       + Works peer-addr support to make it really work.
   + CMD SET: HELP OK, LISTING OK, SETTING OK

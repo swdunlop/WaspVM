@@ -16,7 +16,7 @@
 
 (module "lib/collate-filter")
 (import "lib/filter")
-(export prepend-collation-filter check-collation-filter)
+(export prepend-collation-filter check-collation-filter halt-on-close)
 
 ; This filter will prepend data with a length prior to transmission.
 (define-filter (prepend-collation-filter)
@@ -40,4 +40,11 @@
     (println* "Reading message of length " (format len))
     (define msg (read len))
     (send msg out)))
+
+(define-filter (halt-on-close)
+  (forever
+    (define evt (wait in))
+    (when (eq? evt 'close)
+      (halt))
+    (send evt out)))
 

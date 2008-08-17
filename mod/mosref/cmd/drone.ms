@@ -67,24 +67,26 @@
            (define transport #f)
 
            (define (attempt-affiliation)
-             (set! session (guard (lambda (e)
-                                    (traceback e)
-                                    (send-line "ERROR: Listener for " id "failed, "
-                                               (car (error-info e)) ".")
-                                    #f)
-                             (node-sin-listen node portno sin)))
+             (set! session 
+               (guard (lambda (e)
+                        (traceback e)
+                        (send-line "ERROR: Listener for " id "failed, "
+                                   (car (error-info e)) ".")
+                        #f)
+                 (node-sin-listen node portno sin)))
 
              (unless session (return))
 
-             (set! transport (guard (lambda (e)
-                                      ;TODO: Only traceback if error is not
-                                      ;      an affiliation error.
-                                      (traceback e)
-                                      (send-line "ERROR: Affilation of " id 
-                                                 " failed, " (car (error-info e)) 
-                                                 ".")
-                                      #f)
-                                (apply console-affiliation ecdh (cdr session)))))
+             (set! transport 
+               (guard (lambda (e)
+                        ;TODO: Only traceback if error is not
+                        ;      an affiliation error.
+                        (traceback e)
+                        (send-line "ERROR: Affilation of " id 
+                                   " failed, " (car (error-info e)) 
+                                   ".")
+                        #f)
+                 (apply console-affiliation ecdh (cdr session)))))
 
            (until transport (attempt-affiliation))
           
