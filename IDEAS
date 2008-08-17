@@ -1,3 +1,7 @@
+- Provide a Feedback System for Errors in MOSREF
+  + Break up messages into chunks no larger than 1024 bytes.
+  + Ensure that messages larger than 2**32 cause a console error.
+
 - Add Wait Multiple
   + recv_mt's take a ct argument.
   + wait primitive can send a count through.
