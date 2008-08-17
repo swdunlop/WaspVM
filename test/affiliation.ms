@@ -161,7 +161,7 @@
 (define (fuzz xmit recv ct)
   (until (<= ct 0)
      (set! ct (- ct 1))
-     (define msg (read-prng (random-integer 0 1024)))
+     (define msg (read-prng (random-integer 0 4096)))
      (send (copy-string msg) xmit)
      (print (if (string=? (wait/doom recv) msg) "." "x")))
   (print *line-sep*))

@@ -18,11 +18,21 @@
 (import "lib/filter")
 (export prepend-collation-filter check-collation-filter halt-on-close)
 
+(define (track tag str)
+  (print* tag "[" (format (string-length str)) "] ")
+  (define len (string-length str)) 
+  (when (> len 8) (set! len 8))
+  (println* (format (substring str len))))
+    
 ; This filter will prepend data with a length prior to transmission.
 (define-filter (prepend-collation-filter)
   (forever
     (define evt (wait in))
     (when (string? evt)
+      (define len (string-length evt))
+      (println* "    XMIT----: " (format len) " bytes.")
+      (when (> len 16) (set! len 16))
+      (println* "            : " (format (substring evt 0 len)))
       (string-prepend! evt 
                        (word->string (string-length evt))))
     (send evt out)))
@@ -37,8 +47,11 @@
   
   (forever
     (define len (wait-for-int))
-    (println* "Reading message of length " (format len))
+    (println* "    ----RECV: " (format len) " bytes.")
     (define msg (read len))
+    (define len (string-length msg))
+    (when (> len 16) (set! len 16))
+    (println* "            : " (format (substring msg 0 len)))
     (send msg out)))
 
 (define-filter (halt-on-close)

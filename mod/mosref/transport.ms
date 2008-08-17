@@ -16,10 +16,6 @@
 
 (module "mosref/base")
 
-(import "lib/crypto-filter")
-(import "lib/checksum-filter")
-(import "lib/collate-filter")
-(import "lib/copy-filter")
 (import "lib/trace")
 (import "lib/with-io")
 (import "mosref/patch")
@@ -46,37 +42,43 @@
 
 (export make-mosref-recv make-mosref-xmit)
 
-(define (make-mosref-xmit xmit xmit-key xmit-iv)
-  (define xmit-key (make-salsa20-key xmit-key xmit-iv))
-  (define (xmit-encrypt message) (salsa20-encrypt xmit-key message))
+(define-filter (mosref-decrypt key iv)
+  (set! key (make-salsa20-key key iv))             
+  (define read-ciphertext (buffer-input in))
+  (define (read . args)
+    (define data (read-ciphertext @args))
+    (unless (string? data) 
+      (send data out) 
+      (halt))
+    (salsa20-decrypt key data))
 
-  (output-chain xmit
-                ;(trace-filter "xmit-ciphertext")
-                (encrypt-filter xmit-encrypt)
-                ;(trace-filter "xmit-plaintext w/len+cs")
-                (prepend-collation-filter)
-                ;(trace-filter "xmit-plaintext w/cs")
-                (prepend-checksum-filter crc32)
-                ;(trace-filter "xmit-plaintext")
-                (copy-filter)))
+  (forever
+    (define len (string->word (read 2)))
+    (define crc (string->quad (read 4)))
+    (define text (read len))
+    (unless (= crc (crc32 text))
+      (send `(fail crc "garbled message received") out)
+      (halt))
+    (send text out)))
+
+(define-filter (mosref-encrypt key iv)
+  (set! key (make-salsa20-key key iv))             
+  (forever
+    (define event (wait in))
+    (when (string? event) 
+      (define len (string-length event))
+      (define crc (crc32 event))
+      (send (salsa20-encrypt key (word->string len)) out)
+      (send (salsa20-encrypt key (quad->string crc)) out)
+      (set! event (salsa20-encrypt key event)))
+    (send event out)))
+
+(define (make-mosref-xmit xmit xmit-key xmit-iv)
+  (output-chain xmit (mosref-encrypt xmit-key xmit-iv)))
 
 (define (make-mosref-recv extra recv recv-key recv-iv)
-  (define recv-key (make-salsa20-key recv-key recv-iv))
-  (define (recv-decrypt message) (salsa20-decrypt recv-key message))
-    
-  (when extra
-    (set! recv (preface-input extra recv)))
-
-  (input-chain recv
-               (halt-on-close)
-               ;(trace-filter "recv-ciphertext")
-               (decrypt-filter recv-decrypt)
-               ;(trace-filter "recv-plaintext w/len+cs")
-               (check-collation-filter)
-               ;(trace-filter "recv-plaintext w/cs")
-               (check-checksum-filter crc32)
-               ;(trace-filter "recv-plaintext")
-               ))
+  (when extra (set! recv (preface-input extra recv)))
+  (input-chain recv (mosref-decrypt recv-key recv-iv)))
 
 (define (spawn-endpoint endpoint break xmit recv)
   ;(set! xmit (output-chain xmit (trace-filter "XMIT")))
