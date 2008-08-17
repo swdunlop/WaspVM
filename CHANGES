@@ -1,4 +1,34 @@
-????/??/?? Port MOSREF 2.0b4 into WaspVM.
+????/??/?? Code Quality Improvements for MOSREF 
+  At this point, MOSREF is functional, but could use some improvements; this
+  milestone is focussed on making MOSREF a production-worthy tool.
+  
+  + Verified operation of drone bridging.
+  + Moved all inline programs in MOSREF commands into their own modules to
+    reduce excessive transmission traffic.
+  + Restored tcp-forward.
+  + Restored the MOSREF "proxy" command.
+  + Modified MOSREF communications to operate in 1k blocks, supporting 
+    messages of up to 2 GB in length.
+  + Added HELP for properties.
+  + Added test suite for all MOSREF commands using a local drone.
+  + Cross-platform testing using win32.
+  + Restored the scan command.
+  + Ensured the initial mode of any executable created by WaspC is 0700.
+  + Added the os-connection-peer primitive, which can get the remote peer's 
+    address and service of a connection.
+  + Ensured that sudden collapse of a drone will not crash the console.
+  + Removed debugging spam from lib/patch.
+  + Ensured that all spawned processes on the console will traceback and halt
+    intead of crashing the console.
+  + The console will checkpoint its state to disk after each modification of
+    a setting or creation of a drone.
+  + The console may be started with this checkpointed state, permitting the
+    recovery of lost drones.
+  + Added the "recover all" command, recovering all disconnected drones.
+  + Tagged MOSREF as MOSREF 3.0b1
+  + Tagged WASPVM as 0.4 final.
+
+2006/08/16 Port MOSREF 2.0b4 into WaspVM.
   Found the final source tree for MOSREF, porting it into the current
   work on MOSREF..
   
@@ -29,38 +59,7 @@
   - Disabled use of lib/terminal in bin/mosref.
   - Disabled exploit command.
   - Disabled fork command.
-  - Disabled proxy command.
-    + NOTE: proxy command and anything that relies on tcp-forward will fail until the 'connect
-      message is put into vm/os.c.
-  - Disabled scan command.
-  + Make sure initial mode of drone is 0700
-  - CMD HELP: HELP OK, WORKS
-    ? How does one get help on properties?
-  + CMD SH: HELP OK, WORKS LOCAL, ??? REMOTE
-      + Remote works, but tries to send done on console output.
-      + Should not use drone-local lib/env to determine spawn-command availability.
-      + May want to consider providing run-command on WIN32.
-  + NOTE: Messages restricted to 64k or smaller.  Some applications need to chunk it up, like 
-    cp et al.
-  + CMD CP: HELP OK, WORKS LOCAL, ??? TO-DRONE, ??? FROM-DRONE, ??? TO-FROM-DRONE
-    + For Local to Remote:
-      + Data is colleted on remote end, we get done and we.. halt on the     
-        console.
-    + For Remote to Local:
 
-    ? What will ON drone CP file file do?
-    ? What will ON drone CP file console:file do?
-
-  + CMD NODES: HELP OK, WORKS LOCAL, WORKSCONNECTED
-      + Works peer-addr support to make it really work.
-  + CMD SET: HELP OK, LISTING OK, SETTING OK
-    + Parse errors overformatting key name.
-  + CMD WITH: HELP OK, WORKS LOCAL
-  + NOTE: closes from remote end during a process tends to crash the console.
-  + Need to write mosquito or expect-driven test cases to automate mosref testing.
-  + Need to re-enable ciphers and examine why they aren't syncing.
-  + Add an exit-on-close filter to start of drone receive chain.
-  + Need to generalize traceback and self-protection on console side.
 2008/08/14 Port MOSREF Affiliation into WaspVM.
   - Ported lib/buffer-channel into the core.
   - Ported lib/tag-filter into the core.

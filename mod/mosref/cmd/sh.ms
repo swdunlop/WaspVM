@@ -28,50 +28,60 @@
   (spawn-node-shell (mosref-shell-node shell) (tc->list terms)))
 
 (define *node-shell-prog*
-  (inline (export nothing)
-          (import "lib/env")
-          (import "mosref/patch")
-          (when (string-begins-with? *platform* "win")
-            (send (list 'error 
-                        "MOSREF cannot spawn shell commands on Microsoft Windows"))
-            (send 'close)
-            (halt))
+  (inline 
+    (export nothing)
+    (import "lib/env")
+    (import "mosref/patch")
+    (when (string-begins-with? *platform* "win")
+      (send 
+        '(error "MOSREF cannot spawn shell commands on Microsoft Windows"))
+      (send 'close)
+      (halt))
 
-          (define cmd (wait))
-          (define prog (car cmd))
-          (define args (cdr cmd))
+    (define cmd (wait))
+    (define prog (car cmd))
+    (define args (cdr cmd))
 
-          (set! prog (locate-cmd prog))
-          (unless prog
-            (send (list 'error
-                        (string-append "Drone cannot find " (format (car cmd) ) 
-                                       ".")))
-            (send 'close)
-            (return))
+    (set! prog (locate-cmd prog))
+    (unless prog
+      (send (list 'error
+                  (string-append "Drone cannot find " 
+                                 (format (car cmd) ) 
+                                 ".")))
+      (send 'close)
+      (return))
 
-          (define stream (spawn-command prog args))
-          (define lane (make-reserved-lane *drone-bridge*))
-          (send (list 'connect (lane-tag lane)))
-          (patch2 stream lane)
-          (send 'close)))
+    (define stream (spawn-command prog args))
+    (define lane (make-reserved-lane *drone-bridge*))
+    (send (list 'connect (lane-tag lane)))
+    (patch2 stream lane)
+    (send 'close)))
 
 (define (spawn-node-shell (<drone-node> node) cmd)
   (define conn (spawn-node-program node *node-shell-prog*))
   (define xmit (car conn))
   (define recv (cadr conn))
   (define bridge (drone-node-bridge node))
+
   (send cmd xmit)
   (define event (wait recv))
   (send 'close xmit)
+
   (when (eq? event 'close)
     (send 'close xmit)
-    (send-err "Lost connection with shell process."))
+    (send-err "Lost connection with shell process.")
+    (return))
+
   (unless (pair? event)
     (send 'close xmit)
-    (send-err "Unusual message received: " (format event)))
+    (send-err "Unusual message received: " (format event))
+    (return))
+
   (when (eq? (car event) 'connect)
     (define tag (cadr event))
     (define lane (find-reserved-lane bridge tag))
+    (define cmd-done #f)
+
     (when lane
       (define lx (lane-xmit lane))
       (define lr (lane-recv lane))
@@ -80,25 +90,27 @@
       (spawn (lambda ()
                (forever
                  (define e (wait lr))
-                 (when (eq? e 'done)
+                 (when (or (eq? e 'done) 
+                           (eq? e 'close))
+                   (set! cmd-done #t)
                    (return))
-                 (when (eq? e 'close)
-                   (send 'done tx)
-                   (return))
-                 (send e tx))))
-      (forever
-        (define e (wait tr))
-        (when (eq? e 'done)
-          (return))
-        (send e lx)
-        (when (eq? e 'close)
-          (send 'done lx)
-          (send e (output tx)))))
-    (send-err "Could not resolve initial lane.")
-    (return))
+                 (when (string? e)
+                   (send e tx)))))
+
+      (until cmd-done
+        (define e (wait 10 tr))
+        (when (eq? e 'close) (return))
+        (when (string? e) (send e lx)))
+      
+      (return))
+
+    (send-err "Could not resolve initial lane."))
+
   (when (eq? (car event) 'error)
     (send 'close xmit)
-    (send-err (cadr event))))
+    (send-err (cadr event)))
+
+  (return))
 
 (define (spawn-node-shell (<console-node> node) cmd)
   (when (string-begins-with? *platform* "win")
@@ -121,11 +133,9 @@
   (spawn (function (relay-command-output)
            (until cmd-done
              (define e (wait sr))
-             (when (eq? e 'done)
-               (return))
-             (when (eq? e 'close)
+             (when (or (eq? e 'done)
+                       (eq? e 'close))
                (set! cmd-done #t)
-               ;(send 'done tx);XX
                (return))
              (send e tx))))
     
