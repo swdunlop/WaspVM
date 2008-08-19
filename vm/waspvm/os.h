@@ -20,17 +20,20 @@
 #include "memory.h"
 #include <event.h>
 
-#define WASP_CONNECTING 1
-#define WASP_CONNECTED  2
-#define WASP_CLOSING    3
-#define WASP_CLOSED     4
+#define WASP_CONNECTING     0
+#define WASP_CONNECTED      1
+#define WASP_CLOSING        2
+#define WASP_CLOSED         3
 
 WASP_BEGIN_SUBTYPE( connection, os_connection )
     struct bufferevent* event;
 
     int handle;
+    
+    int looping: 1;
     int writing: 1;
     int reading: 1;
+    int conn_ready: 1;
     int state: 4;
 WASP_END_SUBTYPE( os_connection )
 
@@ -60,7 +63,7 @@ WASP_END_SUBTYPE( os_service );
 #define OS_SERVICE_RESULT( x )  TYPED_RESULT( os_service, x )
 
 wasp_os_service wasp_make_os_service( int handle );
-wasp_os_connection wasp_make_os_connection( int handle );
+wasp_os_connection wasp_make_os_connection( int handle, int connected );
 
 void wasp_init_os_subsystem( );
 

@@ -20,7 +20,6 @@
 (import "lib/socks-server")
 (import "lib/tcp-server")
 
-;TODO: Add password authentication.
 (define-cmd "proxy"
             "proxy [<portno> [<secret>]]"
             (string-append

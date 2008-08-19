@@ -101,3 +101,9 @@
 (define (println* . items)
   (print* @items *line-sep*))
 
+(define (tcp-connect . args)
+  (define conn (start-tcp-connect @args))
+  (define event (wait conn)) 
+  ;;TODO: error on fail event.
+  conn)
+

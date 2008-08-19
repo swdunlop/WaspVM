@@ -12,7 +12,12 @@
   + Modified waspdoc/c-file to document primitive functions.
   + Modified waspdoc/c-file to document primitive types.
 
-- Move mosref/patch to lib/patch so collate-filter can depend on it.
+????/??/?? Improved I/O loop
+  + Removed libevent
+  + Wrote API emulating win32 completion-driven semantics on unix.
+  + Ported I/O loop to mac os x.
+  + Enabled truly asynchronous TCP connection semantics.
+  + Moved win32 console I/O logic out.
 
 - Add the (ensure cleanup stmt ...) macro.
   Emulates the common (guard (lambda (err) cleanup (re-error err)) ...) idiom.
@@ -23,12 +28,6 @@
 - Fix serious problems in trace / free inheritance.
   This is seriously not working, and could be disastrous if a later 
   change to a root class isn't accounted for by a derived class.
-
-- Add special os-connection-timeout primitive to avoid redundancies in scheduling timeouts.
-
-- Implement os.c using pure win32 api's.
-
-- Implement os.c using pure macosx api's.
 
 - Add "dump-object" which dumps a lib/object object field by field.
 

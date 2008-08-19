@@ -9,11 +9,17 @@
     each block has a checksum, the overall message has a checksum.  This reduces the potential for 
     noise to tie up memory or hang the node.  (It will still cause the connection to break,
     though.)
-  + Added HELP for properties.
-  + Modified tcp-connect to yield 'connect first.
+  - Renamed tcp-connect primitive to start-tcp-connect
+  - Modified outbound tcp connections to yield 'connect after they first connect.
+  - Added tcp-connect function to core/io; emulates old synchronous tcp-connect 
+    behavior.  (Eating the opening 'connect message.)
   + Restored tcp-forward.
   + Restored the MOSREF "proxy" command.
   + Restored the scan command.
+  + Added HELP for properties.
+    + mosref/node has documentation storage
+    + props have doc entries, just not tied into help.
+    + Add static help topics
   + Added test suite for all MOSREF commands using a local drone.
   + Moved all inline programs in MOSREF commands into their own modules to
     reduce excessive transmission traffic.

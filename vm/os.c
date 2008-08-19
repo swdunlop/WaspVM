@@ -50,6 +50,7 @@
 
 wasp_process wasp_os_loop_process;
 unsigned int wasp_os_loop_use = 0;
+wasp_symbol wasp_ss_connect;
 
 void wasp_enable_os_loop( ){
     IO_TRACE( "OS Loop Enabled, Use Ct: %i\n", wasp_os_loop_use + 1 );
@@ -82,56 +83,58 @@ void wasp_activate_os_loop( ){
 }
 void wasp_deactivate_os_loop( ){ }
 
+void wasp_enable_conn_loop( wasp_os_connection oscon ){
+    if( oscon->looping ) return;
+    oscon->looping = 1;
+    wasp_enable_os_loop( );
+    wasp_root_obj( (wasp_object) oscon );
+}
+
+void wasp_disable_conn_loop( wasp_os_connection oscon ){
+    if( ! oscon->looping ) return;
+    if( oscon->reading ) return;
+    if( oscon->writing ) return;
+    if( oscon->state == WASP_CONNECTING ) return;
+
+    oscon->looping = 0;
+    wasp_disable_os_loop( );
+    wasp_unroot_obj( (wasp_object) oscon );
+}
+
 void wasp_os_start_writing( wasp_os_connection conn, wasp_string data ){
     char* str = wasp_sf_string( data );
     int   len = wasp_string_length( data );
     
-    bufferevent_enable( conn->event, EV_WRITE );
-    bufferevent_write( conn->event, str, len );
+    if( conn->writing ){
+        bufferevent_write( conn->event, str, len );
+    }else{
+        conn->writing = 1;
+        bufferevent_enable( conn->event, EV_WRITE );
+        bufferevent_write( conn->event, str, len );
+        wasp_enable_conn_loop( conn );
+    }
     //TODO: Try writing directly, first.. Sometimes it works!
-    
-    if( conn->writing ) return;
-    conn->writing = 1;
-
-    if( conn->reading )return;
-    IO_TRACE( "-- %4i -- WRITING -- ENABLE --\n", conn->handle );
-    wasp_enable_os_loop( );
-    wasp_root_obj( (wasp_object) conn );
 }
 
 void wasp_os_start_reading( wasp_os_connection conn ){
     if( conn->reading ) return;
-    
     conn->reading = 1;
     bufferevent_enable( conn->event, EV_READ );
-
-    if( conn->writing )return;
-    IO_TRACE( "-- %4i -- READING -- ENABLE --\n", conn->handle );
-    wasp_enable_os_loop( );
-    wasp_root_obj( (wasp_object) conn );
+    wasp_enable_conn_loop( conn );
 }
 
 void wasp_os_stop_writing( wasp_os_connection conn ){
     if( ! conn->writing ) return;
-    IO_TRACE( "Stopped writing for connection %x\n", conn );
     conn->writing = 0;
     bufferevent_disable( conn->event, EV_WRITE );
-
-    if( conn->reading )return;
-    IO_TRACE( "-- %4i -- WRITING -- DISABLE --\n", conn->handle );
-    wasp_disable_os_loop( );
-    wasp_unroot_obj( (wasp_object) conn );
+    wasp_disable_conn_loop( conn );
 }
 
 void wasp_os_stop_reading( wasp_os_connection conn ){
     if( ! conn->reading ) return;
     conn->reading = 0;
     bufferevent_disable( conn->event, EV_READ );
-
-    if( conn->writing ) return;
-    IO_TRACE( "-- %4i -- READING -- DISABLE --\n", conn->handle );
-    wasp_disable_os_loop( );
-    wasp_unroot_obj( (wasp_object) conn );
+    wasp_disable_conn_loop( conn );
 }
 
 
@@ -141,7 +144,7 @@ void wasp_os_closed( wasp_os_connection conn ){
         
         close( conn->handle );
         conn->state = WASP_CLOSED;
-        
+          
         wasp_os_stop_writing( conn );
         wasp_os_stop_reading( conn );
 
@@ -202,6 +205,15 @@ wasp_string wasp_read_bufferevent( struct bufferevent* ev ){
 int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
     wasp_os_connection conn = inp->conn;
     
+    if( conn->state < WASP_CONNECTED ) return 0;
+
+    if( conn->conn_ready ){
+        *data = wasp_vf_symbol( wasp_ss_connect );
+        conn->conn_ready = 0; 
+        wasp_disable_conn_loop( conn );
+        return 1;
+    };
+
     if( conn->state >= WASP_CLOSING ){
         *data = wasp_vf_symbol( wasp_ss_close );
         return 1;
@@ -232,7 +244,18 @@ void wasp_os_read_cb(
 void wasp_os_xmit_cb( 
     struct bufferevent* ev, wasp_os_connection conn 
 ){
-    IO_TRACE( "Detected write completion for %x\n", conn );
+    if( conn->state < WASP_CONNECTED ){
+        printf( "Gone write-ready on connection.\n" );
+        conn->state = WASP_CONNECTED;
+        wasp_input input = ((wasp_connection)conn)->input;
+
+        if( ! wasp_wake_monitor( 
+            input, wasp_vf_symbol( wasp_ss_connect )  
+        ) ) conn->conn_ready = 1;
+        
+        wasp_disable_conn_loop( conn );
+    };
+
     wasp_os_stop_writing( conn );
     if( conn->state == WASP_CLOSING ) wasp_os_closed( conn );
     //TODO: Write completion notification.
@@ -271,7 +294,7 @@ void wasp_svc_read_cb( int handle, short event, void* service ){
     IO_TRACE( "-- %4i -- LISTENER -- DISABLE --\n",((wasp_os_service) service)->handle );
     wasp_disable_os_loop( );
     
-    wasp_os_connection conn = wasp_make_os_connection( fd );
+    wasp_os_connection conn = wasp_make_os_connection( fd, 1 );
     
     wasp_wake_monitor( (wasp_input)service, wasp_vf_os_connection( conn ) );
 }
@@ -304,7 +327,7 @@ void wasp_os_close_service( wasp_os_service service ){
     };
 }
 
-wasp_os_connection wasp_make_os_connection( int handle ){
+wasp_os_connection wasp_make_os_connection( int handle, int connected ){
     //TODO: Unblock the handle. Note that this will not work with pipes.
 
     wasp_os_connection oscon = WASP_OBJALLOC( os_connection );
@@ -327,8 +350,14 @@ wasp_os_connection wasp_make_os_connection( int handle ){
                                     (evbuffercb) wasp_os_xmit_cb, 
                                     (everrorcb) wasp_os_error_cb, 
                                     oscon);
-    bufferevent_enable( oscon->event, EV_WRITE );
-    wasp_root_obj( (wasp_object) oscon ); //TODO: Needs unroot on close.
+    
+    if( connected ){
+        oscon->state = WASP_CONNECTED;
+    }else{
+        bufferevent_enable( oscon->event, EV_WRITE );
+        oscon->state = WASP_CONNECTING;
+        wasp_enable_conn_loop( oscon );
+    }
 
     return oscon;
 }
@@ -347,6 +376,23 @@ void wasp_report_net_error( ){
 #else
     if( errno == EINPROGRESS )return;
     wasp_errf( wasp_es_vm, "s", strerror( errno ) );
+#endif
+}
+
+//TODO: This should be more generic..
+wasp_integer wasp_net_error( wasp_integer k ){
+    if( k == -1 )wasp_report_net_error( );
+    return k;
+}
+
+void wasp_unblock_fd( int fd ){
+#if defined( _WIN32 )||defined( __CYGWIN__ )
+    //TODO:WIN32:IO Probably doesn't work on nonsockets.
+    unsigned long unblocking = 1;
+    wasp_net_error( ioctlsocket( fd, FIONBIO, &unblocking ) );
+#else
+    unsigned long unblocking = 1;
+    wasp_net_error( ioctl( fd, FIONBIO, &unblocking ) );
 #endif
 }
 
@@ -414,14 +460,18 @@ wasp_os_connection wasp_tcp_connect( wasp_value host, wasp_value service ){
         freeaddrinfo( addr ); 
         wasp_report_net_error( );
     }
-
+   
+    //TODO: Enable after Wasp I/O Rewrite
+    //wasp_unblock_fd( result );
     if( connect( result, addr->ai_addr, (int) addr->ai_addrlen ) ){
         freeaddrinfo( addr ); 
         wasp_report_net_error( );
     }
+    //TODO: Disable after Wasp I/O Rewrite
+    wasp_unblock_fd( result );
     
-    wasp_os_connection conn = wasp_make_os_connection( result );
-    IO_TRACE( "Connected to remote host on %x\n", conn );
+    wasp_os_connection conn = wasp_make_os_connection( result, 0 );
+    IO_TRACE( "Connecting to remote host on %x\n", conn );
 
     return conn;
 }
@@ -562,9 +612,9 @@ wasp_connection wasp_make_stdio( ){
     // create a connection for each, then take the resulting input and
     // output and bind them into a new connection to represent the console.
     
-    wasp_os_connection oc = wasp_make_os_connection( STDOUT_FILENO );
-    wasp_os_connection ic = wasp_make_os_connection( STDIN_FILENO );
-    
+    wasp_os_connection oc = wasp_make_os_connection( STDOUT_FILENO, 1 );
+    wasp_os_connection ic = wasp_make_os_connection( STDIN_FILENO, 1 );
+
     wasp_connection conn = wasp_make_connection( NULL, NULL );
 
     wasp_stdin = ((wasp_connection)ic)->input;
@@ -637,13 +687,13 @@ WASP_GENERIC_COMPARE( os_input )
 
 WASP_C_SUBTYPE2( os_output, "os-output", output );
 
-WASP_BEGIN_PRIM( "tcp-connect", tcp_connect )
+WASP_BEGIN_PRIM( "start-tcp-connect", start_tcp_connect )
     REQ_ANY_ARG( host );
     REQ_ANY_ARG( service );
     NO_REST_ARGS( );
 
     RESULT( wasp_vf_os_connection( wasp_tcp_connect( host, service ) ) );
-WASP_END_PRIM( tcp_connect )
+WASP_END_PRIM( start_tcp_connect )
 
 WASP_BEGIN_PRIM( "os-connection-input", os_connection_input )
     REQ_OS_CONNECTION_ARG( connection );
@@ -658,12 +708,6 @@ WASP_BEGIN_PRIM( "os-connection-output", os_connection_output )
 
     RESULT( wasp_vf_output( connection->connection.output ) );
 WASP_END_PRIM( os_connection_output );
-
-//TODO: This should be more generic..
-wasp_integer wasp_net_error( wasp_integer k ){
-    if( k == -1 )wasp_report_net_error( );
-    return k;
-}
 
 WASP_BEGIN_PRIM( "serve-tcp", serve_tcp )
     REQ_INTEGER_ARG( portno );
@@ -680,16 +724,8 @@ WASP_BEGIN_PRIM( "serve-tcp", serve_tcp )
                                            IPPROTO_TCP ) );
     wasp_net_error( bind( server_fd, (struct sockaddr*)&addr, sizeof( addr ) ) );
     wasp_net_error( listen( server_fd, 5 ) );
-
-#if defined( _WIN32 )||defined( __CYGWIN__ )
-	//TODO:WIN32:IO Probably doesn't work on nonsockets.
-    unsigned long unblocking = 1;
-    wasp_net_error( ioctlsocket( server_fd, FIONBIO, &unblocking ) );
-#else
-    // wasp_net_error( fcntl( server_fd, F_SETFL, O_NONBLOCK ) );
-    unsigned long unblocking = 1;
-    wasp_net_error( ioctl( server_fd, FIONBIO, &unblocking ) );
-#endif
+    
+    wasp_unblock_fd( server_fd );
 
     OS_SERVICE_RESULT( wasp_make_os_service( server_fd ) );
 WASP_END_PRIM( serve_tcp )
@@ -764,6 +800,7 @@ void wasp_init_os_subsystem( ){
     setenv( "EVENT_NOPOLL", "yes", 1 );
 #endif
     event_init( );
+    wasp_ss_connect = wasp_symbol_fs( "connect" );
 
     wasp_process p = wasp_make_process( wasp_activate_os_loop, 
                                         wasp_deactivate_os_loop, 
@@ -776,7 +813,7 @@ void wasp_init_os_subsystem( ){
     WASP_I_SUBTYPE( os_input, input );
     WASP_I_SUBTYPE( os_output, output );
     
-    WASP_BIND_PRIM( tcp_connect );
+    WASP_BIND_PRIM( start_tcp_connect );
 
     WASP_BIND_PRIM( os_connection_input );
     WASP_BIND_PRIM( os_connection_output );
