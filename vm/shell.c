@@ -71,7 +71,7 @@ wasp_connection wasp_spawn_cmd( wasp_string path, wasp_list arg, wasp_list var )
     char** argv = wasp_make_argv( arg, argc );
     char** varv = varc ? wasp_make_argv( var, varc ) : environ;
 
-    wasp_connection conn = (wasp_connection)wasp_make_os_connection( fds[0] );
+    wasp_connection conn = (wasp_connection)wasp_make_os_connection( fds[0], 1 );
 
     int pid = fork(); 
 

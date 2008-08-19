@@ -35,8 +35,8 @@
 
   (define secret (opt-term terms))
 
-  (spawn-node-proxy (mosref-shell-node shell) portno secret)
-  (send-line "SOCKS Proxy created, listening on port " (format portno) ".")) 
+  (when (spawn-node-proxy (mosref-shell-node shell) portno secret)
+    (send-line "SOCKS Proxy created, listening on port " (format portno) ".")))
 
 (define *node-tcp-forward-prog* 
   (inline (export nothing)
@@ -70,17 +70,15 @@
 
 (define (node-tcp-connect (<console-node> node) addr portno lapse)
   ;TODO: Put that lapse in, too.
-  (define conn (start-tcp-connect addr portno))
-  (list (input conn) (output conn)))
+  (start-tcp-connect addr portno))
 
 (define (node-tcp-connect (<drone-node> node) addr portno lapse)
   (define conn (spawn-node-program node *node-tcp-forward-prog*))
-  (define xmit (car conn))
-  (define recv (cadr conn))
-  (send addr xmit)
-  (send portno xmit)
-  (send lapse xmit)
-  (list xmit recv))
+  (set! conn (make-connection (cadr conn) (car conn)))
+  (send addr conn)
+  (send portno conn)
+  (send lapse conn)
+  conn)
 
 (export node-tcp-connect)
 
@@ -94,9 +92,7 @@
     
   (define (node-proxy-connect addr portno)
     (define conn (node-tcp-connect node addr portno 10000))
-    (define xmit (car conn))
-    (define recv (cadr conn))
-    (define evt (wait recv))
+    (define evt (wait conn))
 
     (cond ((eq? evt 'close) (log-line "FAIL: " 
                                       (format-addr addr) ":" (format portno) 
@@ -107,13 +103,6 @@
           ((eq? evt 'connect) (log-line "SUCC: "
                                         (format-addr addr) ":" (format portno) 
                                         " -- Connected.")
-                              (send (format-socks4-response #t portno addr))
-                              (spawn (lambda () (forever 
-                                                  (define evt (wait))
-                                                  (send evt xmit))))
-                              (forever 
-                                (define evt (wait recv))
-                                (send evt))
                               conn)
           (else (log-line "FAIL: " (format-addr addr) ":" (format portno) 
                           " -- Got unexpected response: " (format evt))
@@ -126,8 +115,12 @@
                 (format secret) ", got " (format auth))
       (return #f))
     (return #t))
+  
+  (guard (lambda (err)
+           (log-line "SOCKS: Could not start listener, " (car (error-info err)) ".")
+           #f)
 
-  (spawn-socks4-proxy portno node-proxy-auth node-proxy-connect))
+    (spawn-socks4-proxy portno node-proxy-auth node-proxy-connect)))
 
 (export spawn-node-proxy)
 

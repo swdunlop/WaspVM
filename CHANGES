@@ -15,6 +15,7 @@
     behavior.  (Eating the opening 'connect message.)
   - Restored tcp-forward.
   + Restored the MOSREF "proxy" command.
+    + Premature node proxy creation is working!?
     + Server close not sent to client?
     + Is the proxy being spawned on the console or the client? Verify.
     + Client close not sent to the server?

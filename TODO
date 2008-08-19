@@ -19,6 +19,17 @@
   + Enabled truly asynchronous TCP connection semantics.
   + Moved win32 console I/O logic out.
 
+- Add Generational GC
+  + Ensure NO direct modifications are done of object properties.
+    + Rename each property to zxz_ <property>
+    + Compile and fix all broken zxz_ references.
+  + For each direct modification, gc_check_eph( parent, child ) must be called.
+  + New objects are in the Ephemeral pool.
+  + When a non-ephemeral object gets a reference to an ephemeral, the ephemeral becomes 
+    grey.
+  + After each instruction, all greys are traced, making them white.  Any remaining ephemerals
+    are freed.
+
 - Add the (ensure cleanup stmt ...) macro.
   Emulates the common (guard (lambda (err) cleanup (re-error err)) ...) idiom.
 

@@ -27,6 +27,7 @@
 (module "lib/socks-server.ms")
 (import "lib/patch")
 (import "lib/tcp-server")
+(import "lib/trace")
 
 (define (read-to-zero! str what)
   (define res (make-string (string-length str)))
@@ -88,7 +89,7 @@
     (define f #f)
     (define addr #f)
     (define portno #f)
-
+    
     (guard (lambda (err)
              (send (format-socks4-response #f 0 0))
              (send 'close)
@@ -117,7 +118,7 @@
           (set! addr (resolve-ipv4 addr))))
 
       (set! f (conn-fn addr portno)))
-  
+
     (send (format-socks4-response #t addr portno))
     (define c-xmit (output))
     (define c-recv (input))
@@ -132,8 +133,12 @@
           ((eq? f #f) (send 'close c-xmit)
                       (return)))
 
-    (patch (input) f)
-    (patch f (output)))
+    (patch (input-chain (input)
+                        (trace-filter "C->S"))
+           f)
+
+    (patch f (output-chain (output)
+                           (trace-filter "S->C"))))
 
   (spawn-tcp-server portno socks4-proxy-session))
 
