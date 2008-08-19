@@ -245,7 +245,6 @@ void wasp_os_xmit_cb(
     struct bufferevent* ev, wasp_os_connection conn 
 ){
     if( conn->state < WASP_CONNECTED ){
-        printf( "Gone write-ready on connection.\n" );
         conn->state = WASP_CONNECTED;
         wasp_input input = ((wasp_connection)conn)->input;
 

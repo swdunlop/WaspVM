@@ -27,8 +27,8 @@
               " connections on the current node.  If the port number is"
               " omitted, it will be selected at random."
               "\n\n"
-              "If a shared secret is supplied, the authentication supplied to the"
-              " socks proxy must be match the supplied secret.")
+              "If a shared secret is supplied, the authentication supplied" 
+              " to the socks proxy must be match the supplied secret.")
 
   (define portno (or (opt-integer terms " proxy port")
                      (random-integer 20000 30000)))
@@ -43,7 +43,7 @@
           (define addr (wait))
           (define portno (wait))
           (define lapse (wait))
-          (define conn (tcp-connect addr portno))
+          (define conn (start-tcp-connect addr portno))
           (define timer (timeout lapse (output conn)))
           (define evt (wait conn))
           (cond 
@@ -69,11 +69,9 @@
             (halt))))
 
 (define (node-tcp-connect (<console-node> node) addr portno lapse)
-  (define conn (tcp-connect addr portno))
-  (define xmit (input conn))
-  (define recv (output conn))
-  (define timer (timeout lapse xmit '(fail "timed out")))
-  (list xmit recv))
+  ;TODO: Put that lapse in, too.
+  (define conn (start-tcp-connect addr portno))
+  (list (input conn) (output conn)))
 
 (define (node-tcp-connect (<drone-node> node) addr portno lapse)
   (define conn (spawn-node-program node *node-tcp-forward-prog*))
@@ -91,36 +89,10 @@
   (define log-channel (output))
   (define (log-line . bits)
     (define msg (string-append @bits *line-sep*))
-    (send msg log-channel)
+    (send msg log-channel))
     ;(print msg)
-    )
-  (define (node-proxy-session)
-    (define req (guard (lambda (err)
-                         (unless (eq? (error-key err) 'socks)
-                           (re-error err))
-                         (send (format-socks4-response #f 0 0))
-                         (send 'close)
-                         (halt))
-                  (parse-socks4-request (wait))))
-    (set! req (apply make-tc req))
-    (define auth (tc-next! req))
-    (define proto (tc-next! req))
-    (define addr (tc-next! req))
-    (define portno (tc-next! req))
-
-    (unless (eq? proto 'tcp)
-      (send (format-socks4-response #f portno addr))
-      (send 'close)
-      (halt))
-
-    (unless (or (not secret)
-                (string=? secret auth))
-      (log-line "AUTH: Failed authentication, expected " (format secret) ", got "
-                (format auth))
-      (send (format-socks4-response #f portno addr))
-      (send 'close)
-      (halt))
-
+    
+  (define (node-proxy-connect addr portno)
     (define conn (node-tcp-connect node addr portno 10000))
     (define xmit (car conn))
     (define recv (cadr conn))
@@ -130,23 +102,32 @@
                                       (format-addr addr) ":" (format portno) 
                                       " -- "
                                       "Connection terminated before it"
-                                      " connected.")) 
+                                      " connected.")
+                            #f) 
           ((eq? evt 'connect) (log-line "SUCC: "
-                                      (format-addr addr) ":" (format portno) 
-                                      " -- Connected.")
+                                        (format-addr addr) ":" (format portno) 
+                                        " -- Connected.")
                               (send (format-socks4-response #t portno addr))
                               (spawn (lambda () (forever 
                                                   (define evt (wait))
                                                   (send evt xmit))))
                               (forever 
                                 (define evt (wait recv))
-                                (send evt)))
-          ((and (pair? evt) (eq? (car evt) 'fail))
-                              (log-line "FAIL: " (cadr fail))))
-    (send (format-socks4-response #f portno addr))
-    (send 'close))
+                                (send evt))
+                              conn)
+          (else (log-line "FAIL: " (format-addr addr) ":" (format portno) 
+                          " -- Got unexpected response: " (format evt))
+                #f)))
 
-  (spawn-tcp-server portno node-proxy-session))
+  (define (node-proxy-auth attempt)
+    (unless (or (not secret)
+                (string=? secret attempt))
+      (log-line "AUTH: Failed authentication, expected " 
+                (format secret) ", got " (format auth))
+      (return #f))
+    (return #t))
+
+  (spawn-socks4-proxy portno node-proxy-auth node-proxy-connect))
 
 (export spawn-node-proxy)
 
