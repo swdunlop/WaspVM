@@ -43,15 +43,16 @@
           (define addr (wait))
           (define portno (wait))
           (define lapse (wait))
-          (define conn (start-tcp-connect addr portno))
-          (define timer (timeout lapse (output conn)))
-          (define evt (wait conn))
+          (define conn (guard (function (handle-conn-failure err)
+                                (send `(fail ,@(error-info err)))
+                                (halt))
+                         (start-tcp-connect addr portno)))
+          (define evt (wait lapse conn))
           (cond 
             ((eq? evt 'timeout) (send '(fail "timed out"))
                                 (send 'close))
 
             ((eq? evt 'connect) (send 'connect)
-                                (cancel-timeout timer)
                                 (spawn (function (lane-to-conn)
                                                  (forever
                                                    (define evt (wait))
@@ -65,8 +66,7 @@
                                                      (send 'close))
 
             (else (send "unrecognized response to connection attempt")
-                  (send 'close))
-            (halt))))
+                  (send 'close)))))
 
 (define (node-tcp-connect (<console-node> node) addr portno lapse)
   ;TODO: Put that lapse in, too.

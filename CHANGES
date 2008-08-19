@@ -13,8 +13,11 @@
   - Modified outbound tcp connections to yield 'connect after they first connect.
   - Added tcp-connect function to core/io; emulates old synchronous tcp-connect 
     behavior.  (Eating the opening 'connect message.)
-  + Restored tcp-forward.
+  - Restored tcp-forward.
   + Restored the MOSREF "proxy" command.
+    + Server close not sent to client?
+    + Is the proxy being spawned on the console or the client? Verify.
+    + Client close not sent to the server?
   + Restored the scan command.
   + Added HELP for properties.
     + mosref/node has documentation storage

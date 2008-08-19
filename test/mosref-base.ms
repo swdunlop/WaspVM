@@ -1,5 +1,5 @@
 (import "lib/test")
-(import "mosref/base")
+(import "mosref/transport")
 
 (enable-spot-tests)
 

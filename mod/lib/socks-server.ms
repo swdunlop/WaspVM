@@ -78,10 +78,9 @@
 
 (define (spawn-socks4-proxy portno auth-fn conn-fn)
   (define (socks4-proxy-session)
-    (define t (timeout 10000))
     (define e #f)
     (define (next what)
-      (set! e (wait))
+      (set! e (wait 10000))
       (if (eq? e 'timeout)
         (error 'socks (string-append "timeout while waiting for " what))
         e))
@@ -93,7 +92,6 @@
     (guard (lambda (err)
              (send (format-socks4-response #f 0 0))
              (send 'close)
-             (cancel-timeout t)
              (unless (eq? (error-key err) 'socks)
                (re-error err))
              (halt))
@@ -120,7 +118,6 @@
 
       (set! f (conn-fn addr portno)))
   
-    (cancel-timeout t)
     (send (format-socks4-response #t addr portno))
     (define c-xmit (output))
     (define c-recv (input))
