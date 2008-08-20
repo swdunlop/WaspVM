@@ -22,6 +22,21 @@
 (import "mosref/shell")
 (import "mosref/cmds")
 
+(export spawn main)
+
+(define actual-spawn spawn)
+
+(define (spawn fn . args)
+  (define (trace-and-halt err)
+    (define buffer (make-string))
+    (traceback err buffer)
+    (print* "IN: " (format fn) " " buffer)
+    (halt))
+
+  (actual-spawn (function (spawn-safety)
+                  (guard trace-and-halt 
+                    (apply fn args)))))
+
 (define (main . args)
   (do-mosref args))
  
