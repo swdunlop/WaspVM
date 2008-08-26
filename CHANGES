@@ -5,20 +5,28 @@
   - Verified operation of drone bridging.
   - Moved mosref/patch to lib/patch.
   - Removed debugging spam from lib/patch.
-  - Modified MOSREF communications to operate in blocks of random sizes from 0 to 255 bytes,
-    each block has a checksum, the overall message has a checksum.  This reduces the potential for 
-    noise to tie up memory or hang the node.  (It will still cause the connection to break,
-    though.)
+  - Modified MOSREF communications to operate in blocks of random sizes from 0 
+    to 255 bytes, each block has a checksum, the overall message has a 
+    checksum.  This reduces the potential for noise to tie up memory or hang 
+    the node.  (It will still cause the connection to break, though.)
   - Renamed tcp-connect primitive to start-tcp-connect
-  - Modified outbound tcp connections to yield 'connect after they first connect.
+  - Modified outbound tcp connections to yield 'connect after they first 
+    connect.
   - Added tcp-connect function to core/io; emulates old synchronous tcp-connect 
     behavior.  (Eating the opening 'connect message.)
   - Restored tcp-forward.
+  - Adulterated spawn in mosref to traceback and halt on an unhandled error in
+    any spawned process.
+  + BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
+    + Does not happen with -O1, -O2
+
   + Restored the MOSREF "proxy" command.
     + Premature node proxy creation is working!?
     + Server close not sent to client?
     + Is the proxy being spawned on the console or the client? Verify.
     + Client close not sent to the server?
+    + Need to insulate against transmitting to a closed client or server within
+      the proxy module.
   + Restored the scan command.
   + Added HELP for properties.
     + mosref/node has documentation storage

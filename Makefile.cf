@@ -56,10 +56,12 @@ CFLAGS += -DNDEBUG
 endif
 
 ifdef COMPACT
+### NOTE: -Os causes list formatting to fail on linux with gcc-4.3.
 CFLAGS += -Os
 else
 ifdef FAST
-CFLAGS += -O3
+### NOTE: -O3 causes list formatting to fail on linux with gcc-4.3.
+CFLAGS += -O2
 else
 CFLAGS += -O
 endif
