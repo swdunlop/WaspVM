@@ -105,7 +105,7 @@
 
 (define-macro (fail-on-error channel . body)
   `(guard (function (fail-for-error err)
-            ;(re-error err) ;TODO: Just for debugging..
+            (re-error err) ;TODO: Just for debugging..
             (send (list 'fail 
                         (error-key err)
                         @(error-info err)

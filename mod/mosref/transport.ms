@@ -16,6 +16,8 @@
 
 (module "mosref/base")
 
+(import "lib/buffer-input")
+(import "lib/bridge")
 (import "lib/trace")
 (import "lib/with-io")
 (import "lib/patch")
@@ -66,8 +68,6 @@
     (define block-crc (string->quad (read 4)))
     (define block (read len))
     
-    ;(println* "    RECV-BLOCK[ " (format len) " : " (format block-crc) " ]")
-
     (unless (= (crc32 block) block-crc)
       (send `(fail crc "garbled message block received") out)
       (halt))
@@ -80,7 +80,6 @@
     (set! req (string->quad (read 4)))
     (set! message-crc (string->quad (read 4)))
       
-    ;(println* "RECV-MESG[ " (format req) " : " (format message-crc) " ]")
     (while (> req 0) (read-block))
 
     (unless (= message-crc (crc32 buffer))
@@ -105,7 +104,6 @@
     (when (> block-sz message-left)
       (set! block-sz message-left))
     (define block (substring message message-ofs block-sz))
-    ;(println* "    XMIT-BLOCK[ " (format block-sz) " : " (format (crc32 block)) " ]")
     (write (byte->string block-sz))
     (write (quad->string (crc32 block)))
     (write block)
@@ -117,7 +115,6 @@
     (set! message-ofs 0)
     (write (quad->string message-left))
     (write (quad->string (crc32 message)))
-    ;(println* "XMIT-MESG[ " (format message-left) " : " (format (crc32 message)) " ]")
     (while (> message-left 0) (send-block)))
 
   (forever
@@ -135,8 +132,6 @@
   (input-chain recv (mosref-decrypt recv-key recv-iv)))
 
 (define (spawn-endpoint endpoint break xmit recv)
-  ;(set! xmit (output-chain xmit (trace-filter "XMIT")))
-  ;(set! recv (input-chain  recv (trace-filter "RECV")))
   (define bridge (make-bridge xmit recv))
   (define lanes (bridge-lanes bridge))
 

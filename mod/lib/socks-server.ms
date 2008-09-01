@@ -132,13 +132,8 @@
                            (set! f-recv (input f)))
           ((eq? f #f) (send 'close c-xmit)
                       (return)))
-
-    (patch (input-chain (input)
-                        (trace-filter "C->S"))
-           f)
-
-    (patch f (output-chain (output)
-                           (trace-filter "S->C"))))
+    (patch (input) f)
+    (patch f (output)))
 
   (spawn-tcp-server portno socks4-proxy-session))
 

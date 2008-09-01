@@ -18,21 +18,20 @@
     arg)
   
   (define (usage)
-    (print (string-append
-             "USAGE: waspdoc check source -- Check source for new and missing.\n"
-             "       waspdoc dump source <src-file> -- View source info.\n"
-             "       waspdoc dump module <mod-name> -- View module info.\n"))
+    (print* "USAGE: waspdoc check source -- Check source for new and missing.\n"
+            "       waspdoc dump source <src-file> -- View source info.\n"
+            "       waspdoc dump module <mod-name> -- View module info.\n")
     (exit 0))
 
   (define (fail . args)
     (if arg
-      (print (string-append "Did not understand " arg ".\n"))
-      (print (string-append "Expected more.\n")))
+      (println* "Did not understand " arg ".")
+      (println* "Expected more."))
     (exit 1))
 
   (define (next-opt for-what)
     (when (tc-empty? opts)
-      (print (string-append "Expected " what ".\n"))
+      (println* "Expected " what ".")
       (exit 1))
 
     (set! opt (tc-next! opts))

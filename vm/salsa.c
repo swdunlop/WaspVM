@@ -140,12 +140,12 @@ int wasp_random_handle = 0;
 int wasp_get_random_handle( ){
     if( wasp_random_handle ) return wasp_random_handle;
 
-    wasp_random_handle = open( "/dev/random", O_RDONLY );
-    if( wasp_random_handle > 0 ) return;
-
     wasp_random_handle = open( "/dev/urandom", O_RDONLY );
     if( wasp_random_handle > 0 ) return;
     
+    wasp_random_handle = open( "/dev/random", O_RDONLY );
+    if( wasp_random_handle > 0 ) return;
+
     wasp_random_handle = 0;
     wasp_errf( wasp_es_vm, "s", "could not open OS entropy source" );
     return 0;

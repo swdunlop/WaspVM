@@ -215,6 +215,11 @@ int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
     };
 
     if( conn->state >= WASP_CLOSING ){
+        if( conn->close_sent ){
+            return 0; // This causes an eternal wait; close is only produced
+                      // once.
+        };
+        conn->close_sent = 1;
         *data = wasp_vf_symbol( wasp_ss_close );
         return 1;
     }

@@ -35,7 +35,8 @@
            (forever
              (define evt (wait in))
              (send evt out)
-             (when (eq? evt 'close) (return))))))
+             (when (eq? evt 'close) 
+               (return))))))
 
 (define (patch2 left right)
   (patch left right)

@@ -85,7 +85,7 @@ typedef int wasp_boolean;
     typedef wasp_##dt wasp_##st; \
     WASP_H_TYPE( st ) \
 
-#ifdef NDEBUG
+#ifdef XXX_NDEBUG
 
 #define OPT_TYPED_ARG( vn, tn ) \
     wasp_boolean has_##vn; \

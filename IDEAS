@@ -1,3 +1,15 @@
+- Lib/Expect
+  + (make-queue items...) yields a queue preloaded with items.
+  + (expect input timeout pattern) -> #f or pattern-items
+  E.G. (expect (make-queue "abc,123,456") 100 '^(.*),$') -> ("abc") 
+  + (expect-case input timeout 
+      ((pattern ...) ...)
+      ('timeout stmt ...)
+      ('else stmt...))
+  E.G. (expect-case (make-queue "abc,123,456") 100
+        (("^abc,(.*)$") (print* "ABC had: " (car result)))
+        (timeout        (print* "Out of data.")))
+
 - Recovery System for Console Shutdown
   + The console will checkpoint its state to disk after each modification of
     a setting or creation of a drone.

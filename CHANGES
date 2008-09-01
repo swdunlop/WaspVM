@@ -12,33 +12,26 @@
   - Renamed tcp-connect primitive to start-tcp-connect
   - Modified outbound tcp connections to yield 'connect after they first 
     connect.
-  - Added tcp-connect function to core/io; emulates old synchronous tcp-connect 
-    behavior.  (Eating the opening 'connect message.)
+  - Added tcp-connect function to core/io; emulates old synchronous 
+    tcp-connect behavior.  (Eating the opening 'connect message.)
   - Restored tcp-forward.
   - Adulterated spawn in mosref to traceback and halt on an unhandled error in
     any spawned process.
-  + BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
-    + Does not happen with -O1, -O2
+  - Ensured that OS connections will only yield a 'close once; subsequent 
+    waits on the connection result in an infinite wait.  (Which corresponds
+    with other inputs.)
+  - Restored the MOSREF "proxy" command.
 
-  + Restored the MOSREF "proxy" command.
-    + Premature node proxy creation is working!?
-    + Server close not sent to client?
-    + Is the proxy being spawned on the console or the client? Verify.
-    + Client close not sent to the server?
-    + Need to insulate against transmitting to a closed client or server within
-      the proxy module.
+  + BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
+    + Does not happen with -O1, -O2 and -O0
+
   + Restored the scan command.
   + Added HELP for properties.
     + mosref/node has documentation storage
     + props have doc entries, just not tied into help.
     + Add static help topics
   + Added test suite for all MOSREF commands using a local drone.
-  + Moved all inline programs in MOSREF commands into their own modules to
-    reduce excessive transmission traffic.
   + Ensured the initial mode of any executable created by WaspC is 0700.
-  + Ensured that sudden collapse of a drone will not crash the console.
-  + Ensured that all spawned processes on the console will traceback and halt
-    intead of crashing the console.
   + Verify standalone operation of drone. 
   + Verify Cross-platform operation using win32.
   + Verify Cross-platform operation using darwin.

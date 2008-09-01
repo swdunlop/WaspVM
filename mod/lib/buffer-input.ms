@@ -37,7 +37,6 @@
                    (else (function (ignore-debris event)))))
 
   (define (process evt)
-    ;(print (string-append "Processing event: " (format evt) "\n"))
     (cond ((string? evt) (string-append! buffer evt))
           ((eq? evt 'close) (reject 'close)
                             (error 'close))
@@ -45,12 +44,10 @@
 
   (define more (cond
                  (timeout (function (more/timed)
-                                 ;(print "Looking for more..\n")
                             (define event (wait timeout source))
                             (unless 
                               (eq? event 'timeout) (process event))))
                  (else (function (more/patient)
-                                 ;(print "Looking for more..\n")
                           (define event (wait source))
                           (process event)))))
 

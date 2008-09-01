@@ -18,6 +18,9 @@
 #include <string.h>
 #include <ctype.h>
 
+//TODO: Do not leave in
+#undef NDEBUG
+
 #ifdef WASP_IN_WIN32
 // We need hton and ntoh
 #include <winsock2.h>
@@ -191,7 +194,7 @@ void wasp_format_symbol( wasp_string buf, wasp_symbol sym ){
     wasp_string_append_sym( buf, sym ); 
 }
 void wasp_free_symbol( wasp_symbol sym ){
-    assert( 0 );
+    assert( 0 ); // Should never happen!
     wasp_objfree( (wasp_object) sym );
 }
 // WASP_GENERIC_FREE( symbol);

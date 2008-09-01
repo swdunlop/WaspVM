@@ -46,7 +46,7 @@ OPTIONS:
   (define mods (make-tc))
   
   (define (parse-fail msg)
-    (print (string-append "WASPC:" msg *line-sep*)))
+    (println* "WASPC:" msg))
   
   (define (parse-args args)
     (when (null? args) (return))
@@ -79,7 +79,7 @@ OPTIONS:
 
   (define old-build-module build-module)
   (set! build-module (lambda (item)
-                       (print (string-append "BUILD: " item *line-sep*))
+                       (println* "BUILD: " item)
                        (old-build-module item)))
   (set! mods (tc->list mods))
   (set! mods (apply build-modules mods))

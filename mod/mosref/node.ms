@@ -90,10 +90,10 @@
   (define lane (make-lane (drone-node-bridge node)))
   (define xmit (output-chain (lane-xmit lane)
                              (freeze-filter)
-                             (trace-filter "XMIT:")))
+                             (trace-filter "T-XMIT")))
   (define recv (input-chain (lane-recv lane)
                             (thaw-filter)
-                            (trace-filter "RECV:")))
+                            (trace-filter "T-RECV")))
   (send program xmit)
   (list xmit recv))
 

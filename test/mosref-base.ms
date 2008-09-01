@@ -25,7 +25,7 @@
 (define transport (make-queue))
 
 (define xmit (make-mosref-xmit transport secret-1 iv-1))
-(define recv (make-mosref-recv transport secret-2 iv-2))
+(define recv (make-mosref-recv "" transport secret-2 iv-2))
 
 ;; Shameless Pirates of Penzance fandom follows:
 (define verse

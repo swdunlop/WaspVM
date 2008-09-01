@@ -88,7 +88,6 @@
   (define (log-line . bits)
     (define msg (string-append @bits *line-sep*))
     (send msg log-channel))
-    ;(print msg)
     
   (define (node-proxy-connect addr portno)
     (define conn (node-tcp-connect node addr portno 10000))

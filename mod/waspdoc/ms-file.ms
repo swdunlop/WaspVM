@@ -152,7 +152,6 @@
   source)
 
 (define (waspdoc-ms-path? path)
-  (print "Checking path: ") (print path) (print *line-sep*)
   (string-ends-with? path ".ms"))
 
 (export waspdoc-scan-ms waspdoc-ms-path?)

@@ -15,6 +15,7 @@
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 
 (module "mosref/listener")
+(import "lib/buffer-input")
 (import "lib/patch")
 (import "lib/record")
 
@@ -35,7 +36,6 @@
   (define (mosref-sin-checker conn)
     (define read (buffer-input conn 5000))
     (define preamble (read *preamble-len*))
-    (print "PREAMBLE: ")(print (format preamble))(print "\n")
 
     (unless (string? preamble)
       ; You have 5 seconds to send a preamble.. Otherwise, it's the plank!

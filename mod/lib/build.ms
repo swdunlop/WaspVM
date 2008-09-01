@@ -128,11 +128,9 @@
             (unless item-data
               (when standalone
                 (set! standalone #f)
-                (print "WARNING: The program has dependencies on the following")
-                (print " subsystems:\n"))
-              (print "    ")
-              (print item-name)
-              (print "\n")
+                (println* "WARNING: The program has dependencies on the "
+                          "following" " subsystems:"))
+              (println* "    " item-name)
               (return))
             (glue exe item-data))
 

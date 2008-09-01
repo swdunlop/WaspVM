@@ -15,6 +15,7 @@
 ; Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA 
 
 (module "lib/collate-filter")
+(import "lib/buffer-input")
 (import "lib/filter")
 (export prepend-collation-filter check-collation-filter halt-on-close)
 

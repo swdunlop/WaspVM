@@ -34,7 +34,8 @@ WASP_BEGIN_SUBTYPE( connection, os_connection )
     int writing: 1;
     int reading: 1;
     int conn_ready: 1;
-    int state: 4;
+    int close_sent: 1;
+    int state: 3;
 WASP_END_SUBTYPE( os_connection )
 
 WASP_BEGIN_SUBTYPE( input, os_input )
