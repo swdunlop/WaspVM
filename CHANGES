@@ -1,6 +1,14 @@
 ????/??/?? Code Quality Improvements for MOSREF 
+  - Fixed bug in lib/build when building cross-platform applications for win32
+  - Added (preload module ..) function to core/import; informs the module
+    loader that the specified module should be considered "loaded in the
+    near future."
+  - Added logic to lib/build to manage circular dependencies in standalone
+    applications by emitting a preload after the core modules are loaded but 
+    before the remainder.
   + BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
     + Does not happen with -O1, -O2 and -O0
+  + Add SO_REUSEADDR socket option to services.
   + Added HELP for properties.
     + mosref/node has documentation storage
     + props have doc entries, just not tied into help.
@@ -9,6 +17,8 @@
   + Ensured the initial mode of any executable created by WaspC is 0700.
   + Verify standalone operation of drone. 
   + Verify Cross-platform operation using win32.
+    + BUG: make test-socks causes timeouts and not closes to be sent,
+      then hangs forever.
   + Verify Cross-platform operation using darwin.
   + Tagged MOSREF as MOSREF 3.0b1
   + Tagged WASPVM as 0.4 final.

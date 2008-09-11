@@ -61,6 +61,8 @@
 
 (export load-mo load)
 
+
+
 (define *imports* (make-dict))
 
 (define (imported? key)
@@ -69,7 +71,7 @@
 (define (import key)
   (when (imported? key)
     (return))
-  
+   
   (define path (convert-path key))
 
   (define mo-path (find-module-file (string-append path ".mo")))
@@ -96,4 +98,10 @@
 (define (module key)
   (dict-set! *imports* key #t))
 
-(export imported? import module)
+(define (preload . keys)
+  (until (null? keys)
+    (set! key (car keys))
+    (set! keys (cdr keys))
+    (dict-set! *imports* key #t)))
+
+(export imported? import module preload)

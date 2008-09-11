@@ -100,3 +100,5 @@
 
 (close-service server-listener)
 (close-service proxy-listener)
+
+(exit)

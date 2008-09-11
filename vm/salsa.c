@@ -119,13 +119,9 @@ int wasp_get_random_context( ){
 void wasp_read_entropy( void* ptr, int req ){
     wasp_string entropy = wasp_make_string( req );
     
-    if( CryptGenRandom( wasp_get_random_context( ), req, ptr ) ){
-        wasp_string_wrote( entropy, req );
-        return entropy;
-    }else{
+    if( ! CryptGenRandom( wasp_get_random_context( ), req, ptr ) ){
         wasp_raise_winerror( wasp_es_vm );
         //wasp_errf( wasp_es_vm, "s", "could not access entropy from CryptApi" );
-        return NULL;
     }
 }
 
@@ -223,7 +219,7 @@ wasp_integer wasp_random_integer( wasp_integer min, wasp_integer max ){
     wasp_quad rnd;
 
     for(;;){ 
-        rnd = wasp_random_quad( random ); 
+        rnd = wasp_random_quad( ); 
         if( rnd <= maxrnd ) break; 
     }
 

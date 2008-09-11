@@ -27,7 +27,7 @@
   (define path (path-join (site-config 'stub-path)
                           (string-append "waspvm-" platform)))
 
-  (when (string-begins-with? platform "winnt")
+  (when (string-begins-with? platform "win-")
     (set! path (string-append path ".exe")))
 
   (if (file-path? path) (read-data-file path) #f))
@@ -37,6 +37,13 @@
   (string-append (substring src 0 (- (string-length src)
                                      (string-length tail)))
                  tail))
+
+(define (build-inline data)
+  (set! data (compile data))
+  (set! data (optimize data))
+  (set! data (assemble data))
+  (set! data (freeze data))
+  data)
 
 (define (build-module module)
   (define (compile-module ms-path mo-path)
@@ -121,10 +128,12 @@
 (define (build-exe-with-stub stub main)
   (define standalone #t)
   (define exe (make-string))
-  
-  (define (glue-dep item)
-            (define item-name (car item))
-            (define item-data (cdr item))
+  (define ign (make-set))
+
+  (define (glue-dep item-name item-data)
+            (when (set-member? ign item-name)
+              (return))
+            (set-add! ign item-name)
             (unless item-data
               (when standalone
                 (set! standalone #f)
@@ -133,17 +142,21 @@
               (println* "    " item-name)
               (return))
             (glue exe item-data))
+  
+  (define (glue-mod item-name)
+    (glue-dep item-name (build-module item-name)))
+  
+  (define (glue-inl item-name stmts)
+    (glue-dep item-name (build-inline stmts)))
 
   (string-append! exe stub)
 
-  (for-each glue-dep 
-            (map (lambda (item-name)
-                   (cons item-name (build-module item-name)))
-                 (code-dependencies main)))
+  (define dependencies (code-dependencies main))
+  (for-each glue-mod (core-dependencies))
+  (glue-inl "*preloads*" `((preload ,@dependencies)))
+  (for-each glue-mod dependencies) 
 
-  (if (pair? main)
-    (glue exe (freeze (assemble (optimize (compile main))))))
-
+  (when (pair? main) (glue-inl "*main*" main))
   exe)
 
 ;;TODO: Note, this only works when platform is equivalent to the current

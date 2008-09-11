@@ -29,7 +29,7 @@
 (define (env-is name val)
     (equal? (get-env name) val))
 
-(define *in-winnt*   (string-begins-with? *platform* "winnt"))
+(define *in-winnt*   (string-begins-with? *platform* "win-"))
 (define *in-win32*   *in-winnt*)
 (define *in-darwin*  (string-begins-with? *platform* "darwin"))
 ; We need to test if this is GNU/Darwin, or OS X ?
