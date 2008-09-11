@@ -1,4 +1,19 @@
 ????/??/?? Code Quality Improvements for MOSREF 
+  + BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
+    + Does not happen with -O1, -O2 and -O0
+  + Added HELP for properties.
+    + mosref/node has documentation storage
+    + props have doc entries, just not tied into help.
+    + Add static help topics
+  + Added test suite for all MOSREF commands using a local drone.
+  + Ensured the initial mode of any executable created by WaspC is 0700.
+  + Verify standalone operation of drone. 
+  + Verify Cross-platform operation using win32.
+  + Verify Cross-platform operation using darwin.
+  + Tagged MOSREF as MOSREF 3.0b1
+  + Tagged WASPVM as 0.4 final.
+
+2008/08/30 MOSREF Proxy Command and Fixes
   At this point, MOSREF is functional, but could use some improvements; this
   milestone is focussed on making MOSREF a production-worthy tool.
   
@@ -21,22 +36,6 @@
     waits on the connection result in an infinite wait.  (Which corresponds
     with other inputs.)
   - Restored the MOSREF "proxy" command.
-
-  + BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
-    + Does not happen with -O1, -O2 and -O0
-
-  + Restored the scan command.
-  + Added HELP for properties.
-    + mosref/node has documentation storage
-    + props have doc entries, just not tied into help.
-    + Add static help topics
-  + Added test suite for all MOSREF commands using a local drone.
-  + Ensured the initial mode of any executable created by WaspC is 0700.
-  + Verify standalone operation of drone. 
-  + Verify Cross-platform operation using win32.
-  + Verify Cross-platform operation using darwin.
-  + Tagged MOSREF as MOSREF 3.0b1
-  + Tagged WASPVM as 0.4 final.
 
 2006/08/16 Port MOSREF 2.0b4 into WaspVM.
   Found the final source tree for MOSREF, porting it into the current

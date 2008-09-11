@@ -127,3 +127,13 @@
 - Clarify verb-noun vs. noun-verb in primitive names?
   Why do we have tc-add and not add-tc, yet we have send-output?
 
+- Wasp Stubs, Library, Subsystems:
+  - Generate a shared libwasp.
+  - Generate a static libwasp.
+  - Generate a static waspvm that can be used for standalone compilation.
+    - Must export all symbols for loaded subsystems.
+    - May want to enable ability to link subsystems in hard, too.
+      - Use ld to link them in..
+      - 
+  - Restore the Subsystem loading code.
+
