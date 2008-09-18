@@ -30,7 +30,10 @@ SO  = .dll
 CFLAGS += -mno-cygwin 
 CFLAGS += -DWASP_SO='".dll"'
 CFLAGS += -I/usr/local/include -L/usr/local/lib
-EXEFLAGS += -L/usr/local/lib -levent -lws2_32 -lregex 
+EXEFLAGS += -L/usr/local/lib -levent -lws2_32
+CFLAGS += -Irx
+LDFLAGS += -Lrx
+LIBRX += rx/libregex.a
 
 else # Assuming we're in UNIX..
 

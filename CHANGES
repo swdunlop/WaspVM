@@ -6,23 +6,10 @@
   - Added logic to lib/build to manage circular dependencies in standalone
     applications by emitting a preload after the core modules are loaded but 
     before the remainder.
-  + BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
-    + Does not happen with -O1, -O2 and -O0
-  + Add SO_REUSEADDR socket option to services.
-  + Added HELP for properties.
-    + mosref/node has documentation storage
-    + props have doc entries, just not tied into help.
-    + Add static help topics
-  + Added test suite for all MOSREF commands using a local drone.
-  + Ensured the initial mode of any executable created by WaspC is 0700.
-  + Verify standalone operation of drone. 
-  + Verify Cross-platform operation using win32.
-    + BUG: make test-socks causes timeouts and not closes to be sent,
-      then hangs forever.
-  + Verify Cross-platform operation using darwin.
-  + Tagged MOSREF as MOSREF 3.0b1
-  + Tagged WASPVM as 0.4 final.
-
+  - Removed some superfluous debug spam.
+  - Tagged WASPVM as 0.4.
+  - Added Henry Spencer's regex for WIN32 platform, which is regex-poor.
+  
 2008/08/30 MOSREF Proxy Command and Fixes
   At this point, MOSREF is functional, but could use some improvements; this
   milestone is focussed on making MOSREF a production-worthy tool.

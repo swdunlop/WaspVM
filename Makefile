@@ -14,12 +14,13 @@ SOFLAGS += -shared
 SALSA_OBJS += vm/salsa20$(OBJ) vm/salsa$(OBJ)
 CURVE_OBJS += vm/curve$(OBJ) vm/curve25519_i64$(OBJ)
 
-WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$(OBJ) vm/core$(OBJ) vm/error$(OBJ) vm/file$(OBJ) vm/format$(OBJ) vm/init$(OBJ) vm/list$(OBJ) vm/memory$(OBJ) vm/mq$(OBJ) vm/number$(OBJ) vm/package$(OBJ) vm/parse$(OBJ) vm/primitive$(OBJ) vm/print$(OBJ) vm/procedure$(OBJ) vm/process$(OBJ) vm/queue$(OBJ) vm/string$(OBJ) vm/tag$(OBJ) vm/tree$(OBJ) vm/vector$(OBJ) vm/vm$(OBJ) vm/multimethod$(OBJ) vm/shell$(OBJ) vm/os$(OBJ) vm/time$(OBJ) vm/regex$(OBJ) vm/filesystem$(OBJ) $(CURVE_OBJS) $(SALSA_OBJS) vm/crc32$(OBJ)
+WASPVM_OBJS += vm/boolean$(OBJ) vm/channel$(OBJ) vm/closure$(OBJ) vm/connection$(OBJ) vm/core$(OBJ) vm/error$(OBJ) vm/file$(OBJ) vm/format$(OBJ) vm/init$(OBJ) vm/list$(OBJ) vm/memory$(OBJ) vm/mq$(OBJ) vm/number$(OBJ) vm/package$(OBJ) vm/parse$(OBJ) vm/primitive$(OBJ) vm/print$(OBJ) vm/procedure$(OBJ) vm/process$(OBJ) vm/queue$(OBJ) vm/string$(OBJ) vm/tag$(OBJ) vm/tree$(OBJ) vm/vector$(OBJ) vm/vm$(OBJ) vm/multimethod$(OBJ) vm/shell$(OBJ) vm/os$(OBJ) vm/time$(OBJ) vm/regex$(OBJ) vm/filesystem$(OBJ) $(CURVE_OBJS) $(SALSA_OBJS) vm/crc32$(OBJ) $(LIBRX)
+
 # vm/plugin$(OBJ)  -- Disabled until after 1.0
 
 LIBWASPVM ?= libwaspvm$(SO)
 
-$(WASPVM_EXE): vm/waspvm$(OBJ) $(WASPVM_OBJS)
+$(WASPVM_EXE): vm/waspvm$(OBJ) $(WASPVM_OBJS) $(LIBRX)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(WASPVM_OBJS) $< $(EXEFLAGS) -o $@
 	test z$(DEBUG) = z && strip $(WASPVM_EXE) || true
 
@@ -41,6 +42,9 @@ $(MOSREF_EXE): $(WASPC_EXE) $(WASPVM_EXE)
 $(WASP_EXE): $(WASPC_EXE) $(WASPVM_EXE) 
 	cd mod && $(WASPC_EXE) -exe $(WASP_EXE) -stub $(WASPVM_EXE) bin/wasp
 	chmod +rx $(WASP_EXE)
+
+$(LIBRX):
+	cd rx && make lib
 
 install: $(WASPDOC_EXE) $(WASP_EXE) $(WASPC_EXE) $(WASPVM_EXE)
 	cd mod && $(WASP_EXE) bin/install.ms
@@ -74,6 +78,7 @@ bootstrap:
 
 clean:
 	rm -f vm/*$(OBJ) $(WASPDOC_EXE) $(WASPVM_EXE) $(WASPC_EXE) $(WASPLD_EXE) $(WASP_EXE)
+	cd rx && make clean
 	rm -rf package
 
 test: test-waspvm test-mosref test-affiliation

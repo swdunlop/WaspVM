@@ -13,11 +13,15 @@
   + Modified waspdoc/c-file to document primitive types.
 
 ????/??/?? Improved I/O loop
+  + Add SO_REUSEADDR socket option to services.
   + Removed libevent
   + Wrote API emulating win32 completion-driven semantics on unix.
   + Ported I/O loop to mac os x.
   + Enabled truly asynchronous TCP connection semantics.
   + Moved win32 console I/O logic out.
+
++ BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
+  + Does not happen with -O1, -O2 and -O0
 
 - Add Generational GC
   + Ensure NO direct modifications are done of object properties.

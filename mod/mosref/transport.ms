@@ -35,9 +35,7 @@
 (define (make-iv) (read-prng 8))
 
 ;;; But the node key? Let's aim higher..  Oh Mr. OS...
-;(define (make-private-key) (read-entropy 32))
-(print "TODO: Use Entropy for Node Keys again..\n")
-(define (make-private-key) (read-prng 32))
+(define (make-private-key) (read-entropy 32))
 
 (define find-public-key curve25519-public)
 (define find-shared-secret curve25519-secret)

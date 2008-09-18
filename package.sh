@@ -21,7 +21,8 @@ WASPVM=waspvm-$PLATFORM$EXE
 rm -rf $PKGDIR
 mkdir -pm 0755 $PKGDIR
 cp -rf mod/* $PKGDIR
-cp $WASPVM $PKGDIR
+cp -rf stubs/$WASPVM $PKGDIR
+rm $PKGDIR/local-* $(find $PKGDIR -name '*.mf')
 cd $PKGDIR
 
 cat >site/config.ms <<EOF
@@ -37,5 +38,6 @@ EOF
 ## TODO: This is bogus..
 if test z$EXE = z.exe; then
     ../waspc -exe waspdoc$EXE -stub $WASPVM bin/waspdoc
+../waspc$EXE -exe mosref$EXE    -stub $WASPVM bin/mosref
 fi
 

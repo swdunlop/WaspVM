@@ -89,11 +89,9 @@
     (error 'off (string-append "Drone " (node-id node) " is offline."))) 
   (define lane (make-lane (drone-node-bridge node)))
   (define xmit (output-chain (lane-xmit lane)
-                             (freeze-filter)
-                             (trace-filter "T-XMIT")))
+                             (freeze-filter)))
   (define recv (input-chain (lane-recv lane)
-                            (thaw-filter)
-                            (trace-filter "T-RECV")))
+                            (thaw-filter)))
   (send program xmit)
   (list xmit recv))
 

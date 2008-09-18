@@ -24,3 +24,6 @@ stubs/*
 mod/site/config.mo
 mod/site/config.ms
 FUTURE
+rx/engine.ih
+rx/regcomp.ih
+rx/regerror.ih

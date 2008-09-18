@@ -87,11 +87,9 @@
 
   (with-input (input-chain (input)
                            (thaw-filter))
-                           (trace-filter "T-RECV")
     (define command (wait))
     (with-output (output-chain (output)
                                (freeze-filter))
-                               (trace-filter "T-XMIT")
       (command))))
 
 (define (drone-broken bridge)
