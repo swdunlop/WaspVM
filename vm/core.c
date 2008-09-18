@@ -1375,26 +1375,28 @@ WASP_BEGIN_PRIM( "split-lines", split_lines )
     wasp_tc tc = wasp_make_tc( tc );
     char ch;
 
-    void add_item( ){
-        wasp_tc_add( tc, wasp_vf_string( wasp_string_fm( bp, sp - bp ) ) );
-    }
-
     while( ch = *sp ){
         switch( ch ){
         case '\r':
-            add_item( );
+            wasp_tc_add( 
+                tc, wasp_vf_string( wasp_string_fm( bp, sp - bp ) ) 
+            );
             if( sp[1] == '\n' ) sp++;
             bp = sp + 1;
             break;
         case '\n':
-            add_item( );
+            wasp_tc_add( 
+                tc, wasp_vf_string( wasp_string_fm( bp, sp - bp ) ) 
+            );
             bp = sp + 1;
             break;
         };
         sp ++;
     };
 
-    add_item( );
+    wasp_tc_add( 
+        tc, wasp_vf_string( wasp_string_fm( bp, sp - bp ) ) 
+    );
     
     LIST_RESULT( tc->head );
 WASP_END_PRIM( split_lines )
