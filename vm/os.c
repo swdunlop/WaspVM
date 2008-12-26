@@ -31,6 +31,7 @@
 #else
 
 #include <unistd.h>
+#include <termios.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -790,6 +791,18 @@ WASP_END_PRIM( scan_io )
 
 #endif
 
+WASP_BEGIN_PRIM( "unbuffer-console", unbuffer_console )
+#ifdef WASP_IN_WIN32
+    // Basically, we enable absolutely nothing.
+    SetConsoleMode( wasp_stdin_fd, ENABLE_EXTENDED_FLAGS );
+#else
+    struct termios cfg;
+    tcgetattr( STDIN_FILENO, &cfg );
+    cfmakeraw( &cfg );
+    tcsetattr( STDIN_FILENO, TCSADRAIN, &cfg );
+#endif
+WASP_END_PRIM( unbuffer_console )
+
 void wasp_init_os_subsystem( ){
 #ifdef WASP_IN_WIN32
     WSADATA wsa_data;
@@ -829,6 +842,8 @@ void wasp_init_os_subsystem( ){
 #ifdef WASP_DEBUG_IO
     WASP_BIND_PRIM( scan_io );
 #endif
+    
+    WASP_BIND_PRIM( unbuffer_console );
     wasp_set_global( wasp_symbol_fs( "*console*" ), 
                      wasp_vf_connection( wasp_make_stdio( ) ) );
 }

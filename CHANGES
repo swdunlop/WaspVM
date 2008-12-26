@@ -1,3 +1,6 @@
+2008/12/26 The SCUD Terminal Library
+  - Added unbuffer-console primitive, which prevents line buffering of stdin.
+
 2008/12/01 Code Quality Improvements for MOSREF 
   - Fixed bug in lib/build when building cross-platform applications for win32
   - Added (preload module ..) function to core/import; informs the module
