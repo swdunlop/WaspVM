@@ -794,13 +794,16 @@ WASP_END_PRIM( scan_io )
 WASP_BEGIN_PRIM( "unbuffer-console", unbuffer_console )
 #ifdef WASP_IN_WIN32
     // Basically, we enable absolutely nothing.
-    SetConsoleMode( wasp_stdin_fd, ENABLE_EXTENDED_FLAGS );
+    if( ! SetConsoleMode( wasp_stdin_fd, ENABLE_EXTENDED_FLAGS ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    }; 
 #else
     struct termios cfg;
     tcgetattr( STDIN_FILENO, &cfg );
     cfmakeraw( &cfg );
     tcsetattr( STDIN_FILENO, TCSADRAIN, &cfg );
 #endif
+    NO_RESULT( )
 WASP_END_PRIM( unbuffer_console )
 
 void wasp_init_os_subsystem( ){
