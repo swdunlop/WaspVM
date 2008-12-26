@@ -41,3 +41,10 @@
   (apply locate-path name
          (string-split* (cadr (assoc "PATH" *env*))
                         (if *in-win32* ";" ":"))))
+
+(define-macro (osdef formals . cases)
+    (define (gen-case case)
+      `(,(car case) (function ,formals ,@(cdr case))))
+
+    `(define ,(car formals) (cond ,@(map gen-case (filter pair? cases)))))
+

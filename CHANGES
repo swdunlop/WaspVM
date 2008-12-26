@@ -1,5 +1,9 @@
 2008/12/26 The SCUD Terminal Library
   - Added unbuffer-console primitive, which prevents line buffering of stdin.
+  - Added conio-goto, conio-set-attr, conio-cls, conio-clear for Win32.
+  - Introduced the SCUD terminal abstraction library.
+  - Added the osdef macro to lib/env, which permits per-OS function 
+    definitions.
 
 2008/12/01 Code Quality Improvements for MOSREF 
   - Fixed bug in lib/build when building cross-platform applications for win32

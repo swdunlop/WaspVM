@@ -610,6 +610,94 @@ wasp_connection wasp_make_console( ){
 
 wasp_connection wasp_make_stdio( ){ return wasp_make_console( ); }
 
+WASP_BEGIN_PRIM( "conio-goto", conio_goto )
+    REQ_INTEGER_ARG( row )
+    REQ_INTEGER_ARG( col )
+    NO_REST_ARGS( );
+    
+    COORD pos = { col, row };
+    if( ! SetConsolePosition( wasp_stdin_fd, pos ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+
+    NO_RESULT( );
+WASP_END_PRIM( conio_goto )
+
+WASP_BEGIN_PRIM( conio_set_attr )
+    OPT_ANY_ARG( fg )
+    OPT_ANY_ARG( bg )
+    NO_REST_ARGS( );
+    
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    if( ! GetConsoleScreenBufferInfo( wasp_stdout_fd, &info ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+
+    int n = 0;
+
+    if( has_fg && wasp_is_integer( fg ) ){
+        n |= wasp_integer_fv( fg );
+    }else{ 
+        n |= info->wAttributes & ( 
+            FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED |
+            FOREGROUND_INTENSITY
+        );
+    };
+
+    if( has_bg && wasp_is_integer( bg ) ){
+        n |= wasp_integer_fv( bg );
+    }else{ 
+        n |= info->wAttributes & ( 
+            BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED |
+            BACKGROUND_INTENSITY
+        );
+    };
+
+    if( ! SetConsoleTextAttribute( wasp_stdin_fd, n ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+
+    NO_RESULT( );
+WASP_END_PRIM( conio_set_attr )
+
+WASP_BEGIN_PRIM( conio_clear )
+    NO_REST_ARGS( );
+    
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    if( ! GetConsoleScreenBufferInfo( wasp_stdout_fd, &info ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+    
+    int x = info->dwCursorPosition.x, y = info->dwCursorPosition.y;
+    int l = info->dwSize.x - x;
+
+    FillConsoleOutputAttribute( 
+        wasp_stdout_fd, info->wAttributes, l, info->dwCursorPosition, NULL 
+    );
+    FillConsoleOutputCharacter( 
+        wasp_stdout_fd, ' ', l, info->dwCursorPosition, NULL 
+    );
+
+    NO_RESULT( );
+WASP_END_PRIM( conio_clear )
+
+WASP_BEGIN_PRIM( conio_cls )
+    NO_REST_ARGS( );
+    
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    if( ! GetConsoleScreenBufferInfo( wasp_stdout_fd, &info ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+    
+    int l = info->dwSize.x * info.dwSize.y;
+    COORD c = { 0, 0 };
+    FillConsoleOutputAttribute( wasp_stdout_fd, info->wAttributes, l, c, NULL )
+    FillConsoleOutputAttribute( wasp_stdout_fd, ' ', l, c, NULL )
+    NO_RESULT( );
+WASP_END_PRIM( conio_cls )
+
+
+
 #else
 
 wasp_connection wasp_make_stdio( ){
@@ -845,8 +933,15 @@ void wasp_init_os_subsystem( ){
 #ifdef WASP_DEBUG_IO
     WASP_BIND_PRIM( scan_io );
 #endif
-    
+
+#ifdef WASP_IN_WIN32
     WASP_BIND_PRIM( unbuffer_console );
+    WASP_BIND_PRIM( conio_goto );
+    WASP_BIND_PRIM( conio_cls );
+    WASP_BIND_PRIM( conio_clear );
+    WASP_BIND_PRIM( conio_set_attr );
+#endif
+
     wasp_set_global( wasp_symbol_fs( "*console*" ), 
                      wasp_vf_connection( wasp_make_stdio( ) ) );
 }
