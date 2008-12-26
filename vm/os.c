@@ -615,15 +615,15 @@ WASP_BEGIN_PRIM( "conio-goto", conio_goto )
     REQ_INTEGER_ARG( col )
     NO_REST_ARGS( );
     
-    COORD pos = { col, row };
-    if( ! SetConsolePosition( wasp_stdin_fd, pos ) ){
+    COORD pos = { col - 1, row - 1 };
+    if( ! SetConsoleCursorPosition( wasp_stdout_fd, pos ) ){
         wasp_raise_winerror( wasp_es_vm );
     };
 
     NO_RESULT( );
 WASP_END_PRIM( conio_goto )
 
-WASP_BEGIN_PRIM( conio_set_attr )
+WASP_BEGIN_PRIM( "conio-set-attr", conio_set_attr )
     OPT_ANY_ARG( fg )
     OPT_ANY_ARG( bg )
     NO_REST_ARGS( );
@@ -638,7 +638,7 @@ WASP_BEGIN_PRIM( conio_set_attr )
     if( has_fg && wasp_is_integer( fg ) ){
         n |= wasp_integer_fv( fg );
     }else{ 
-        n |= info->wAttributes & ( 
+        n |= info.wAttributes & ( 
             FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED |
             FOREGROUND_INTENSITY
         );
@@ -647,20 +647,20 @@ WASP_BEGIN_PRIM( conio_set_attr )
     if( has_bg && wasp_is_integer( bg ) ){
         n |= wasp_integer_fv( bg );
     }else{ 
-        n |= info->wAttributes & ( 
+        n |= info.wAttributes & ( 
             BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED |
             BACKGROUND_INTENSITY
         );
     };
 
-    if( ! SetConsoleTextAttribute( wasp_stdin_fd, n ) ){
+    if( ! SetConsoleTextAttribute( wasp_stdout_fd, n ) ){
         wasp_raise_winerror( wasp_es_vm );
     };
 
     NO_RESULT( );
 WASP_END_PRIM( conio_set_attr )
 
-WASP_BEGIN_PRIM( conio_clear )
+WASP_BEGIN_PRIM( "conio-clear", conio_clear )
     NO_REST_ARGS( );
     
     CONSOLE_SCREEN_BUFFER_INFO info;
@@ -668,20 +668,20 @@ WASP_BEGIN_PRIM( conio_clear )
         wasp_raise_winerror( wasp_es_vm );
     };
     
-    int x = info->dwCursorPosition.x, y = info->dwCursorPosition.y;
-    int l = info->dwSize.x - x;
+    int x = info.dwCursorPosition.X, y = info.dwCursorPosition.Y;
+    int l = info.dwSize.X - x;
 
     FillConsoleOutputAttribute( 
-        wasp_stdout_fd, info->wAttributes, l, info->dwCursorPosition, NULL 
+        wasp_stdout_fd, info.wAttributes, l, info.dwCursorPosition, NULL 
     );
     FillConsoleOutputCharacter( 
-        wasp_stdout_fd, ' ', l, info->dwCursorPosition, NULL 
+        wasp_stdout_fd, ' ', l, info.dwCursorPosition, NULL 
     );
 
     NO_RESULT( );
 WASP_END_PRIM( conio_clear )
 
-WASP_BEGIN_PRIM( conio_cls )
+WASP_BEGIN_PRIM( "conio-cls", conio_cls )
     NO_REST_ARGS( );
     
     CONSOLE_SCREEN_BUFFER_INFO info;
@@ -689,10 +689,10 @@ WASP_BEGIN_PRIM( conio_cls )
         wasp_raise_winerror( wasp_es_vm );
     };
     
-    int l = info->dwSize.x * info.dwSize.y;
+    int l = info.dwSize.X * info.dwSize.Y;
     COORD c = { 0, 0 };
-    FillConsoleOutputAttribute( wasp_stdout_fd, info->wAttributes, l, c, NULL )
-    FillConsoleOutputAttribute( wasp_stdout_fd, ' ', l, c, NULL )
+    FillConsoleOutputAttribute( wasp_stdout_fd, info.wAttributes, l, c, NULL );
+    FillConsoleOutputCharacter( wasp_stdout_fd, ' ', l, c, NULL );
     NO_RESULT( );
 WASP_END_PRIM( conio_cls )
 
@@ -934,8 +934,9 @@ void wasp_init_os_subsystem( ){
     WASP_BIND_PRIM( scan_io );
 #endif
 
-#ifdef WASP_IN_WIN32
     WASP_BIND_PRIM( unbuffer_console );
+
+#ifdef WASP_IN_WIN32
     WASP_BIND_PRIM( conio_goto );
     WASP_BIND_PRIM( conio_cls );
     WASP_BIND_PRIM( conio_clear );

@@ -42,6 +42,9 @@
          (string-split* (cadr (assoc "PATH" *env*))
                         (if *in-win32* ";" ":"))))
 
+(export osdef locate-cmd env-is get-env has-env *env*
+        *in-win32* *in-x11* *in-posix* *in-darwin* *in-macosx* *in-winnt*)
+
 (define-macro (osdef formals . cases)
     (define (gen-case case)
       `(,(car case) (function ,formals ,@(cdr case))))
