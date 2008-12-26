@@ -1,6 +1,4 @@
-  - Added string->uppercase, string->lowercase primitives to core.c
-
-????/??/?? Code Quality Improvements for MOSREF 
+2008/12/01 Code Quality Improvements for MOSREF 
   - Fixed bug in lib/build when building cross-platform applications for win32
   - Added (preload module ..) function to core/import; informs the module
     loader that the specified module should be considered "loaded in the
@@ -11,6 +9,7 @@
   - Removed some superfluous debug spam.
   - Tagged WASPVM as 0.4.
   - Added Henry Spencer's regex for WIN32 platform, which is regex-poor.
+  - Added string->uppercase, string->lowercase primitives to core.c
   
 2008/08/30 MOSREF Proxy Command and Fixes
   At this point, MOSREF is functional, but could use some improvements; this
