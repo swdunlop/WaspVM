@@ -1,3 +1,6 @@
++ BUG: core/io depends on lib/iterate
++ BUG: waspvm depends on libevent shared object on Linux.
+
 ????/??/?? Buffer Restoration
   + Forked string and buffer types again.
   + Strings are now immutable at a primitive level.

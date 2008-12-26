@@ -1,3 +1,5 @@
+  - Added string->uppercase, string->lowercase primitives to core.c
+
 ????/??/?? Code Quality Improvements for MOSREF 
   - Fixed bug in lib/build when building cross-platform applications for win32
   - Added (preload module ..) function to core/import; informs the module

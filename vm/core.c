@@ -29,6 +29,35 @@
 #include <arpa/inet.h>
 #endif
 
+WASP_BEGIN_PRIM( "string->uppercase", string_uppercase )
+    REQ_STRING_ARG( string );
+    NO_REST_ARGS( );
+    
+    int ix, ln = wasp_string_length( string );
+    wasp_string result = wasp_make_string( ln );
+    wasp_string_wrote( result, ln );
+    char* r = wasp_sf_string( result );
+    char* s = wasp_sf_string( string );
+
+    for( ix = 0; ix < ln; ix ++ ) r[ix] = toupper( s[ix] );
+    
+    STRING_RESULT( result )
+WASP_END_PRIM( string_uppercase )
+
+WASP_BEGIN_PRIM( "string->lowercase", string_lowercase )
+    REQ_STRING_ARG( string );
+    NO_REST_ARGS( );
+    
+    int ix, ln = wasp_string_length( string );
+    wasp_string result = wasp_make_string( ln );
+    wasp_string_wrote( result, ln );
+    char* r = wasp_sf_string( result );
+    char* s = wasp_sf_string( string );
+
+    for( ix = 0; ix < ln; ix ++ ) r[ix] = tolower( s[ix] );
+    STRING_RESULT( result )
+WASP_END_PRIM( string_lowercase )
+
 WASP_BEGIN_PRIM( "string-read-expr!", string_read_expr )
     REQ_STRING_ARG( string );
     NO_REST_ARGS( );
@@ -2038,6 +2067,9 @@ void wasp_bind_core_prims( ){
     WASP_BIND_PRIM( percent_decode );
     
     WASP_BIND_PRIM( string_read_expr );
+
+    WASP_BIND_PRIM( string_uppercase );
+    WASP_BIND_PRIM( string_lowercase );
 
     wasp_set_global( wasp_symbol_fs( "*version*" ), 
                     wasp_vf_string( wasp_string_fs( WASP_VERSION ) ) );

@@ -27,7 +27,7 @@ WASP_END_TYPE( salsa20_key )
 #define SALSA20_KEY_RESULT( vn ) TYPED_RESULT( vn, salsa20_key )
 #define OPT_SALSA20_KEY_ARG( vn ) OPT_TYPED_ARG( vn, salsa20_key )
 
- WASP_GENERIC_MT( salsa20_key );
+WASP_GENERIC_MT( salsa20_key );
 WASP_C_TYPE2( salsa20_key, "salsa20-key" );
 
 wasp_salsa20_key wasp_make_salsa20_key( wasp_string seed ){
