@@ -610,6 +610,19 @@ wasp_connection wasp_make_console( ){
 
 wasp_connection wasp_make_stdio( ){ return wasp_make_console( ); }
 
+WASP_BEGIN_PRIM( "conio-size", conio_size )
+    NO_REST_ARGS( );
+    
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    if( ! GetConsoleScreenBufferInfo( wasp_stdout_fd, &info ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+
+    LIST_RESULT( wasp_listf( 2, 
+        wasp_vf_integer( info.Y ), wasp_vf_integer( info.X )
+    ) );
+WASP_END_PRIM( conio_size )
+
 WASP_BEGIN_PRIM( "conio-goto", conio_goto )
     REQ_INTEGER_ARG( row )
     REQ_INTEGER_ARG( col )
@@ -725,6 +738,32 @@ wasp_connection wasp_make_stdio( ){
 
     return conn;
 }
+
+WASP_BEGIN_PRIM( "tty-size", tty_size )
+    REQ_ANY_ARG( tty );
+    NO_REST_ARGS( );
+    
+    wasp_os_connection cn;
+    if( wasp_is_os_connection( tty ) ){
+        cn = wasp_os_connection_fv( tty );
+    }else if( wasp_is_os_input( tty ) ){
+        cn = wasp_os_input_fv( tty )->conn;
+    }else if( wasp_is_os_output( tty ) ){
+        cn = wasp_os_output_fv( tty )->conn;
+    }else{
+        wasp_errf( wasp_es_vm, "sx",
+                  "expected OS connection, input or output", tty );
+    };
+
+// TODO: This is Linux-specific.
+    struct winsize sz;
+    wasp_os_error( ioctl( cn->handle, TIOCGWINSZ, &sz ) );
+
+    LIST_RESULT( wasp_listf( 2, 
+        wasp_vf_integer( sz.ws_row ), wasp_vf_integer( sz.ws_col ) 
+    ) );
+WASP_END_PRIM( tty_size )
+
 #endif
 
 wasp_free_os_connection( wasp_os_connection oscon ){ 
@@ -940,7 +979,10 @@ void wasp_init_os_subsystem( ){
     WASP_BIND_PRIM( conio_goto );
     WASP_BIND_PRIM( conio_cls );
     WASP_BIND_PRIM( conio_clear );
+    WASP_BIND_PRIM( conio_size );
     WASP_BIND_PRIM( conio_set_attr );
+#else
+    WASP_BIND_PRIM( tty_size );
 #endif
 
     wasp_set_global( wasp_symbol_fs( "*console*" ), 

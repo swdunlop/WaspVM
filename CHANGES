@@ -1,3 +1,18 @@
+????/??/?? Terminal Support Improvements
+  - Bumped version to 0.4.2.
+  - Moved lib/env to use a dictionary instead of an assoc-list.
+  t Ensured environ is not used on Windows.
+  t Added conio-size primitive, which returns the current number of rows and
+    columns.
+  - Added tty-size primitive, which returns the current number of rows and
+    columns.
+    + NOTE: Only works on Linux.. Need to figure this out for BSD.
+  + Added signal.c, which implements a signal input for POSIX.
+  + Added lib/signal, which implements a signal input demux for POSIX.
+  + Added signal handler to SCUD for SIGWINCH.
+  + Added scud-size function, which returns the current number of rows and
+    columns as a list.
+
 2008/12/26 The SCUD Terminal Library
   - Added unbuffer-console primitive, which prevents line buffering of stdin.
   - Added conio-goto, conio-set-attr, conio-cls, conio-clear for Win32.
@@ -6,7 +21,7 @@
     definitions.
   - Tagged 0.4.1
 
-2008/12/01 Code Quality Improvements for MOSREF 
+2008/9/18 Code Quality Improvements for MOSREF 
   - Fixed bug in lib/build when building cross-platform applications for win32
   - Added (preload module ..) function to core/import; informs the module
     loader that the specified module should be considered "loaded in the

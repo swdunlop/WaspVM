@@ -17,15 +17,13 @@
 (module "lib/env")
 (import "lib/iterate")
 
-(define *env* (map (lambda (var) (string-split var "=")) *environ*))
+(define *env* (make-dict))
+(define tc (apply make-tc *environ*))
+(until (tc-empty? tc)
+  (dict-set! *env* @(string-split (tc-next! tc) "=")))
 
-(define (has-env name) (assoc name *env*))
-
-(define (get-env name)
-    (define var (has-env name))
-      (if var (cadr var)
-                  #f))
-
+(define (has-env name) (dict-ref *env* name))
+(define (get-env name) (has-env name))
 (define (env-is name val)
     (equal? (get-env name) val))
 
@@ -39,15 +37,15 @@
 
 (define (locate-cmd name)
   (apply locate-path name
-         (string-split* (cadr (assoc "PATH" *env*))
+         (string-split* (get-env "PATH")
                         (if *in-win32* ";" ":"))))
-
-(export osdef locate-cmd env-is get-env has-env *env*
-        *in-win32* *in-x11* *in-posix* *in-darwin* *in-macosx* *in-winnt*)
 
 (define-macro (osdef formals . cases)
     (define (gen-case case)
       `(,(car case) (function ,formals ,@(cdr case))))
 
     `(define ,(car formals) (cond ,@(map gen-case (filter pair? cases)))))
+
+(export osdef locate-cmd env-is get-env has-env *env*
+        *in-win32* *in-x11* *in-posix* *in-darwin* *in-macosx* *in-winnt*)
 

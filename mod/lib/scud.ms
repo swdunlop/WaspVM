@@ -9,6 +9,10 @@
 "NOTE: Print is used, instead of send, because on Windows, many of these"
 "commands must be done synchronously."
 
+;;;TODO: POSIX: Store foreground and background in module namespace.
+;;;TODO: POSIX: For special 'clear background, just reset and reuse fg.
+;;;TODO: Find way for POSIX to get screen dimensions.
+
 (define dict make-dict)
 
 ;;;IRGB

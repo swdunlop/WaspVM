@@ -102,6 +102,21 @@ WASP_BEGIN_PRIM( "spawn-command", spawn_command );
     
     CONNECTION_RESULT( wasp_spawn_cmd( path, args, env ) );
 WASP_END_PRIM( spawn_command );
+
+wasp_list wasp_get_environ( ){
+    char** env = environ;
+    wasp_tc tc = wasp_make_tc( );
+    while( *env ){
+        wasp_tc_add( tc, wasp_vf_string( wasp_string_fs( *env ) ) );
+        env++;
+    }
+    return tc->head;
+};
+#else
+wasp_list wasp_get_environ( ){
+    return NULL;
+};
+
 #endif
 
 WASP_BEGIN_PRIM( "run-command", run_command );
@@ -112,17 +127,13 @@ WASP_BEGIN_PRIM( "run-command", run_command );
 WASP_END_PRIM( spawn_command );
 
 void wasp_init_shell_subsystem( ){
+
 #ifndef WASP_IN_WIN32
 // spawn_cmd not defined for win32, yet.
     WASP_BIND_PRIM( spawn_command );
 #endif
 
+    wasp_set_global( wasp_symbol_fs( "*environ*" ), 
+                     wasp_vf_list( wasp_get_environ( ) ) );
     WASP_BIND_PRIM( run_command );
-    char** env = environ;
-    wasp_tc tc = wasp_make_tc( );
-    while( *env ){
-        wasp_tc_add( tc, wasp_vf_string( wasp_string_fs( *env ) ) );
-        env++;
-    }
-    wasp_set_global( wasp_symbol_fs( "*environ*" ), wasp_vf_list( tc->head ) );
 }

@@ -3,7 +3,7 @@ ARCH=$(shell uname -m)
 ROOT=$(shell pwd)
 SYS=mod/sys
 
-VERSION=0.4.1
+VERSION=0.4.2
 
 CFLAGS += -DWASP_VERSION='"$(VERSION)"'
 

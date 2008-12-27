@@ -40,12 +40,12 @@ static inline wasp_boolean is_thaw_ref( wasp_word w ){
     return w < 0x7FFC;
 }
 
+static void err( const char* m ){ wasp_errf( wasp_es_pkg, "s", m ); };
+                               
 wasp_value wasp_thaw_mem( const void* mem, wasp_quad memlen ){
     wasp_quad   memix  = 0;
     wasp_vector values = NULL;
     
-    void err( const char* m ){ wasp_errf( wasp_es_pkg, "s", m ); };
-                               
     const void* next_block( wasp_word len ){
         const char* p = mem + memix;
         memix += len;
