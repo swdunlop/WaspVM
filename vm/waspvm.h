@@ -67,6 +67,7 @@
 #include "waspvm/os.h"
 
 void wasp_init_wasp( );
+void wasp_init_signal_subsystem( );
 void wasp_init_crc32_subsystem( );
 void wasp_init_shell_subsystem( );
 void wasp_bind_core_prims( );

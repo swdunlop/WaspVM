@@ -41,7 +41,8 @@
                                 (cons 'bright-grey    15)
                                 (cons 'white          15)))
 
-(define *conio-bg-colors* (dict (cons 'black          0)
+(define *conio-bg-colors* (dict (cons 'clear          0)
+                                (cons 'black          0)
                                 (cons 'red            64)
                                 (cons 'green          32)
                                 (cons 'brown          96)
@@ -50,7 +51,8 @@
                                 (cons 'cyan           48)
                                 (cons 'grey           112)))
 
-(define *vt100-bg-colors* (dict (cons 'black          "40")
+(define *vt100-bg-colors* (dict (cons 'clear          "0")
+                                (cons 'black          "40")
                                 (cons 'red            "41")
                                 (cons 'green          "42")
                                 (cons 'brown          "43")
@@ -67,6 +69,8 @@
                                 (cons 'magenta        "35")
                                 (cons 'cyan           "36")
                                 (cons 'grey           "37")
+                                (cons 'yellow         "1;33")
+                                (cons 'bright-yellow  "1;33")
                                 (cons 'dark-red       "2;31")
                                 (cons 'dark-green     "2;32")
                                 (cons 'dark-brown     "2;33")
@@ -86,6 +90,8 @@
 ;TODO: Determine how to poll for updates, write a function for it,
 ;      export that function and cause send-vt100 and scud-print to call it.
 
+(define *last-fg* "1;37")
+
 (define (lookup table color)
   (cond ((symbol? color)
          (set! color (dict-ref table color))
@@ -104,8 +110,7 @@
 (define (vt100-cmd key . fields)
   (print (if (null? fields)
           (string-append 27 key)
-          (string-append 27 "[" (string-join ";" @fields) key))
-       ))
+          (string-append 27 "[" (string-join ";" @fields) key))))
   
 (define (scud-assert msg okay)
   "If the supplied value, okay, is non-false, an error is raised with the"
@@ -138,23 +143,35 @@
   "*vt100-bg-colors*."
     
   (*in-winnt* (conio-set-attr #f (conio-bg color)))
-  (else (vt100-cmd "m" (vt100-bg color))))
+  (else 
+    (if (eq? color 'clear)
+      (vt100-cmd "m" "0" *last-fg*)
+      (vt100-cmd "m" (vt100-bg color)))))
 
 (osdef (set-scud-fg color)
   "Sets the foreground of the to the specified color found in"
   "*vt100-fg-colors*."
 
   (*in-winnt* (conio-set-attr (conio-fg color) #f))
-  (else (vt100-cmd "m" (vt100-fg color))))
+  (else (set! color (vt100-fg color))
+        (set! *last-fg* color) 
+        (vt100-cmd "m" color)))
 
 (osdef (set-scud-colors bg fg)
   "Sets the foreground of the to the specified color found in"
   "*vt100-fg-colors*; also resets any other attributes."
 
   (*in-winnt* (conio-set-attr (conio-fg fg) (conio-bg bg)))
-  (else (vt100-cmd "m" "0" (vt100-bg bg) (vt100-fg fg))))
+  (else (set! fg (vt100-fg fg))
+        (set! bg (vt100-bg bg))
+        (set! *last-fg* fg) 
+        (vt100-cmd "m" bg fg)))
+
+(osdef (scud-size)
+  (*in-winnt* (conio-size))
+  (else (tty-size (output))))
 
 (export scud-goto scud-clear scud-cls scud-print set-scud-fg set-scud-bg 
-        set-scud-colors)
+        set-scud-colors scud-size)
 
 

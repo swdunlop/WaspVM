@@ -1,17 +1,18 @@
-????/??/?? Terminal Support Improvements
+2008/12/26 Terminal Support Improvements
   - Bumped version to 0.4.2.
   - Moved lib/env to use a dictionary instead of an assoc-list.
-  t Ensured environ is not used on Windows.
-  t Added conio-size primitive, which returns the current number of rows and
+  - Ensured environ is not used on Windows.
+  - Added conio-size primitive, which returns the current number of rows and
     columns.
   - Added tty-size primitive, which returns the current number of rows and
     columns.
     + NOTE: Only works on Linux.. Need to figure this out for BSD.
-  + Added signal.c, which implements a signal input for POSIX.
-  + Added lib/signal, which implements a signal input demux for POSIX.
-  + Added signal handler to SCUD for SIGWINCH.
-  + Added scud-size function, which returns the current number of rows and
+  - Added scud-size function, which returns the current number of rows and
     columns as a list.
+  - Added clear background to vt100, simply resets background; workaround for
+    transparent terminals that are only transparent when there is no
+    background color.
+  - Added clear background to conio, simply uses black.
 
 2008/12/26 The SCUD Terminal Library
   - Added unbuffer-console primitive, which prevents line buffering of stdin.

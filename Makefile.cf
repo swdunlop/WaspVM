@@ -8,11 +8,12 @@ VERSION=0.4.2
 CFLAGS += -DWASP_VERSION='"$(VERSION)"'
 
 ifeq ($(ARCH),i686)
-
 ARCH = x86
-
+else
+ifeq ($(ARCH),Power Macintosh)
+ARCH = ppc
 endif
-
+endif
 
 ifeq ($(OS),MINGW32)
 OS = win
