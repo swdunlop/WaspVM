@@ -8,7 +8,8 @@
 
 "NOTE: Print is used, instead of send, because on Windows, many of these"
 "commands must be done synchronously."
-
+;;;TODO: Move colors to global variables.
+;;;TODO: Add set-color primitive.
 ;;;TODO: POSIX: Store foreground and background in module namespace.
 ;;;TODO: POSIX: For special 'clear background, just reset and reuse fg.
 ;;;TODO: Find way for POSIX to get screen dimensions.
@@ -17,95 +18,39 @@
 
 ;;;IRGB
 ;;;8421
-(define *conio-fg-colors* (dict (cons 'black          0)
-                                (cons 'red            4)
-                                (cons 'green          2)
-                                (cons 'brown          6)
-                                (cons 'blue           1)
-                                (cons 'magenta        5) 
-                                (cons 'cyan           3)
-                                (cons 'grey           7)
-                                (cons 'dark-red       4)
-                                (cons 'dark-green     2)
-                                (cons 'dark-brown     6)
-                                (cons 'dark-blue      1)
-                                (cons 'dark-magenta   5)
-                                (cons 'dark-cyan      3)
-                                (cons 'dark-grey      7)
-                                (cons 'bright-red     12)
-                                (cons 'bright-green   10)
-                                (cons 'bright-brown   14)
-                                (cons 'bright-blue    9)
-                                (cons 'bright-magenta 13)
-                                (cons 'bright-cyan    11)
-                                (cons 'bright-grey    15)
-                                (cons 'white          15)))
+(define *colors* (dict))
+(define (bind-color code . symbols)
+  (for-each (lambda (symbol) (dict-set! *colors* symbol code )) symbols))
 
-(define *conio-bg-colors* (dict (cons 'clear          0)
-                                (cons 'black          0)
-                                (cons 'red            64)
-                                (cons 'green          32)
-                                (cons 'brown          96)
-                                (cons 'blue           16)
-                                (cons 'magenta        80) 
-                                (cons 'cyan           48)
-                                (cons 'grey           112)))
+(bind-color 0 'black)
+(bind-color 1 'red 'dark-red)
+(bind-color 2 'green 'dark-green)
+(bind-color 3 'brown 'yellow 'dark-yellow)
+(bind-color 4 'blue 'dark-blue)
+(bind-color 5 'magenta 'dark-magenta)
+(bind-color 6 'cyan 'dark-cyan)
+(bind-color 7 'light-grey)
+(bind-color 8 'grey 'dark-grey)
+(bind-color 9 'bright-red 'light-red)
+(bind-color 10 'light-green 'bright-green)
+(bind-color 11 'light-yellow 'bright-yellow)
+(bind-color 12 'light-blue 'bright-blue)
+(bind-color 13 'light-magenta 'bright-magenta)
+(bind-color 14 'light-cyan 'bright-cyan)
+(bind-color 15 'white 'light-white 'bright-white)
 
-(define *vt100-bg-colors* (dict (cons 'clear          "0")
-                                (cons 'black          "40")
-                                (cons 'red            "41")
-                                (cons 'green          "42")
-                                (cons 'brown          "43")
-                                (cons 'blue           "44")
-                                (cons 'magenta        "45")
-                                (cons 'cyan           "46")
-                                (cons 'gray           "47")))
+(define (color-ref symbol)
+  (when (integer? c) (return c))
+  (define c (dict-ref *colors* symbol))
+  (when c (return c))
+  (error 'color "Color not recognized" symbol))
 
-(define *vt100-fg-colors* (dict (cons 'black          "30")
-                                (cons 'red            "31")
-                                (cons 'green          "32")
-                                (cons 'brown          "33")
-                                (cons 'blue           "34")
-                                (cons 'magenta        "35")
-                                (cons 'cyan           "36")
-                                (cons 'grey           "37")
-                                (cons 'yellow         "1;33")
-                                (cons 'bright-yellow  "1;33")
-                                (cons 'dark-red       "2;31")
-                                (cons 'dark-green     "2;32")
-                                (cons 'dark-brown     "2;33")
-                                (cons 'dark-blue      "2;34")
-                                (cons 'dark-magenta   "2;35")
-                                (cons 'dark-cyan      "2;36")
-                                (cons 'dark-grey      "2;37")
-                                (cons 'bright-red     "1;31")
-                                (cons 'bright-green   "1;32")
-                                (cons 'bright-brown   "1;33")
-                                (cons 'bright-blue    "1;34")
-                                (cons 'bright-magenta "1;35")
-                                (cons 'bright-cyan    "1;36")
-                                (cons 'bright-grey    "1;37")
-                                (cons 'white          "1;37")))
+(define-macro (to-color var) `(set! ,var (color-ref ,var)))
 
 ;TODO: Determine how to poll for updates, write a function for it,
 ;      export that function and cause send-vt100 and scud-print to call it.
 
-(define *last-fg* "1;37")
-
-(define (lookup table color)
-  (cond ((symbol? color)
-         (set! color (dict-ref table color))
-         (scud-assert "Color name not valid." color)
-         color)
-
-        ((integer? color) (number->string color))
-
-        (else (error 'scud "Color must be an integer or a symbol."))))
-
-(define (vt100-bg color) (lookup *vt100-bg-colors* color))
-(define (vt100-fg color) (lookup *vt100-fg-colors* color))
-(define (conio-bg color) (lookup *conio-bg-colors* color))
-(define (conio-fg color) (lookup *conio-fg-colors* color))
+(define *last-fg* 7)
 
 (define (vt100-cmd key . fields)
   (print (if (null? fields)
@@ -138,34 +83,37 @@
   "Prints the specified data at the current position."
   (print (string-append @data)))
 
-(osdef (set-scud-bg color)
-  "Sets the background of the to the specified color, found in"
-  "*vt100-bg-colors*."
+(define (set-scud-bg color)
+  "Sets the background of the to the specified color, found in *colors*."
     
-  (*in-winnt* (conio-set-attr #f (conio-bg color)))
-  (else 
-    (if (eq? color 'clear)
-      (vt100-cmd "m" "0" *last-fg*)
-      (vt100-cmd "m" (vt100-bg color)))))
+  (when (eq? color 'clear)
+    (reset-console-colors)
+    (set-console-colors *last-fg* #f)
+    (return))
 
-(osdef (set-scud-fg color)
-  "Sets the foreground of the to the specified color found in"
-  "*vt100-fg-colors*."
+  (to-color color)
+  (set-console-colors #f color))
 
-  (*in-winnt* (conio-set-attr (conio-fg color) #f))
-  (else (set! color (vt100-fg color))
-        (set! *last-fg* color) 
-        (vt100-cmd "m" color)))
+(define (set-scud-fg color)
+  "Sets the foreground of the to the specified color found in *colors*."
 
-(osdef (set-scud-colors bg fg)
+  (to-color color)
+  (when color (set! *last-fg* color))
+  (set-console-colors color #f))
+
+(define (set-scud-colors bg fg)
   "Sets the foreground of the to the specified color found in"
   "*vt100-fg-colors*; also resets any other attributes."
+    
+  (when (eq? bg 'clear)
+    (reset-console-colors)
+    (set-scud-fg fg)
+    (return))
 
-  (*in-winnt* (conio-set-attr (conio-fg fg) (conio-bg bg)))
-  (else (set! fg (vt100-fg fg))
-        (set! bg (vt100-bg bg))
-        (set! *last-fg* fg) 
-        (vt100-cmd "m" bg fg)))
+  (to-color bg) 
+  (to-color fg) 
+  (when fg (set! *last-fg* fg))
+  (set-console-colors fg bg))
 
 (osdef (scud-size)
   (*in-winnt* (conio-size))

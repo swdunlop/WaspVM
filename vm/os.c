@@ -138,7 +138,6 @@ void wasp_os_stop_reading( wasp_os_connection conn ){
     wasp_disable_conn_loop( conn );
 }
 
-
 void wasp_os_closed( wasp_os_connection conn ){    
     if( conn->state < WASP_CLOSED ){
         IO_TRACE( "OS Closed for connection %x\n", conn );
@@ -636,43 +635,6 @@ WASP_BEGIN_PRIM( "conio-goto", conio_goto )
     NO_RESULT( );
 WASP_END_PRIM( conio_goto )
 
-WASP_BEGIN_PRIM( "conio-set-attr", conio_set_attr )
-    OPT_ANY_ARG( fg )
-    OPT_ANY_ARG( bg )
-    NO_REST_ARGS( );
-    
-    CONSOLE_SCREEN_BUFFER_INFO info;
-    if( ! GetConsoleScreenBufferInfo( wasp_stdout_fd, &info ) ){
-        wasp_raise_winerror( wasp_es_vm );
-    };
-
-    int n = 0;
-
-    if( has_fg && wasp_is_integer( fg ) ){
-        n |= wasp_integer_fv( fg );
-    }else{ 
-        n |= info.wAttributes & ( 
-            FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED |
-            FOREGROUND_INTENSITY
-        );
-    };
-
-    if( has_bg && wasp_is_integer( bg ) ){
-        n |= wasp_integer_fv( bg );
-    }else{ 
-        n |= info.wAttributes & ( 
-            BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED |
-            BACKGROUND_INTENSITY
-        );
-    };
-
-    if( ! SetConsoleTextAttribute( wasp_stdout_fd, n ) ){
-        wasp_raise_winerror( wasp_es_vm );
-    };
-
-    NO_RESULT( );
-WASP_END_PRIM( conio_set_attr )
-
 WASP_BEGIN_PRIM( "conio-clear", conio_clear )
     NO_REST_ARGS( );
     
@@ -708,8 +670,6 @@ WASP_BEGIN_PRIM( "conio-cls", conio_cls )
     FillConsoleOutputCharacter( wasp_stdout_fd, ' ', l, c, NULL );
     NO_RESULT( );
 WASP_END_PRIM( conio_cls )
-
-
 
 #else
 
@@ -918,6 +878,191 @@ WASP_END_PRIM( scan_io )
 
 #endif
 
+#ifdef WASP_IN_WIN32
+static int windows_color_map[] = {
+    //IRGB
+    //8421
+    0, 
+    4,  // Red
+    2,  // Green
+    6,  // Yellow
+    1,  // Blue
+    5,  // Magenta
+    3,  // Cyan
+    7,  // White
+    // Bright
+    12, // Bright-Red
+    10, // Bright-Green
+    14, // Bright-Yellow
+    9,  // Bright-Blue
+    13, // Bright-Magenta
+    11, // Bright-Cyan
+    15,  // Bright-White
+};
+#endif
+
+static void reset_console_colors( ){
+#ifdef WASP_IN_WIN32
+    if( ! SetConsoleTextAttribute( wasp_stdout_fd, 15 ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+#else
+    printf( "\033[0m" );
+    fsync( STDIN_FILENO );
+    fflush( stdout );
+#endif
+}
+
+static void set_console_colors( int fg, int bg ){
+#ifdef WASP_IN_WIN32
+    fg = windows_color_map[fg];
+    bg = windows_color_map[bg];
+
+    bg = ( bg & 8 ) << 4;
+    if( ! SetConsoleTextAttribute( wasp_stdout_fd, fg | bg ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+
+    NO_RESULT( );
+    //TODO
+#else
+#define FG ( 30 + ( fg & 7 ) )
+#define BG ( 40 + ( bg & 7 ) )
+// #define BG ( bg ? 40 + ( bg & 7 ) : 0 )
+
+    if( fg == 256 ){
+        if( bg != 256 ) printf( "\033[%im", BG );
+    }else{
+        putchar( 27 ); putchar( '[' );
+        if( fg & 8 ){ 
+            printf( "1;%i", FG );
+        }else{ 
+            printf( "%i", FG ) ;
+        };
+
+        if( bg != 256 ){ printf( ";%im", BG ); }else{ putchar( 'm' ); };
+    }
+    fflush( stdout );
+#undef FG
+#undef BG
+#endif
+}
+
+/*
+WASP_BEGIN_PRIM( "conso-set-attr", conio_set_attr )
+    if( has_fg && wasp_is_integer( fg ) ){
+        n |= wasp_integer_fv( fg );
+    }else{ 
+        n |= info.wAttributes & ( 
+            FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED |
+            FOREGROUND_INTENSITY
+        );
+    };
+
+    if( has_bg && wasp_is_integer( bg ) ){
+        n |= wasp_integer_fv( bg );
+    }else{ 
+        n |= info.wAttributes & ( 
+            BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED |
+            BACKGROUND_INTENSITY
+        );
+    };
+
+    if( ! SetConsoleTextAttribute( wasp_stdout_fd, n ) ){
+        wasp_raise_winerror( wasp_es_vm );
+    };
+
+    NO_RESULT( );
+WASP_END_PRIM( conio_set_attr )
+*/
+WASP_BEGIN_PRIM( "reset-console-colors", reset_console_colors )
+    NO_REST_ARGS( );
+    fflush( stdout );
+    reset_console_colors( );
+#ifndef WASP_IN_WIN32
+    fsync( STDOUT_FILENO );
+#endif
+    NO_RESULT( );
+WASP_END_PRIM( reset_console_colors )
+
+WASP_BEGIN_PRIM( "set-console-colors", set_console_colors )
+    OPT_ANY_ARG( fg )
+    OPT_ANY_ARG( bg )
+    NO_REST_ARGS( );
+
+    if( has_fg && wasp_is_false( fg ) ) has_fg = 0;
+    if( has_bg && wasp_is_false( bg ) ) has_bg = 0;
+    if( has_fg ) fg = wasp_req_integer( fg );
+    if( has_bg ) bg = wasp_req_integer( bg );
+
+    fflush( stdout );
+#ifdef WASP_IN_WIN32
+    //TODO: Do we need to FlushFile ?
+    CONSOLE_SCREEN_BUFFER_INFO info;
+    if( ! ( has_fg && has_bg ) ){
+        if( ! GetConsoleScreenBufferInfo( wasp_stdout_fd, &info ) ){
+            wasp_raise_winerror( wasp_es_vm );
+        };
+
+        if( ! has_fg ) fg = ( info->wAttributes & 15 )
+        if( ! has_bg ) bg = (( info->wAttributes >> 4 ) & 7 );
+    };
+#else
+    fsync( STDOUT_FILENO );
+    if( ! has_fg ) fg = 256;
+    if( ! has_bg ) bg = 256;
+#endif
+
+    set_console_colors( fg, bg ); 
+    NO_RESULT( );
+WASP_END_PRIM( )
+
+WASP_BEGIN_PRIM( "console-blit", console_blit )
+    REQ_STRING_ARG( text )
+    REQ_STRING_ARG( fg )
+    REQ_STRING_ARG( bg )
+    OPT_INTEGER_ARG( offset );
+    OPT_INTEGER_ARG( length ); 
+    
+    fflush( stdout );
+#ifdef WASP_IN_WIN32
+    //TODO: Do we need to FlushFile ?
+    fsync( STDOUT_FILENO );
+#endif
+
+    if( ! has_offset ) offset = 0;
+    if( ! has_length ) length = wasp_string_length( text );
+    
+    if( wasp_string_length( fg ) < length ) length = wasp_string_length( fg );
+    if( wasp_string_length( bg ) < length ) length = wasp_string_length( bg );
+    
+    if( offset >= length ) goto done;
+
+    int c_fg = 256; 
+    int c_bg = 256; 
+    char* fgs = wasp_sf_string( fg );
+    char* bgs = wasp_sf_string( bg );
+    char* txt = wasp_sf_string( text );
+
+    while( offset < length ){
+        int n_fg = fgs[offset];
+        int n_bg = bgs[offset];
+        if(( c_fg != n_fg  )||( c_bg != n_bg  )){
+            set_console_colors( n_fg, n_bg );
+            c_bg = n_bg; c_fg = n_fg;
+        };
+        putchar( txt[offset++] );
+    }
+done:
+    fflush( stdout );
+#ifdef WASP_IN_WIN32
+    //TODO: Do we need to FlushFile ?
+    fsync( STDOUT_FILENO );
+#endif
+
+    NO_RESULT( );
+WASP_END_PRIM( console_blit )
+
 WASP_BEGIN_PRIM( "unbuffer-console", unbuffer_console )
 #ifdef WASP_IN_WIN32
     // Basically, we enable absolutely nothing.
@@ -980,11 +1125,13 @@ void wasp_init_os_subsystem( ){
     WASP_BIND_PRIM( conio_cls );
     WASP_BIND_PRIM( conio_clear );
     WASP_BIND_PRIM( conio_size );
-    WASP_BIND_PRIM( conio_set_attr );
 #else
     WASP_BIND_PRIM( tty_size );
 #endif
-
+   
+    WASP_BIND_PRIM( reset_console_colors );
+    WASP_BIND_PRIM( set_console_colors );
+    WASP_BIND_PRIM( console_blit );
     wasp_set_global( wasp_symbol_fs( "*console*" ), 
                      wasp_vf_connection( wasp_make_stdio( ) ) );
 }

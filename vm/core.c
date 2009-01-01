@@ -682,6 +682,36 @@ WASP_BEGIN_PRIM( "string-ref", string_ref )
     RESULT( wasp_vf_integer( wasp_sf_string( string )[index] ) );
 WASP_END_PRIM( string_ref )
 
+WASP_BEGIN_PRIM( "string-set!", string_set )
+    REQ_STRING_ARG( string );
+    REQ_INTEGER_ARG( index );
+    REQ_INTEGER_ARG( byte );
+    NO_REST_ARGS( );
+    if( index >= wasp_string_length( string ) ){
+        wasp_errf( wasp_es_vm, "si", "index exceeds string length", 
+                               index );
+    }
+    wasp_sf_string( string )[index] = byte;
+    RESULT( wasp_vf_integer( wasp_sf_string( string )[index] ) );
+WASP_END_PRIM( string_set )
+
+WASP_BEGIN_PRIM( "string-fill!", string_fill )
+    REQ_STRING_ARG( string );
+    REQ_INTEGER_ARG( index );
+    REQ_INTEGER_ARG( length );
+    REQ_INTEGER_ARG( byte );
+    NO_REST_ARGS( );
+    if( index >= wasp_string_length( string ) ){
+        wasp_errf( wasp_es_vm, "si", "index exceeds string length", 
+                               index );
+    };
+    if( index + length >= wasp_string_length( string ) ){
+        length = wasp_string_length( string ) - index - 1;
+    };
+    memset( wasp_sf_string( string ) + index, byte, length );
+    NO_RESULT( );
+WASP_END_PRIM( string_fill )
+
 WASP_BEGIN_PRIM( "=", m_eq )
     REQ_INTEGER_ARG( v0 );
    
@@ -1558,6 +1588,7 @@ WASP_END_PRIM( function_name )
 
 WASP_BEGIN_PRIM( "make-string", make_string )
     OPT_INTEGER_ARG( capacity );
+    OPT_INTEGER_ARG( init );
     NO_REST_ARGS( );
     
     if( ! has_capacity ){ 
@@ -1567,7 +1598,10 @@ WASP_BEGIN_PRIM( "make-string", make_string )
     }
 
     wasp_string string = wasp_make_string( capacity );
-
+    if( has_init ){
+        memset( wasp_sf_string( string ), init, capacity );
+        string->length = capacity;
+    };
     RESULT( wasp_vf_string( string ) );
 WASP_END_PRIM( make_string )
 
@@ -2070,6 +2104,9 @@ void wasp_bind_core_prims( ){
 
     WASP_BIND_PRIM( string_uppercase );
     WASP_BIND_PRIM( string_lowercase );
+
+    WASP_BIND_PRIM( string_set );
+    WASP_BIND_PRIM( string_fill );
 
     wasp_set_global( wasp_symbol_fs( "*version*" ), 
                     wasp_vf_string( wasp_string_fs( WASP_VERSION ) ) );

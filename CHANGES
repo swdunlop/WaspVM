@@ -1,3 +1,18 @@
+2008/12/31 Roguelike Terminal Support
+  - Added (string-set! str offset byte), similar to vector-set!
+  - Added (make-string str length init), which creates a string of length bytes,
+    with each byte initialized to init.
+  - Added (string-fill! str offset length byte), which changes length bytes,
+    starting at offset, to byte.
+  - Added (console-blit text foreground background) to os.c; this primitive
+    will iterate over the bytes in text, printing each one with the foreground
+    color and background color at the corresponding offset in foreground and
+    background.  Additionally, offset and length arguments may be specified to
+    restrict the data being displayed.  (For windowing functionality.)
+  - Added (set-console-colors fg bg) primitive for POSIX and CONIO.
+  - Added (reset-console-colors) primitive for POSIX and CONIO.
+  - Modified lib/scud to use new set and reset primitives.
+
 2008/12/26 Terminal Support Improvements
   - Bumped version to 0.4.2.
   - Moved lib/env to use a dictionary instead of an assoc-list.
