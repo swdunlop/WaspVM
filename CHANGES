@@ -1,4 +1,7 @@
 2009/12/06 Bugfix, No Deactivate for Poll Processes
+  Identified by Chris Double; error introduced 2009/12/06 in Polling Processes
+  patch.
+
   - Added a standard wasp_poll_deactivate dummy procedure to process.c
 
 2009/12/06 Polling Processes and Sleeping the VM
