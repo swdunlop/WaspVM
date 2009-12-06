@@ -1,5 +1,11 @@
 + BUG: core/io depends on lib/iterate
 + BUG: waspvm depends on libevent shared object on Linux.
++ BUG: waspvm does not build in 64 bit environments.
+
+????/??/?? Polling Processes and Sleeping the VM
+  + Add a flag to processes that indicates that they are "polling" processes.
+  + Expand the VM loop to sleep WASP_POLL_LATENCY microseconds when all VM
+    processes are idle.
 
 ????/??/?? Buffer Restoration
   + Forked string and buffer types again.
@@ -26,7 +32,7 @@
 + BUG: (format '(1 2 3)) yields "(1)" when vm built with -Os, -O3, ...
   + Does not happen with -O1, -O2 and -O0
 
-- Add Generational GC
++ Add Generational GC
   + Ensure NO direct modifications are done of object properties.
     + Rename each property to zxz_ <property>
     + Compile and fix all broken zxz_ references.

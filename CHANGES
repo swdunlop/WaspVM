@@ -1,3 +1,13 @@
+2009/12/05 Static Compilation Improvements
+  Derived from a patch supplied by Chris Double; ensures libevent is statically
+  linked.
+
+  - Factored libraries out of EXEFLAGS into STATICLIBS and DYNAMICLIBS.
+  - STATICLIBS are linked with -Bstatic.
+  - DYNAMICLIBS are linked with -Bdynamic.
+  - Made librt an explicit dynamic dependency on Linux, indirectly required by
+    libevent.
+
 2008/12/31 Roguelike Terminal Support
   - Added (string-set! str offset byte), similar to vector-set!
   - Added (make-string str length init), which creates a string of length bytes,

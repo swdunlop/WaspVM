@@ -7,6 +7,8 @@ VERSION=0.4.2
 
 CFLAGS += -DWASP_VERSION='"$(VERSION)"'
 
+STATICLIBS += -levent
+
 ifeq ($(ARCH),i686)
 ARCH = x86
 else
@@ -24,14 +26,14 @@ endif
 endif
 
 ifeq ($(OS),win)
-
 EXE = .exe
 OBJ = .o
 SO  = .dll
 CFLAGS += -mno-cygwin 
 CFLAGS += -DWASP_SO='".dll"'
 CFLAGS += -I/usr/local/include -L/usr/local/lib
-EXEFLAGS += -L/usr/local/lib -levent -lws2_32
+EXEFLAGS += -L/usr/local/lib 
+DYNAMICLIBS += -lws2_32 
 CFLAGS += -Irx
 LDFLAGS += -Lrx
 LIBRX += rx/libregex.a
@@ -43,9 +45,11 @@ OBJ = .o
 SO  = .so
 
 CFLAGS += -DWASP_SO='".so"'
-LDFLAGS += -levent
+### Disabled until lib/build and bin/waspc understands subsystems.
 # EXEFLAGS += -rdynamic -ldl
 PLATFORM = unix
+### An indirect dependency of libevent.
+DYNAMICLIBS += -lrt
 
 endif
 
@@ -73,4 +77,7 @@ endif
 
 PLATFORM = $(OS)-$(ARCH)
 CFLAGS += -DWASP_PLATFORM='"$(PLATFORM)"' 
+
+### Derived from a patch submitted by Chris Double.
+EXEFLAGS += -Wl,-Bstatic $(STATICLIBS) -levent -Wl,-Bdynamic $(DYNAMICLIBS)
 
