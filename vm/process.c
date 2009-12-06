@@ -18,7 +18,20 @@
 #include <setjmp.h>
 #include <stdarg.h>
 
-wasp_quad wasp_vm_count = 0;
+#ifdef WASP_IN_WIN32
+
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <wspiapi.h>
+
+#else
+#include <unistd.h>
+#endif
+
+wasp_quad wasp_enable_count = 0;
+wasp_quad wasp_active_count = 0;
+
 wasp_process wasp_first_enabled = NULL;
 wasp_process wasp_last_enabled = NULL;
 wasp_process wasp_active_process = NULL;
@@ -64,7 +77,7 @@ wasp_process wasp_make_process(
     process->deactivate = deactivate;
     process->context = context;
     process->prev = process->next = NULL;
-    process->enabled = 0;
+    process->state = WASP_IDLE_PROCESS;
     process->monitoring = NULL;
     process->name = wasp_vf_symbol( wasp_sym_builtin );
     if( wasp_active_process ){
@@ -74,6 +87,12 @@ wasp_process wasp_make_process(
         process->input = 0;
         process->output = 0;
     };
+    return process;
+}
+
+wasp_process wasp_make_poll( wasp_proc_fn activate, wasp_value context ){
+    wasp_process process = wasp_make_process( activate, NULL, context );
+    process->state = WASP_POLL_PROCESS;
     return process;
 }
 
@@ -94,12 +113,18 @@ void wasp_set_process_input( wasp_process process, wasp_value input ){
 void wasp_set_process_output( wasp_process process, wasp_value output ){
     process->output = output;
 }
-void wasp_enable_process( wasp_process process ){
-    if( process->enabled )return; 
-    
-    if( wasp_is_vm( process->context ) ) wasp_vm_count ++;
 
-    process->enabled = 1;
+void wasp_enable_process( wasp_process process ){
+    switch( process->state ){
+    case WASP_ACTIVE_PROCESS: 
+        return; 
+    case WASP_IDLE_PROCESS:
+        process->state = WASP_ACTIVE_PROCESS;
+        wasp_active_count ++;
+    }
+    
+    wasp_enable_count ++;
+
     process->next = NULL;
     process->prev = wasp_last_enabled;
 
@@ -113,13 +138,18 @@ void wasp_enable_process( wasp_process process ){
 }
 
 void wasp_disable_process( wasp_process process ){
-    if( ! process->enabled )return; 
+    switch( process->state ){
+    case WASP_IDLE_PROCESS:
+        return; 
+    case WASP_ACTIVE_PROCESS: 
+        wasp_active_count --;
+        process->state = WASP_IDLE_PROCESS;
+    }
 
-    if( wasp_is_vm( process->context ) ) wasp_vm_count --;
+    wasp_enable_count --; 
 
     wasp_process prev = process->prev;
     wasp_process next = process->next;
-    process->enabled = 0;
    
     if( prev ){
         prev->next = next;
@@ -134,6 +164,21 @@ void wasp_disable_process( wasp_process process ){
     }
     
     process->next = process->prev = NULL;
+}
+
+void wasp_sleep_if_idle( ){
+    if( wasp_active_count ){
+#ifdef WASP_IN_WIN32
+        // This is a necessary workaround for Windows to process events.
+        SleepEx( 0, TRUE );
+#endif
+    }else{
+#ifdef WASP_IN_WIN32
+        SleepEx( 100, TRUE );
+#else
+        usleep( 100 );
+#endif
+    };
 }
 
 void wasp_proc_loop( ){
@@ -163,6 +208,7 @@ void wasp_proc_loop( ){
                                              wasp_active_process->context );
             wasp_active_process = wasp_active_process->next;
         }
+        wasp_sleep_if_idle( );
     }
 
     wasp_proc_xp = NULL;

@@ -64,25 +64,8 @@ void wasp_disable_os_loop( ){
     if( -- wasp_os_loop_use ) return;
     wasp_disable_process( wasp_os_loop_process );
 }
-
-void wasp_activate_os_loop( ){ 
-#ifdef WASP_IN_WIN32
-    if( wasp_first_enabled == wasp_last_enabled ){
-        SleepEx( 100, TRUE );
-    }else{
-        SleepEx( 0, TRUE );
-    }
-    event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE );
-#else
-    if( wasp_first_enabled == wasp_last_enabled ){
-        event_loop( EVLOOP_ONCE );
-    }else{
-        event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE );
-    }
-#endif
-    if( ! wasp_os_loop_process->enabled ) wasp_proc_loop( );
-}
-void wasp_deactivate_os_loop( ){ }
+   
+void wasp_os_poll( ){ event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE ); }
 
 void wasp_enable_conn_loop( wasp_os_connection oscon ){
     if( oscon->looping ) return;
@@ -1094,9 +1077,7 @@ void wasp_init_os_subsystem( ){
     event_init( );
     wasp_ss_connect = wasp_symbol_fs( "connect" );
 
-    wasp_process p = wasp_make_process( wasp_activate_os_loop, 
-                                        wasp_deactivate_os_loop, 
-                                        wasp_vf_null( ) );
+    wasp_process p = wasp_make_poll( wasp_os_poll, wasp_vf_null( ) );
     wasp_root_obj( (wasp_object) p );
     wasp_os_loop_process = p;
 

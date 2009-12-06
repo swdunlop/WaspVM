@@ -1,3 +1,17 @@
+2009/12/06 Polling Processes and Sleeping the VM
+  - Modified the process object to change the boolean "enabled" to an byte
+    "state."
+  - Added a state WASP_ACTIVE_PROCESS for processes that are actively
+    executing.  This approximates the old "enabled" processes.
+  - Added a state WASP_IDLE_PROCESS for processes that are waiting on a resume;
+    this approximates processes that were not enabled.
+  - Added a state WASP_POLL_PROCESS for processes that poll.
+  - Added convenient wasp_make_poll( fn, value ) to process.c.
+  - Expanded wasp_process_loop to sleep 100 microseconds when active count is
+    0 but enable count is nonzero.
+  - Simplified wasp_os_loop_activate to make wasp_os_poll.
+  - Removed unused wasp_can_be_only_one and wasp_vm_count.
+
 2009/12/06 Salsa/20 Cast Correction
   - Corrected an implicit pointer cast in vm/salsa.c when calling wasp_root_obj
 

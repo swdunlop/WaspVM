@@ -19,6 +19,10 @@
 
 #include "memory.h"
 
+#define WASP_IDLE_PROCESS 0
+#define WASP_POLL_PROCESS 1
+#define WASP_ACTIVE_PROCESS 2
+
 typedef void (*wasp_proc_fn)(wasp_object process, wasp_value context );
 
 WASP_BEGIN_TYPE( process )
@@ -26,7 +30,7 @@ WASP_BEGIN_TYPE( process )
     wasp_process prev, next;
     wasp_proc_fn activate, deactivate;
     wasp_value context;
-    wasp_boolean enabled;
+    wasp_byte state;
     wasp_object monitoring; //TODO: This is a channel..
     wasp_value input, output;
 WASP_END_TYPE( process )
@@ -42,6 +46,8 @@ WASP_END_TYPE( vm )
 wasp_process wasp_make_process( 
     wasp_proc_fn activate, wasp_proc_fn deactivate, wasp_value context 
 );
+wasp_process wasp_make_poll( wasp_proc_fn activate, wasp_value context );
+
 void wasp_trace_process( wasp_process process );
 
 wasp_vm wasp_make_vm( );
@@ -70,15 +76,8 @@ extern wasp_process wasp_first_enabled;
 extern wasp_process wasp_last_enabled;
 extern wasp_process wasp_active_process;
 
-static inline wasp_boolean wasp_can_be_only_one( ){
-    return ( wasp_active_process == wasp_first_enabled ) && 
-           ( wasp_active_process == wasp_last_enabled );
-}
-
 #define REQ_PROCESS_ARG( x ) REQ_TYPED_ARG( x, process )
 #define OPT_PROCESS_ARG( x ) OPT_TYPED_ARG( x, process )
 #define PROCESS_RESULT( x )  TYPED_RESULT( process, x )
-
-extern wasp_quad wasp_vm_count;
 
 #endif
