@@ -1,3 +1,6 @@
+2009/12/06 Salsa/20 Cast Correction
+  - Corrected an implicit pointer cast in vm/salsa.c when calling wasp_root_obj
+
 2009/12/05 Static Compilation Improvements
   Derived from a patch supplied by Chris Double; ensures libevent is statically
   linked.

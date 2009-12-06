@@ -179,7 +179,7 @@ wasp_salsa20_key wasp_get_prng( ){
     wasp_string iv = wasp_read_entropy_str( 8 );
 
     wasp_prng = wasp_make_salsa20_key( seed );
-    wasp_root_obj( wasp_prng );
+    wasp_root_obj( (wasp_object) wasp_prng );
     wasp_set_salsa20_iv( wasp_prng, iv );
 
     return wasp_prng;
