@@ -5,11 +5,6 @@
 + UGLY: Stop casts to wasp_proc_fn by using the correct type for wasp_process.
 + UGLY: printf object used as value since printf doesn't support objects.
 
-????/??/?? Polling Processes and Sleeping the VM
-  + Add a flag to processes that indicates that they are "polling" processes.
-  + Expand the VM loop to sleep WASP_POLL_LATENCY microseconds when all VM
-    processes are idle.
-
 ????/??/?? Buffer Restoration
   + Forked string and buffer types again.
   + Strings are now immutable at a primitive level.
