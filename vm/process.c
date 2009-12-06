@@ -40,7 +40,6 @@ wasp_symbol wasp_sym_builtin;
 wasp_symbol wasp_sym_program;
 
 void wasp_activate_vm( wasp_process process, wasp_vm vm );
-void wasp_activate_netmon( wasp_process process, wasp_object );
 
 void wasp_format_process( wasp_string buf, wasp_process p ){
     wasp_format_begin( buf, p );
@@ -90,8 +89,12 @@ wasp_process wasp_make_process(
     return process;
 }
 
+void wasp_deactivate_poll( wasp_process process, wasp_vm vm ){ }
+
 wasp_process wasp_make_poll( wasp_proc_fn activate, wasp_value context ){
-    wasp_process process = wasp_make_process( activate, NULL, context );
+    wasp_process process = wasp_make_process( 
+        activate, (wasp_proc_fn) wasp_deactivate_poll, context
+    );
     process->state = WASP_POLL_PROCESS;
     return process;
 }
@@ -237,6 +240,7 @@ void wasp_save_vm( wasp_vm vm ){
 void wasp_activate_vm( wasp_process process, wasp_vm vm ){
     wasp_load_vm( vm );
     if( WASP_T ){
+        //TODO: printf object used as value
         wasp_printf( "sxsn", "::: PROCESS ", process, " ACTIVATED :::" );
     }
     wasp_interp_loop( );
@@ -244,6 +248,7 @@ void wasp_activate_vm( wasp_process process, wasp_vm vm ){
 
 void wasp_deactivate_vm( wasp_process process, wasp_vm vm ){
     if( WASP_T ){
+        //TODO: printf object used as value
         wasp_printf( "sxsn", "::: PROCESS ", process, " DEACTIVATED :::" );
     }
     wasp_save_vm( vm );

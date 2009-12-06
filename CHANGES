@@ -1,3 +1,6 @@
+2009/12/06 Bugfix, No Deactivate for Poll Processes
+  - Added a standard wasp_poll_deactivate dummy procedure to process.c
+
 2009/12/06 Polling Processes and Sleeping the VM
   - Modified the process object to change the boolean "enabled" to an byte
     "state."
