@@ -23,11 +23,15 @@
 // Standard integers
 #if defined( __OpenBSD__ )
 
+//TODO: Determine if OpenBSD/x86-64 has stdint.
+
 typedef unsigned char wasp_byte;
 typedef unsigned short wasp_word;
 typedef unsigned long wasp_quad;
+typedef unsigned long long wasp_octet;
 typedef signed long wasp_integer;
 typedef int wasp_boolean;
+typedef unsigned long long wasp_value;
 
 #else
 
@@ -36,8 +40,10 @@ typedef int wasp_boolean;
 typedef uint8_t wasp_byte;
 typedef uint16_t wasp_word;
 typedef uint32_t wasp_quad;
+typedef uint64_t wasp_octet;
 typedef int32_t wasp_integer;
 typedef int wasp_boolean;
+typedef uintptr_t wasp_value;
 
 #endif
 
@@ -205,9 +211,6 @@ struct wasp_null_data { int x; };
     }; \
     WASP_H_TYPE( tn )
 
-// Fundamental Structures and Constants
-typedef wasp_quad wasp_value;
-
 struct wasp_type_data;
 typedef struct wasp_type_data* wasp_type;
 
@@ -219,9 +222,11 @@ typedef struct wasp_pool_data* wasp_pool;
 
 extern wasp_pool wasp_greys, wasp_whites, wasp_blacks, wasp_roots;
 
+//TODO:64
 #define WASP_MAX_IMM 1073741823
 #define WASP_MIN_IMM 0
 
+//TODO:64
 #define WASP_MAX_INT 2147483646
 #define WASP_MIN_INT -2147483646 
 

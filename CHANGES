@@ -1,3 +1,9 @@
+2009/12/12 Preliminary 64-Bit Support
+  - Changed wasp_value's type from wasp_quad to uintptr_t.
+  - This may cause Wasp to compile and work 64-bit clean, but does not gain
+    a lot of efficiency from 64-bit, as MAX_IMM and MAX_INT have not been
+    adjusted.
+
 2009/12/11 Waspdoc TC Bugs Fixed
   Waspdoc contained some incomplete argument parsing fixes that blocked
   normal operation.  Fixed, and ensured it will install properly.
