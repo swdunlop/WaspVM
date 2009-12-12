@@ -38,12 +38,13 @@
     (until (tc-empty? opts)
       (define opt (tc-next! opts))
       (case arg
-        (("-h" "--help") (usage))
+        (("-h" "--help" "-?") (usage))
         (("-r" "--root") (set-waspdoc-root! (next-opt "WaspDoc root path")))
         (else (tc-add! args opt)))))
   
   (define (perform-command)
     (case (next-arg)
+      (("help") (usage))
       (("check") (case (next-arg)
                    (("source") (apply check-source (tc->list args)))
                    (else (fail "check"))))
