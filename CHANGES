@@ -1,3 +1,10 @@
+2009/12/11 Waspdoc TC Bugs Fixed
+  Waspdoc contained some incomplete argument parsing fixes that blocked
+  normal operation.  Fixed, and ensured it will install properly.
+
+  - Restored functionality of waspdoc dump source, waspdoc dump module.
+  - Added waspdoc to install process.
+
 2009/12/06 Bugfix, No Deactivate for Poll Processes
   Identified by Chris Double; error introduced 2009/12/06 in Polling Processes
   patch.

@@ -146,5 +146,5 @@
 
   (chmod "-R 0755" mod-dir) ;stub-dir 
   
-  (chmod "0755" bin-dir wasp-bin waspc-bin))
+  (chmod "0755" bin-dir wasp-bin waspc-bin waspdoc-bin))
 

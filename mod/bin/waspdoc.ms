@@ -8,15 +8,12 @@
 
   (define arg #f)
 
-  (define (exit)
-    (error 'exit))
+  (define (exit code)
+    (error 'exit code))
 
   (define (next-arg)
-    (cond ((null? args) (set! arg #f))
-          (else (set! arg (car args))
-                (set! args (cdr args))))
-    arg)
-  
+    (if (tc-empty? args) #f (tc-next! args)))
+
   (define (usage)
     (print* "USAGE: waspdoc check source -- Check source for new and missing.\n"
             "       waspdoc dump source <src-file> -- View source info.\n"
@@ -24,9 +21,9 @@
     (exit 0))
 
   (define (fail . args)
-    (if arg
-      (println* "Did not understand " arg ".")
-      (println* "Expected more."))
+    (if (null? args)
+      (println* "Expected more.")
+      (println* "Did not understand " @args "."))
     (exit 1))
 
   (define (next-opt for-what)
@@ -40,27 +37,27 @@
   (define (parse-global-options)
     (until (tc-empty? opts)
       (define opt (tc-next! opts))
-      (case (arg)
+      (case arg
         (("-h" "--help") (usage))
         (("-r" "--root") (set-waspdoc-root! (next-opt "WaspDoc root path")))
-        (else (tc-append! args opt)))))
+        (else (tc-add! args opt)))))
   
   (define (perform-command)
     (case (next-arg)
       (("check") (case (next-arg)
-                   (("source") (apply check-source args))
+                   (("source") (apply check-source (tc->list args)))
                    (else (fail "check"))))
                    
       (("dump") (case (next-arg)
-                  (("source") (apply dump-source args))
-                  (("module") (apply dump-module args))
+                  (("source") (apply dump-source (tc->list args)))
+                  (("module") (apply dump-module (tc->list args)))
                   (else (fail "dump"))))
   
       ((#f) (usage))))
  
   (guard (function (catch-exit err)
            (when (eq? (error-key err) 'exit)
-            (return #f))
+            (return))
 
            (re-error err))
     (parse-global-options)
