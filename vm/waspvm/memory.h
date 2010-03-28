@@ -206,7 +206,7 @@ struct wasp_null_data { int x; };
     WASP_H_TYPE( tn )
 
 // Fundamental Structures and Constants
-typedef wasp_quad wasp_value;
+typedef uintptr_t wasp_value;
 
 struct wasp_type_data;
 typedef struct wasp_type_data* wasp_type;
