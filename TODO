@@ -5,6 +5,12 @@
 + UGLY: Stop casts to wasp_proc_fn by using the correct type for wasp_process.
 + UGLY: printf object used as value since printf doesn't support objects.
 
+????/??/?? 64 Bit Phase Two Support
+  + Add a new 64 bit value to thaw.
+  + Add a new 64 bit value to freeze.
+  + Adjust MAX_IMM, MAX_INT based on ptr size.  ( 2 ** ( sizeof( void* ) - 1 ) -1 )
+  + Introduce a longlong to the wasp number stack for 32-bits to interop with 64-bits.
+
 ????/??/?? Buffer Restoration
   + Forked string and buffer types again.
   + Strings are now immutable at a primitive level.
