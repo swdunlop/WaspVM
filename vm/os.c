@@ -26,8 +26,8 @@
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <wspiapi.h>
-
+// disabled as per Chris Double's recommendation, 20110101
+// #include <wspiapi.h>
 #else
 
 #include <unistd.h>
@@ -601,7 +601,10 @@ WASP_BEGIN_PRIM( "conio-size", conio_size )
     };
 
     LIST_RESULT( wasp_listf( 2, 
-        wasp_vf_integer( info.Y ), wasp_vf_integer( info.X )
+        // changed due to build issues with msys/mingw, 20110101
+        // wasp_vf_integer( info.Y ), wasp_vf_integer( info.X )
+        wasp_vf_integer( info.Size.Y ), 
+        wasp_vf_integer( info.Size.X )
     ) );
 WASP_END_PRIM( conio_size )
 
@@ -958,6 +961,7 @@ WASP_BEGIN_PRIM( "conso-set-attr", conio_set_attr )
     NO_RESULT( );
 WASP_END_PRIM( conio_set_attr )
 */
+
 WASP_BEGIN_PRIM( "reset-console-colors", reset_console_colors )
     NO_REST_ARGS( );
     fflush( stdout );
@@ -980,17 +984,17 @@ WASP_BEGIN_PRIM( "set-console-colors", set_console_colors )
 
     fflush( stdout );
 #ifdef WASP_IN_WIN32
-    //TODO: Do we need to FlushFile ?
     CONSOLE_SCREEN_BUFFER_INFO info;
     if( ! ( has_fg && has_bg ) ){
         if( ! GetConsoleScreenBufferInfo( wasp_stdout_fd, &info ) ){
             wasp_raise_winerror( wasp_es_vm );
         };
 
-        if( ! has_fg ) fg = ( info->wAttributes & 15 )
-        if( ! has_bg ) bg = (( info->wAttributes >> 4 ) & 7 );
+        if( ! has_fg ) fg = ( info.wAttributes & 15 )
+        if( ! has_bg ) bg = (( info.wAttributes >> 4 ) & 7 );
     };
 #else
+    //TODO: Do we need to FlushFile ?
     fsync( STDOUT_FILENO );
     if( ! has_fg ) fg = 256;
     if( ! has_bg ) bg = 256;
@@ -1008,7 +1012,7 @@ WASP_BEGIN_PRIM( "console-blit", console_blit )
     OPT_INTEGER_ARG( length ); 
     
     fflush( stdout );
-#ifdef WASP_IN_WIN32
+#ifndef WASP_IN_WIN32
     //TODO: Do we need to FlushFile ?
     fsync( STDOUT_FILENO );
 #endif
@@ -1038,7 +1042,7 @@ WASP_BEGIN_PRIM( "console-blit", console_blit )
     }
 done:
     fflush( stdout );
-#ifdef WASP_IN_WIN32
+#ifndef WASP_IN_WIN32
     //TODO: Do we need to FlushFile ?
     fsync( STDOUT_FILENO );
 #endif
