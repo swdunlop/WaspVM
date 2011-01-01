@@ -1,4 +1,4 @@
-; cOPYRIGht (C) 2006, Ephemeral Security, LLC
+; Copyright (C) 2006, Ephemeral Security, LLC
 ; Modifications (C) 2008, Scott W. Dunlop <swdunlop@gmail.com>
 ; 
 ; This library is free software; you can redistribute it and/or modify it 
@@ -107,8 +107,7 @@
 (define (run-mosref-shell console node)
   (add-shell-display! (output))
   (guard (lambda (err)
-           (traceback err)
-           (remove-shell-display! (output)))
+           (traceback err))
     (define shell (make-mosref-shell node console #t))
 
     (define (send-prompt)
