@@ -1,3 +1,6 @@
+2011/01/01 Migration From Launchpad to Github
+  - Exported bazaar tree to git
+
 2010/03/03 Added rfc1071 primitive to core.
   - Added (rfc1071 str) -> integer, which performs an RFC 1071 checksum of a
     string.  Useful for implementing IPv4 packets.
