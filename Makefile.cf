@@ -31,7 +31,8 @@ OBJ = .o
 SO  = .dll
 CFLAGS += -mno-cygwin 
 CFLAGS += -DWASP_SO='".dll"'
-CFLAGS += -I/usr/local/include -L/usr/local/lib
+CFLAGS += -I/usr/local/include -L/usr/local/lib -L/usr/lib/w32api
+CFLAGS += -D_WIN32_WINNT=0x501
 EXEFLAGS += -L/usr/local/lib 
 DYNAMICLIBS += -lws2_32 
 CFLAGS += -Irx
