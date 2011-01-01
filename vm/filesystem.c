@@ -26,11 +26,7 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef WASP_IN_WIN32
-#include <io.h>
-#else
 #include <dirent.h>
-#endif
 
 //TODO: We really need a time type.
 WASP_BEGIN_PRIM( "path-mtime", path_mtime )
@@ -92,40 +88,6 @@ WASP_BEGIN_PRIM( "dir-files", dir_files )
 
     wasp_tc tc = wasp_make_tc( );
     
-#ifdef WASP_IN_WIN32
-    int len = wasp_string_length( path );
-
-    char* glob = malloc( len + 3 );
-    struct _finddata_t info;
-
-    memcpy( glob, wasp_sf_string( path ), len );
-
-    glob[ len++ ] = '\\';
-    glob[ len++ ] = '*';
-    glob[ len++ ] = 0;
-
-    wasp_quad handle = _findfirst( glob, &info );
-    if( handle == -1 ){
-        free( glob );
-        wasp_errf( wasp_es_vm, "sx", "cannot open directory", path );
-    }else{
-        wasp_tc_add( 
-            tc, 
-            wasp_vf_string( wasp_string_fs( info.name ) ) 
-        );
-    }
-    
-    for(;;){
-        handle = _findnext( handle, &info );
-        if( handle == -1 ) break;
-        wasp_tc_add( 
-            tc, 
-            wasp_vf_string( wasp_string_fs( info.name ) ) 
-        );
-    }
-
-    free( glob );
-#else
     DIR* dir = opendir( wasp_sf_string( path ) );
     if( ! dir ) wasp_errf( wasp_es_vm, "sx", "cannot open directory", path );
     
@@ -136,7 +98,7 @@ WASP_BEGIN_PRIM( "dir-files", dir_files )
     };
 
     closedir( dir );
-#endif
+
     LIST_RESULT( tc->head );
 WASP_END_PRIM( dir_files )
 
