@@ -603,8 +603,8 @@ WASP_BEGIN_PRIM( "conio-size", conio_size )
     LIST_RESULT( wasp_listf( 2, 
         // changed due to build issues with msys/mingw, 20110101
         // wasp_vf_integer( info.Y ), wasp_vf_integer( info.X )
-        wasp_vf_integer( info.Size.Y ), 
-        wasp_vf_integer( info.Size.X )
+        wasp_vf_integer( info.dwSize.Y ), 
+        wasp_vf_integer( info.dwSize.X )
     ) );
 WASP_END_PRIM( conio_size )
 
@@ -990,7 +990,7 @@ WASP_BEGIN_PRIM( "set-console-colors", set_console_colors )
             wasp_raise_winerror( wasp_es_vm );
         };
 
-        if( ! has_fg ) fg = ( info.wAttributes & 15 )
+        if( ! has_fg ) fg = ( info.wAttributes & 15 );
         if( ! has_bg ) bg = (( info.wAttributes >> 4 ) & 7 );
     };
 #else
