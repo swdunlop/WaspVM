@@ -535,6 +535,7 @@ void wasp_trace_ip( wasp_instruction ip ){
 
 void wasp_chain( wasp_pair data ){
     if( ! WASP_CP ) WASP_CP = wasp_make_callframe( );
+    WASP_CP->gp = WASP_GP;
     WASP_CP->head = data;
     WASP_CP->tail = wasp_last_pair( data );
     WASP_CP->count = wasp_list_length( data );
