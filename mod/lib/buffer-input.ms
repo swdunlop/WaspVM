@@ -40,13 +40,14 @@
     (cond ((string? evt) (string-append! buffer evt))
           ((eq? evt 'close) (reject 'close)
                             (error 'close))
+          ((eq? evt 'timeout) (reject 'timeout)
+                              (error 'timeout))
           (else (reject evt))))
 
   (define more (cond
                  (timeout (function (more/timed)
                             (define event (wait timeout source))
-                            (unless 
-                              (eq? event 'timeout) (process event))))
+                            (process event)))
                  (else (function (more/patient)
                           (define event (wait source))
                           (process event)))))
@@ -56,6 +57,7 @@
       (return (string-read! buffer (string-length buffer))))
     
     (catch-case (((close) (return 'close))
+                 ((timeout) (return 'timeout))
                   (else (re-error err)))
       (while (< (string-length buffer) amt)
         (more))
