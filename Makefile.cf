@@ -45,12 +45,18 @@ EXE =
 OBJ = .o
 SO  = .so
 
+ifeq ($(OS),Darwin)
+CFLAGS += -fnested-functions
+endif
+
 CFLAGS += -DWASP_SO='".so"'
 ### Disabled until lib/build and bin/waspc understands subsystems.
 # EXEFLAGS += -rdynamic -ldl
 PLATFORM = unix
 ### An indirect dependency of libevent.
+ifneq ($(OS),Darwin)
 DYNAMICLIBS += -lrt
+endif
 
 endif
 
@@ -80,5 +86,8 @@ PLATFORM = $(OS)-$(ARCH)
 CFLAGS += -DWASP_PLATFORM='"$(PLATFORM)"' 
 
 ### Derived from a patch submitted by Chris Double.
-EXEFLAGS += -Wl,-Bstatic $(STATICLIBS) -levent -Wl,-Bdynamic $(DYNAMICLIBS)
-
+ifeq ($(OS),Darwin)
+EXEFLAGS += $(STATICLIBS) $(DYNAMICLIBS)
+else
+EXEFLAGS += -Wl,-Bstatic $(STATICLIBS) -Wl,-Bdynamic $(DYNAMICLIBS)
+endif
