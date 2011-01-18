@@ -76,6 +76,8 @@ extern wasp_process wasp_first_enabled;
 extern wasp_process wasp_last_enabled;
 extern wasp_process wasp_active_process;
 
+extern wasp_quad wasp_enable_count;
+
 #define REQ_PROCESS_ARG( x ) REQ_TYPED_ARG( x, process )
 #define OPT_PROCESS_ARG( x ) OPT_TYPED_ARG( x, process )
 #define PROCESS_RESULT( x )  TYPED_RESULT( process, x )
