@@ -64,8 +64,14 @@ void wasp_disable_os_loop( ){
     if( -- wasp_os_loop_use ) return;
     wasp_disable_process( wasp_os_loop_process );
 }
-   
-void wasp_os_poll( ){ event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE ); }
+
+void wasp_os_poll( ){
+    if( wasp_enable_count == 1 ){
+        event_loop( EVLOOP_ONCE );
+    }else{
+        event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE ); 
+    }
+}
 
 void wasp_enable_conn_loop( wasp_os_connection oscon ){
     if( oscon->looping ) return;
