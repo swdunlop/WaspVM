@@ -1,5 +1,5 @@
-OS=$(shell uname -s | sed 's:_.*::')
-ARCH=$(shell uname -m)
+OS?=$(shell uname -s | sed 's:_.*::')
+ARCH?=$(shell uname -m)
 ROOT=$(shell pwd)
 SYS=mod/sys
 
@@ -55,7 +55,9 @@ CFLAGS += -DWASP_SO='".so"'
 PLATFORM = unix
 ### An indirect dependency of libevent.
 ifneq ($(OS),Darwin)
+ifneq ($(OS),android)
 DYNAMICLIBS += -lrt
+endif
 endif
 
 endif
