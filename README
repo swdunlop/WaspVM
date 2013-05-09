@@ -43,3 +43,4 @@ MOSREF relies on the cryptographic work of a lot of researchers beyond myself; w
 
 Also, any public notice of Wasp Lisp is largely due to Bill Clementson, whose continued interest and occasional notice has kept the project in the public eye for years, now.
 
+Years after development stopped on WaspVM and I moved on to other projects, Chris Double (@doublec) has kept coming up with neat fixes and ports, such as an Android stub.
