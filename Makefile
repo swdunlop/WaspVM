@@ -1,5 +1,7 @@
 include Makefile.cf
 
+STRIP ?= strip
+
 WASPVM_EXE ?= $(ROOT)/stubs/waspvm-$(PLATFORM)$(EXE)
 WASPC_EXE ?= $(ROOT)/waspc$(EXE)
 WASP_EXE ?= $(ROOT)/wasp$(EXE)
@@ -22,7 +24,7 @@ LIBWASPVM ?= libwaspvm$(SO)
 
 $(WASPVM_EXE): vm/waspvm$(OBJ) $(WASPVM_OBJS) $(LIBRX)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(WASPVM_OBJS) $< $(EXEFLAGS) -o $@
-	test z$(DEBUG) = z && strip $(WASPVM_EXE) || true
+	test z$(DEBUG) = z && $(STRIP) $(WASPVM_EXE) || true
 
 #TODO: This currently relies on a precompiled set of modules.
 $(WASPC_EXE): $(WASPVM_EXE) $(WASPLD_EXE)
@@ -68,7 +70,7 @@ objects: $(WASPVM_OBJS)
 
 %$(EXE): vm/%$(OBJ) $(WASPVM_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(WASPVM_OBJS) $< $(EXEFLAGS) -o $@
-	test z$(DEBUG) = z && strip $(WASPVM_EXE) || true
+	test z$(DEBUG) = z && $(STRIP) $(WASPVM_EXE) || true
 
 vm/%$(OBJ): vm/%.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
