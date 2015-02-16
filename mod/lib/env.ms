@@ -17,22 +17,26 @@
 (module "lib/env")
 (import "lib/iterate")
 
-(define *env* (make-dict))
-(define tc (apply make-tc *environ*))
-(until (tc-empty? tc)
-  (dict-set! *env* @(string-split (tc-next! tc) "=")))
-
-(define (has-env name) (dict-ref *env* name))
-(define (get-env name) (has-env name))
-(define (env-is name val)
-    (equal? (get-env name) val))
-
 (define *in-winnt*   (string-begins-with? *platform* "win-"))
 (define *in-win32*   *in-winnt*)
 (define *in-darwin*  (string-begins-with? *platform* "darwin"))
 ; We need to test if this is GNU/Darwin, or OS X ?
 (define *in-macosx*  *in-darwin*)
 (define *in-posix*   (not *in-win32*))
+
+(define *env* (make-dict))
+(define tc (apply make-tc *environ*))
+(until (tc-empty? tc)
+  (define args (string-split (tc-next! tc) "="))
+  (define key (if *in-win32* (string->uppercase (car args)) (car args)))
+  (define value (cadr args))
+  (dict-set! *env* key value))
+
+(define (has-env name) (dict-ref *env* name))
+(define (get-env name) (has-env name))
+(define (env-is name val)
+    (equal? (get-env name) val))
+
 (define *in-x11*     (has-env "DISPLAY"))
 
 (define (locate-cmd name)
