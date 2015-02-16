@@ -23,7 +23,6 @@
 #include "waspvm.h"
 
 
-//TODO: This will not work on win32.
 extern char** environ;
 
 int wasp_scan_argv( wasp_list arglist ){
@@ -102,6 +101,7 @@ WASP_BEGIN_PRIM( "spawn-command", spawn_command );
     
     CONNECTION_RESULT( wasp_spawn_cmd( path, args, env ) );
 WASP_END_PRIM( spawn_command );
+#endif
 
 wasp_list wasp_get_environ( ){
     char** env = environ;
@@ -112,12 +112,6 @@ wasp_list wasp_get_environ( ){
     }
     return tc->head;
 };
-#else
-wasp_list wasp_get_environ( ){
-    return NULL;
-};
-
-#endif
 
 WASP_BEGIN_PRIM( "run-command", run_command );
     REQ_STRING_ARG( command );
