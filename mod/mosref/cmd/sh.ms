@@ -32,11 +32,6 @@
     (export nothing)
     (import "lib/env")
     (import "lib/patch")
-    (when (string-begins-with? *platform* "win")
-      (send 
-        '(error "MOSREF cannot spawn shell commands on Microsoft Windows"))
-      (send 'close)
-      (halt))
 
     (define cmd (wait))
     (define prog (car cmd))
@@ -113,9 +108,6 @@
   (return))
 
 (define (spawn-node-shell (<console-node> node) cmd)
-  (when (string-begins-with? *platform* "win")
-    (send-err "MOSREF cannot spawn shell commands on Microsoft Windows"))
- 
   (define prog (car cmd))
   (define args (cdr cmd))
   (set! prog (locate-cmd prog))
