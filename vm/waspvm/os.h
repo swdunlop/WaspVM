@@ -55,6 +55,26 @@ WASP_BEGIN_SUBTYPE( input, os_service )
     int timeout: 1;
 WASP_END_SUBTYPE( os_service );
 
+#ifdef WASP_IN_WIN32
+WASP_BEGIN_SUBTYPE( connection, win32_pipe_connection )
+    int state;
+WASP_END_SUBTYPE( win32_pipe_connection )
+
+WASP_BEGIN_SUBTYPE( input, win32_pipe_input )
+    wasp_win32_pipe_connection conn;
+    HANDLE hHandle;
+    HANDLE hEvent;
+    HANDLE hThread;
+    char buffer[1024];
+    DWORD buffer_len;
+WASP_END_SUBTYPE( win32_pipe_input )
+
+WASP_BEGIN_SUBTYPE( output, win32_pipe_output )
+    wasp_win32_pipe_connection conn;
+    HANDLE hHandle;
+WASP_END_SUBTYPE( win32_pipe_output )
+#endif
+
 #define REQ_OS_CONNECTION_ARG( x ) REQ_TYPED_ARG( x, os_connection )
 #define OPT_OS_CONNECTION_ARG( x ) OPT_TYPED_ARG( x, os_connection )
 #define OS_CONNECTION_RESULT( x )  TYPED_RESULT( os_connection, x )

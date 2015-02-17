@@ -51,6 +51,7 @@
 
 wasp_process wasp_os_loop_process;
 unsigned int wasp_os_loop_use = 0;
+unsigned int wasp_active_apc = 0;
 wasp_symbol wasp_ss_connect;
 
 void wasp_enable_os_loop( ){
@@ -66,7 +67,16 @@ void wasp_disable_os_loop( ){
 }
 
 void wasp_os_poll( ){
-    if( wasp_enable_count == 1 ){
+#ifdef WASP_IN_WIN32
+        // This is a necessary workaround for Windows to process APC
+        // events. It's important that wasp processes waiting for an APC
+        // event don't allow the libevent event_loop here to block, otherwise
+        // the APC won't get run. Those processes should increment
+        // wasp_active_apc if it is waiting for an APC event and decrement
+        // it when the event is run.
+        SleepEx( 0, TRUE );
+#endif
+    if( wasp_active_apc == 0 && wasp_enable_count == 1 ){
         event_loop( EVLOOP_ONCE );
     }else{
         event_loop( EVLOOP_NONBLOCK | EVLOOP_ONCE ); 
@@ -193,7 +203,7 @@ wasp_string wasp_read_bufferevent( struct bufferevent* ev ){
 
 int wasp_os_recv_mt( wasp_os_input inp, wasp_value* data ){
     wasp_os_connection conn = inp->conn;
-    
+
     if( conn->state < WASP_CONNECTED ) return 0;
 
     if( conn->conn_ready ){
@@ -836,6 +846,48 @@ void wasp_raise_winerror( wasp_symbol es ){
 }
 #endif
 
+#ifdef WASP_IN_WIN32
+/* win32_pipe_connection */
+wasp_free_win32_pipe_connection( wasp_win32_pipe_connection conn ){
+    wasp_objfree( conn );
+}
+
+void wasp_trace_win32_pipe_connection( wasp_win32_pipe_connection conn ){
+    wasp_trace_connection( (wasp_connection) conn );
+}
+
+WASP_GENERIC_FORMAT( win32_pipe_connection )
+WASP_GENERIC_COMPARE( win32_pipe_connection )
+WASP_C_SUBTYPE2( win32_pipe_connection, "win32_pipe_connection", connection );
+
+/* win32_pipe_input */
+void wasp_free_win32_pipe_input( wasp_win32_pipe_input input ){
+    wasp_objfree( (wasp_object) input );
+}
+
+void wasp_trace_win32_pipe_input( wasp_win32_pipe_input input ){
+    wasp_grey_obj( (wasp_object) input->conn );
+    wasp_trace_input( (wasp_input)input );
+}
+
+WASP_GENERIC_FORMAT( win32_pipe_input )
+WASP_GENERIC_COMPARE( win32_pipe_input )
+WASP_C_SUBTYPE2( win32_pipe_input, "win32-pipe-input", input );
+
+/* win32_pipe_output */
+void wasp_free_win32_pipe_output( wasp_win32_pipe_output output ){
+    wasp_objfree( (wasp_object) output );
+}
+
+void wasp_trace_win32_pipe_output( wasp_win32_pipe_output output ){
+    wasp_grey_obj( (wasp_object) output->conn );
+}
+
+WASP_GENERIC_FORMAT( win32_pipe_output )
+WASP_GENERIC_COMPARE( win32_pipe_output )
+WASP_C_SUBTYPE2( win32_pipe_output, "win32-pipe-output", output );
+#endif
+
 //TODO: UDP Server
 //TODO: UDP Connect
 //TODO: EvDNS Wrapper
@@ -1095,6 +1147,12 @@ void wasp_init_os_subsystem( ){
     WASP_I_SUBTYPE( os_service, input );
     WASP_I_SUBTYPE( os_input, input );
     WASP_I_SUBTYPE( os_output, output );
+
+#ifdef WASP_IN_WIN32
+    WASP_I_SUBTYPE( win32_pipe_connection, connection );
+    WASP_I_SUBTYPE( win32_pipe_input, input );
+    WASP_I_SUBTYPE( win32_pipe_output, output );
+#endif
     
     WASP_BIND_PRIM( start_tcp_connect );
 
