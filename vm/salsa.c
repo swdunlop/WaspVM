@@ -199,10 +199,10 @@ wasp_string wasp_read_prng( int req ){
 }
 
 wasp_quad wasp_random_quad( ){
-    char q[16];
+    char q[sizeof(wasp_quad)] = { 0 };
     salsa20_crypt( 
         & wasp_get_prng( )->context, 
-        q, q, 4 
+        q, q, sizeof(wasp_quad)
     );
     return *(wasp_quad*)q; 
 }
