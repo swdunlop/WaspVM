@@ -68,7 +68,7 @@ wasp_connection wasp_spawn_cmd( wasp_string path, wasp_list arg, wasp_list var )
 
     wasp_os_error( socketpair( AF_LOCAL, SOCK_STREAM, 0, fds ) ); 
 
-    char** argv = wasp_make_argv( arg, argc );
+    char** argv = wasp_make_argv( arg, argc + 1);
     char** varv = varc ? wasp_make_argv( var, varc ) : environ;
 
     wasp_connection conn = (wasp_connection)wasp_make_os_connection( fds[0], 1 );
