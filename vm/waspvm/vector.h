@@ -20,7 +20,7 @@
 #include "memory.h"
 
 WASP_BEGIN_TYPE( vector )
-    wasp_word  length;
+    wasp_integer  length;
     wasp_value data[0];
 WASP_END_TYPE( vector )
 #define REQ_VECTOR_ARG( vn ) REQ_TYPED_ARG( vn, vector )
